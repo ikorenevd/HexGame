@@ -85,13 +85,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Core\Application.cpp" />
     <ClCompile Include="Engine\Core\Window.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Core\Application.hpp" />
+    <ClInclude Include="Engine\Core\Layer.hpp" />
     <ClInclude Include="Engine\Core\OpenGL.hpp" />
     <ClInclude Include="Engine\Core\Window.hpp" />
     <ClInclude Include="Engine\Engine.hpp" />
+    <ClInclude Include="Game\Game.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -6,10 +6,6 @@ Window::Window(const std::string& title, const glm::ivec2& size):
 	size(size),
 	vsync(false)
 {
-	glfwInit();
-
-	glewExperimental = true;
-	glewInit();
 }
 
 void Window::create()
