@@ -87,8 +87,11 @@
   <ItemGroup>
     <ClCompile Include="Engine\Core\Application.cpp" />
     <ClCompile Include="Engine\Core\Window.cpp" />
+    <ClCompile Include="Engine\Graphics\IndexBuffer.cpp" />
     <ClCompile Include="Engine\Graphics\Shader.cpp" />
     <ClCompile Include="Engine\Graphics\Texture.cpp" />
+    <ClCompile Include="Engine\Graphics\VertexArray.cpp" />
+    <ClCompile Include="Engine\Graphics\VertexBuffer.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -97,8 +100,12 @@
     <ClInclude Include="Engine\Core\OpenGL.hpp" />
     <ClInclude Include="Engine\Core\Window.hpp" />
     <ClInclude Include="Engine\Engine.hpp" />
+    <ClInclude Include="Engine\Graphics\IndexBuffer.h" />
     <ClInclude Include="Engine\Graphics\Shader.hpp" />
     <ClInclude Include="Engine\Graphics\Texture.hpp" />
+    <ClInclude Include="Engine\Graphics\VertexArray.h" />
+    <ClInclude Include="Engine\Graphics\VertexBuffer.h" />
+    <ClInclude Include="Engine\Graphics\VertexLayout.h" />
     <ClInclude Include="Game\Game.hpp" />
   </ItemGroup>
   <ItemGroup>
