@@ -87,6 +87,8 @@
   <ItemGroup>
     <ClCompile Include="Engine\Core\Application.cpp" />
     <ClCompile Include="Engine\Core\Window.cpp" />
+    <ClCompile Include="Engine\Graphics\Shader.cpp" />
+    <ClCompile Include="Engine\Graphics\Texture.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -95,7 +97,13 @@
     <ClInclude Include="Engine\Core\OpenGL.hpp" />
     <ClInclude Include="Engine\Core\Window.hpp" />
     <ClInclude Include="Engine\Engine.hpp" />
+    <ClInclude Include="Engine\Graphics\Shader.hpp" />
+    <ClInclude Include="Engine\Graphics\Texture.hpp" />
     <ClInclude Include="Game\Game.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Shaders\TestFrag.glsl" />
+    <None Include="Assets\Shaders\TestVert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
