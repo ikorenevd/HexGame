@@ -1,5 +1,8 @@
 ﻿#include <Engine/Core/Window.hpp>
 
+#include <Engine/Input/Keyboard.hpp>
+#include <Engine/Input/Mouse.hpp>
+
 Window::Window(const std::string& title, const glm::ivec2& size):
 	window(nullptr),
 	title(title),
@@ -25,7 +28,10 @@ void Window::create()
 
 	setVSync(vsync);
 
-	// TODO: добавить callbackи для инпута
+	glfwSetKeyCallback(window, Keyboard::callback);
+
+	glfwSetCursorPosCallback(window, Mouse::posCallback);
+	glfwSetMouseButtonCallback(window, Mouse::btnCallback);
 }
 
 void Window::display()

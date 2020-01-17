@@ -9,6 +9,8 @@ class TestLayer : public Layer
 public:
 	TestLayer() : Layer("TestLayer")
 	{
+        a = true;
+
         float vertices[] =
         {
                  0.5f,  0.5f,
@@ -47,17 +49,26 @@ public:
         shader = std::make_shared<Shader>("Assets\\Shaders\\TestVert.glsl", "Assets\\Shaders\\TestFrag.glsl");
 	}
 
+    virtual void update() override
+    {
+        a = Mouse::getButtonState(GLFW_MOUSE_BUTTON_LEFT);
+    }
+
 	virtual void render() override
 	{
-        shader->bind();
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-        shader->unbind();
+        if (a)
+        {
+            shader->bind();
+            glBindVertexArray(vao);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glBindVertexArray(0);
+            shader->unbind();
+        }
 	}
 private:
 	unsigned int vao;
     std::shared_ptr<Shader> shader;
+    bool a;
 };
 
 class Game : public Application
