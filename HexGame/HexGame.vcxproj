@@ -87,11 +87,14 @@
   <ItemGroup>
     <ClCompile Include="Engine\Core\Application.cpp" />
     <ClCompile Include="Engine\Core\Window.cpp" />
-    <ClCompile Include="Engine\Graphics\IndexBuffer.cpp" />
+    <ClCompile Include="Engine\Graphics\Buffers\IndexBuffer.cpp" />
+    <ClCompile Include="Engine\Graphics\Buffers\VertexArray.cpp" />
+    <ClCompile Include="Engine\Graphics\Buffers\VertexAttribute.cpp" />
+    <ClCompile Include="Engine\Graphics\Buffers\VertexLayout.cpp" />
+    <ClCompile Include="Engine\Graphics\GLDataType.cpp" />
     <ClCompile Include="Engine\Graphics\Shader.cpp" />
     <ClCompile Include="Engine\Graphics\Texture.cpp" />
-    <ClCompile Include="Engine\Graphics\VertexArray.cpp" />
-    <ClCompile Include="Engine\Graphics\VertexBuffer.cpp" />
+    <ClCompile Include="Engine\Graphics\Buffers\VertexBuffer.cpp" />
     <ClCompile Include="Engine\Graphics\View.cpp" />
     <ClCompile Include="Engine\Input\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Mouse.cpp" />
@@ -103,12 +106,14 @@
     <ClInclude Include="Engine\Core\OpenGL.hpp" />
     <ClInclude Include="Engine\Core\Window.hpp" />
     <ClInclude Include="Engine\Engine.hpp" />
-    <ClInclude Include="Engine\Graphics\IndexBuffer.h" />
+    <ClInclude Include="Engine\Graphics\Buffers\Buffers.hpp" />
+    <ClInclude Include="Engine\Graphics\Buffers\IndexBuffer.hpp" />
+    <ClInclude Include="Engine\Graphics\Buffers\VertexAttribute.hpp" />
+    <ClInclude Include="Engine\Graphics\Buffers\VertexLayout.hpp" />
+    <ClInclude Include="Engine\Graphics\GLDataType.hpp" />
     <ClInclude Include="Engine\Graphics\Shader.hpp" />
     <ClInclude Include="Engine\Graphics\Texture.hpp" />
-    <ClInclude Include="Engine\Graphics\VertexArray.h" />
-    <ClInclude Include="Engine\Graphics\VertexBuffer.h" />
-    <ClInclude Include="Engine\Graphics\VertexLayout.h" />
+    <ClInclude Include="Engine\Graphics\Buffers\VertexBuffer.hpp" />
     <ClInclude Include="Engine\Graphics\View.hpp" />
     <ClInclude Include="Engine\Input\Keyboard.hpp" />
     <ClInclude Include="Engine\Input\Mouse.hpp" />
@@ -117,6 +122,7 @@
   <ItemGroup>
     <None Include="Assets\Shaders\TestFrag.glsl" />
     <None Include="Assets\Shaders\TestVert.glsl" />
+    <None Include="Engine\Graphics\Buffers\VertexArray.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

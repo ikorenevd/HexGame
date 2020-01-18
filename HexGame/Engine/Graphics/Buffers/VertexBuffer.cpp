@@ -1,5 +1,4 @@
-#include <Engine/Core/OpenGL.hpp>
-#include "VertexBuffer.h"
+#include <Engine/Graphics/Buffers/VertexBuffer.hpp>
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size)
 {
@@ -13,12 +12,27 @@ VertexBuffer::~VertexBuffer()
 	glDeleteBuffers(1, &id);
 }
 
-void VertexBuffer::Bind()
+void VertexBuffer::setLayout(const VertexLayout& value)
+{
+	layout = value;
+}
+
+const VertexLayout& VertexBuffer::getLayout() const
+{
+	return layout;
+}
+
+unsigned int VertexBuffer::getId() const
+{
+	return id;
+}
+
+void VertexBuffer::bind()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, id);
 }
 
-void VertexBuffer::Unbind()
+void VertexBuffer::unbind()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
