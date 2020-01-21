@@ -2,22 +2,23 @@
 
 #include <Game/Map/Tile.hpp>
 #include <Game/Map/TerrainType.hpp>
-#include <Game/Map/Utils.hpp>
+#include <Game/Map/HexUtils.hpp>
 
-Map::Map(const glm::ivec2& size) :
-	size(size)
+Map::Map(const glm::ivec2& s) :
+	size(s)
 {
+	size.x += size.x % 2;
+	size.y += size.y % 2;
+
 	tiles.resize(size.x * size.y);
 
 	int a = 0;
-	for (int x = 0; x < size.x; x++)
-		for (int y = 0; y < size.y; y++)
+	for (int x = -(size.x / 2); x < (size.x / 2); x++)
+		for (int y = -(size.y / 2); y < (size.y / 2); y++)
 		{
 			tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), TerrainType::Flatland);
 			a++;
 		}
-
-
 }
 
 const glm::ivec2& Map::getSize() const
@@ -45,9 +46,12 @@ const std::vector<std::shared_ptr<Tile>>& Map::getNeighbors(const std::shared_pt
 {
 	std::vector<std::shared_ptr<Tile>> vec;
 
+	if (tile == nullptr)
+		return vec;
+
 	for (const glm::ivec3& offset : HexUtils::neighborsCoordinates)
 	{
-		auto t = getTile(glm::ivec3(tile->getCoordinates().x + offset.x, tile->getCoordinates().y + offset.y, tile->getCoordinates().z + offset.z));
+		auto t = getTile(tile->getCoordinates() + offset);
 
 		if (t != nullptr)
 		{
@@ -56,4 +60,9 @@ const std::vector<std::shared_ptr<Tile>>& Map::getNeighbors(const std::shared_pt
 	}
 
 	return vec;
+}
+
+const std::vector<std::shared_ptr<Tile>>& Map::getTiles() const
+{
+	return tiles;
 }

@@ -1,6 +1,8 @@
 #include <Engine/Graphics/Buffers/VertexLayout.hpp>
 #include <Engine/Graphics/Buffers/VertexAttribute.hpp>
 
+#include <iostream>
+
 VertexLayout::VertexLayout() :
 	stride(0)
 {

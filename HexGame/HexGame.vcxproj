@@ -98,6 +98,7 @@
     <ClCompile Include="Engine\Graphics\View.cpp" />
     <ClCompile Include="Engine\Input\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Mouse.cpp" />
+    <ClCompile Include="Game\Map\HexUtils.cpp" />
     <ClCompile Include="Game\Map\Map.cpp" />
     <ClCompile Include="Game\Map\TerrainType.cpp" />
     <ClCompile Include="Game\Map\Tile.cpp" />
@@ -121,7 +122,7 @@
     <ClInclude Include="Engine\Input\Keyboard.hpp" />
     <ClInclude Include="Engine\Input\Mouse.hpp" />
     <ClInclude Include="Game\Game.hpp" />
-    <ClInclude Include="Game\Map\Utils.hpp" />
+    <ClInclude Include="Game\Map\HexUtils.hpp" />
     <ClInclude Include="Game\Map\Map.hpp" />
     <ClInclude Include="Game\Map\TerrainType.hpp" />
     <ClInclude Include="Game\Map\Tile.hpp" />
@@ -129,7 +130,12 @@
   <ItemGroup>
     <None Include="Assets\Shaders\TestFrag.glsl" />
     <None Include="Assets\Shaders\TestVert.glsl" />
+    <None Include="Assets\Shaders\TextureFrag.glsl" />
+    <None Include="Assets\Shaders\TextureVert.glsl" />
     <None Include="Engine\Graphics\Buffers\VertexArray.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Textures\Flatland.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

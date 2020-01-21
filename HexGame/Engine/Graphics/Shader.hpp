@@ -28,6 +28,4 @@ public:
 	void setMat4(const std::string& uniform, const glm::mat4& value);
 private:
 	unsigned int id;
-
-	void linkProgram(unsigned int vertShader, unsigned int fragShader);
 };
