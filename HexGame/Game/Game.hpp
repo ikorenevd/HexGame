@@ -4,11 +4,16 @@
 
 #include <Engine/Engine.hpp>
 
+#include <Game/Map/Map.hpp>
+#include <Game/Map/Tile.hpp>
+
 class TestLayer : public Layer
 {
 public:
     TestLayer() : Layer("TestLayer")
     {
+        view = std::make_shared<View>(glm::ivec2(1280, 720));
+
         a = false;
 
         float vertices[] =
@@ -25,27 +30,6 @@ public:
             1, 2, 3
         };
 
-        //unsigned int vbo, ibo;
-
-        //glGenVertexArrays(1, &vao);
-        //glGenBuffers(1, &vbo);
-        //glGenBuffers(1, &ibo);
-
-        //glBindVertexArray(vao);
-
-        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-        //glEnableVertexAttribArray(0);
-        //glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-
-        //glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        //glBindVertexArray(0);
-
         vao = std::make_shared<VertexArray>();
 
         std::shared_ptr<VertexBuffer> vbo = std::make_shared<VertexBuffer>(vertices, sizeof(vertices));
@@ -59,7 +43,23 @@ public:
         vao->setVertexBuffer(vbo);
 
         shader = std::make_shared<Shader>("Assets\\Shaders\\TestVert.glsl", "Assets\\Shaders\\TestFrag.glsl");
-	}
+
+        map = std::make_shared<Map>(glm::ivec2(1920, 1080));
+
+        std::clog << map->getSize().x * map->getSize().y << std::endl;
+
+        auto tile = map->getTile(glm::ivec3(0, 0, 0));
+
+        auto b = map->getNeighbors(tile);
+
+        std::cout << b.size() << std::endl;
+
+        std::clog << tile->getCoordinates().x << " " << tile->getCoordinates().y << " " << tile->getCoordinates().z << std::endl;
+        for (auto t : b)
+        {
+            std::clog << t->getCoordinates().x << " " << t->getCoordinates().y << " " << t->getCoordinates().z << std::endl;
+        }
+    }
 
     virtual void update() override
     {
@@ -71,21 +71,19 @@ public:
         if (a)
         {
             shader->bind();
+            shader->setMat4("view", view->getMatrix());
+            shader->setMat4("transform", glm::scale(glm::mat4(1.f), glm::vec3(glm::vec2(50.f, 50.f), 1.f)));
             vao->bind();
             glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
             vao->unbind();
             shader->unbind();
-            //shader->bind();
-            //glBindVertexArray(vao);
-            //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            //glBindVertexArray(0);
-            //shader->unbind();
         }
 	}
 private:
-	//unsigned int vao;
+    std::shared_ptr<View> view;
     std::shared_ptr<VertexArray> vao;
     std::shared_ptr<Shader> shader;
+    std::shared_ptr<Map> map;
     bool a;
 };
 
@@ -94,7 +92,7 @@ class Game : public Application
 public:
 	Game() : Application(std::string("Game"), glm::ivec2(1280, 720))
 	{
-		this->getWindow()->setVSync(true);
+		this->getWindow()->setVSync(false);
 	}
 
 	virtual void pushingLayers() override

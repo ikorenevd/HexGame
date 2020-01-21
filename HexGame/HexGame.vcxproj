@@ -98,6 +98,9 @@
     <ClCompile Include="Engine\Graphics\View.cpp" />
     <ClCompile Include="Engine\Input\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Mouse.cpp" />
+    <ClCompile Include="Game\Map\Map.cpp" />
+    <ClCompile Include="Game\Map\TerrainType.cpp" />
+    <ClCompile Include="Game\Map\Tile.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -118,6 +121,10 @@
     <ClInclude Include="Engine\Input\Keyboard.hpp" />
     <ClInclude Include="Engine\Input\Mouse.hpp" />
     <ClInclude Include="Game\Game.hpp" />
+    <ClInclude Include="Game\Map\Utils.hpp" />
+    <ClInclude Include="Game\Map\Map.hpp" />
+    <ClInclude Include="Game\Map\TerrainType.hpp" />
+    <ClInclude Include="Game\Map\Tile.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\TestFrag.glsl" />

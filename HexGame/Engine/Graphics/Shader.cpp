@@ -20,14 +20,15 @@ static unsigned int loadShader(GLenum type, const std::string& fileName)
 	std::string str_src = loadShaderSource(fileName);
 
 	const char* src = str_src.c_str();
-	glShaderSource(shader, 1, &src, NULL);
+	int srcLength = str_src.size();
+	glShaderSource(shader, 1, &src, &srcLength);
 	glCompileShader(shader);
 
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
-		std::clog << "ERROR: CANT COMPILE SHADER" << fileName << "\n";
+		std::clog << "ERROR: CANT COMPILE SHADER " << fileName << "\n";
 		std::clog << infoLog << "\n";
 	}
 
