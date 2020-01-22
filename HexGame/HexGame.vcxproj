@@ -98,6 +98,7 @@
     <ClCompile Include="Engine\Graphics\View.cpp" />
     <ClCompile Include="Engine\Input\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Mouse.cpp" />
+    <ClCompile Include="Game\Layers\MapLayer.cpp" />
     <ClCompile Include="Game\Map\HexUtils.cpp" />
     <ClCompile Include="Game\Map\Map.cpp" />
     <ClCompile Include="Game\Map\TerrainType.cpp" />
@@ -122,6 +123,7 @@
     <ClInclude Include="Engine\Input\Keyboard.hpp" />
     <ClInclude Include="Engine\Input\Mouse.hpp" />
     <ClInclude Include="Game\Game.hpp" />
+    <ClInclude Include="Game\Layers\MapLayer.hpp" />
     <ClInclude Include="Game\Map\HexUtils.hpp" />
     <ClInclude Include="Game\Map\Map.hpp" />
     <ClInclude Include="Game\Map\TerrainType.hpp" />
@@ -135,7 +137,9 @@
     <None Include="Engine\Graphics\Buffers\VertexArray.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\Textures\Flatland.png" />
+    <Image Include="Assets\Textures\blue.png" />
+    <Image Include="Assets\Textures\grey.png" />
+    <Image Include="Assets\Textures\orange.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,6 +8,8 @@
 #include <Game/Map/Map.hpp>
 #include <Game/Map/Tile.hpp>
 
+#include <Game/Layers/MapLayer.hpp>
+
 class TestLayer : public Layer
 {
 public:
@@ -91,10 +93,10 @@ public:
 
 	virtual void pushingLayers() override
 	{
-		map = std::make_shared<Map>(glm::ivec2(100, 100));
+		map = std::make_shared<Map>(glm::ivec2(40, 40));
 
-        pushLayer(new TestLayer);
-		//pushLayer(new MapLayer(map));
+        //pushLayer(new TestLayer);
+		pushLayer(new MapLayer(map));
 	}
 private:
 	std::shared_ptr<Map> map;
