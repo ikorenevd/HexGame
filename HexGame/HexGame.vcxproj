@@ -120,6 +120,8 @@
     <ClInclude Include="Engine\Graphics\View.hpp" />
     <ClInclude Include="Engine\Input\Keyboard.hpp" />
     <ClInclude Include="Engine\Input\Mouse.hpp" />
+    <ClInclude Include="Game\Buildings\Buildings.hpp" />
+    <ClInclude Include="Game\Buildings\Factory.hpp" />
     <ClInclude Include="Game\Game.hpp" />
     <ClInclude Include="Game\Map\Utils.hpp" />
     <ClInclude Include="Game\Map\Map.hpp" />
