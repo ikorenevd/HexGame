@@ -2,7 +2,7 @@
 
 enum class TerrainType
 {
-	Flatland,
+	Flatland = 0,
 	Hill,
 	Mountain
 };

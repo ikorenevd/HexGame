@@ -4,13 +4,13 @@
 
 #include <Engine/Core/OpenGL.hpp>
 
-enum ColorModel
+enum class ColorModel
 {
 	RGB = 0,
 	RGBA
 };
 
-enum TextureFilter
+enum class TextureFilter
 {
 	Nearest = 0,
 	Linear

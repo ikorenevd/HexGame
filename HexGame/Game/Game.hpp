@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <iostream>
@@ -6,6 +7,8 @@
 
 #include <Game/Map/Map.hpp>
 #include <Game/Map/Tile.hpp>
+
+#include <Game/Layers/MapLayer.hpp>
 
 class TestLayer : public Layer
 {
@@ -16,12 +19,14 @@ public:
 
         a = false;
 
+        texture = std::make_shared<Texture>("Assets\\Textures\\Flatland.png", ColorModel::RGBA);
+
         float vertices[] =
         {
-                 0.5f,  0.5f,
-                 0.5f, -0.5f,
-                -0.5f, -0.5f,
-                -0.5f,  0.5f,
+            0.5f,  0.5f, 1.f, 1.f,
+            0.5f, -0.5f, 1.f, 0.f,
+            -0.5f, -0.5f, 0.f,0.f,
+            -0.5f,  0.5f, 0.f, 1.f
         };
 
         unsigned int indices[] =
@@ -29,12 +34,16 @@ public:
             0, 1, 3,
             1, 2, 3
         };
+        
+        std::clog << sizeof(vertices) / 4 << std::endl;
+
 
         vao = std::make_shared<VertexArray>();
 
         std::shared_ptr<VertexBuffer> vbo = std::make_shared<VertexBuffer>(vertices, sizeof(vertices));
         vbo->setLayout(VertexLayout({
-            VertexAttribute("position", GLDataType::Float2)
+            VertexAttribute("position", GLDataType::Float2),
+            VertexAttribute("1", GLDataType::Float2)
         }));
 
         std::shared_ptr<IndexBuffer> ibo = std::make_shared<IndexBuffer>(indices, 6);
@@ -42,23 +51,7 @@ public:
         vao->setIndexBuffer(ibo);
         vao->setVertexBuffer(vbo);
 
-        shader = std::make_shared<Shader>("Assets\\Shaders\\TestVert.glsl", "Assets\\Shaders\\TestFrag.glsl");
-
-        map = std::make_shared<Map>(glm::ivec2(1920, 1080));
-
-        std::clog << map->getSize().x * map->getSize().y << std::endl;
-
-        auto tile = map->getTile(glm::ivec3(0, 0, 0));
-
-        auto b = map->getNeighbors(tile);
-
-        std::cout << b.size() << std::endl;
-
-        std::clog << tile->getCoordinates().x << " " << tile->getCoordinates().y << " " << tile->getCoordinates().z << std::endl;
-        for (auto t : b)
-        {
-            std::clog << t->getCoordinates().x << " " << t->getCoordinates().y << " " << t->getCoordinates().z << std::endl;
-        }
+        shader = std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl");
     }
 
     virtual void update() override
@@ -70,20 +63,23 @@ public:
 	{
         if (a)
         {
+            texture->bind();
             shader->bind();
+            shader->setInt("ourTexture", 0);
             shader->setMat4("view", view->getMatrix());
-            shader->setMat4("transform", glm::scale(glm::mat4(1.f), glm::vec3(glm::vec2(50.f, 50.f), 1.f)));
+            shader->setMat4("transform", glm::scale(glm::mat4(1.f), glm::vec3(100, 100, 1)));
             vao->bind();
-            glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             vao->unbind();
             shader->unbind();
+            texture->unbind();
         }
 	}
 private:
     std::shared_ptr<View> view;
     std::shared_ptr<VertexArray> vao;
     std::shared_ptr<Shader> shader;
-    std::shared_ptr<Map> map;
+    std::shared_ptr<Texture> texture;
     bool a;
 };
 
@@ -97,6 +93,11 @@ public:
 
 	virtual void pushingLayers() override
 	{
-		pushLayer(new TestLayer);
+		map = std::make_shared<Map>(glm::ivec2(40, 40));
+
+        //pushLayer(new TestLayer);
+		pushLayer(new MapLayer(map));
 	}
+private:
+	std::shared_ptr<Map> map;
 };

@@ -66,6 +66,12 @@
     <ClCompile Include="Game\Map\Map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Map\HexUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Layers\MapLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.hpp">
@@ -128,7 +134,10 @@
     <ClInclude Include="Game\Map\Map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Map\Utils.hpp">
+    <ClInclude Include="Game\Map\HexUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Layers\MapLayer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Game\Buildings\Buildings.hpp">
@@ -142,5 +151,18 @@
     <None Include="Assets\Shaders\TestVert.glsl" />
     <None Include="Assets\Shaders\TestFrag.glsl" />
     <None Include="Engine\Graphics\Buffers\VertexArray.hpp" />
+    <None Include="Assets\Shaders\TextureVert.glsl" />
+    <None Include="Assets\Shaders\TextureFrag.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Textures\blue.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\Textures\orange.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\Textures\grey.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

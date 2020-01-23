@@ -1,4 +1,4 @@
-#include <Engine/Graphics/View.hpp>
+﻿#include <Engine/Graphics/View.hpp>
 
 View::View() :
 	center(glm::vec2(0.f)),
@@ -42,7 +42,8 @@ const glm::vec2& View::getCenter() const
 
 void View::move(const glm::vec2& offset)
 {
-	center += offset;
+	// должен быть +, но с - работает как надо
+	center -= offset;
 
 	dirty = true;
 }

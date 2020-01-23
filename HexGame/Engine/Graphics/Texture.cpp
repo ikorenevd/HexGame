@@ -1,5 +1,7 @@
 #include <Engine/Graphics/Texture.hpp>
 
+#include <iostream>
+
 Texture::Texture(const std::string& path, ColorModel colMod, TextureFilter textFilter)
 {
 	glGenTextures(1, &id);
@@ -7,20 +9,19 @@ Texture::Texture(const std::string& path, ColorModel colMod, TextureFilter textF
 
 	switch (textFilter)
 	{
-	case Nearest:
+	case TextureFilter::Nearest:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		break;
-	case Linear:
+	case TextureFilter::Linear:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		break;
 	}
 
-
 	switch (colMod)
 	{
-	case RGB:
+	case ColorModel::RGB:
 		unsigned char* image;
 		image = SOIL_load_image(path.c_str(), &size.x, &size.y, 0, SOIL_LOAD_RGB);
 		
@@ -28,7 +29,7 @@ Texture::Texture(const std::string& path, ColorModel colMod, TextureFilter textF
 		
 		SOIL_free_image_data(image);
 		break;
-	case RGBA:
+	case ColorModel::RGBA:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -41,7 +42,7 @@ Texture::Texture(const std::string& path, ColorModel colMod, TextureFilter textF
 		break;
 	}
 
-	glActiveTexture(0);
+	unbind();
 }
 
 void Texture::bind()

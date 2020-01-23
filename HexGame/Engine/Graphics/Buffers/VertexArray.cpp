@@ -35,11 +35,11 @@ void VertexArray::setVertexBuffer(const std::shared_ptr<VertexBuffer>& value)
 	for (const auto& attribute : layout)
 	{
 		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(0, getGLDataTypeElementsCount(attribute.type), getGLDataTypeToBaseOpenGLType(attribute.type), attribute.normalized ? GL_TRUE : GL_FALSE, layout.getStride(), (const void*)attribute.offset);
+		glVertexAttribPointer(index, getGLDataTypeElementsCount(attribute.type), getGLDataTypeToBaseOpenGLType(attribute.type), attribute.normalized ? GL_TRUE : GL_FALSE, layout.getStride(), (const void*)attribute.offset);
 		index++;
 	}
 
-	value->unbind();
+	//value->unbind();
 	glBindVertexArray(0);
 
 	vertexBuffer = value;
@@ -55,7 +55,6 @@ void VertexArray::setIndexBuffer(const std::shared_ptr<IndexBuffer>& value)
 	glBindVertexArray(id);
 	value->bind();
 	indexBuffer = value;
-	//value->unbind();
 	glBindVertexArray(0);
 }
 
