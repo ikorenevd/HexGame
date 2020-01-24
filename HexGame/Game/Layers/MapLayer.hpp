@@ -18,8 +18,4 @@ private:
 	float speed = 2.f;
 
 	std::shared_ptr<VertexArray> vao;
-	std::shared_ptr<Shader> shader;
-	std::shared_ptr<Texture> orange;
-	std::shared_ptr<Texture> blue;
-	std::shared_ptr<Texture> grey;
 };

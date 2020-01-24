@@ -1,5 +1,8 @@
 #include <Game/Layers/MapLayer.hpp>
 
+#include <Engine/Core/Manager.hpp>
+#include <Engine/Graphics/Texture.hpp>
+
 #include <Game/Map/Map.hpp>
 #include <Game/Map/Tile.hpp>
 #include <Game/Map/TerrainType.hpp>
@@ -10,9 +13,9 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 {
 	view = std::make_shared<View>(glm::ivec2(1280, 720));
 
-	orange = std::make_shared<Texture>("Assets\\Textures\\orange.png", ColorModel::RGBA);
-	blue = std::make_shared<Texture>("Assets\\Textures\\blue.png", ColorModel::RGBA);
-	grey = std::make_shared<Texture>("Assets\\Textures\\grey.png", ColorModel::RGBA);
+	TextureManager::add("orange", std::make_shared<Texture>("Assets\\Textures\\orange.png", ColorModel::RGBA));
+	TextureManager::add("blue", std::make_shared<Texture>("Assets\\Textures\\blue.png", ColorModel::RGBA));
+	TextureManager::add("grey", std::make_shared<Texture>("Assets\\Textures\\grey.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -28,85 +31,67 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 		1, 2, 3
 	};
 
-	std::clog << sizeof(vertices) / 4 << std::endl;
-
-
 	vao = std::make_shared<VertexArray>();
 
 	std::shared_ptr<VertexBuffer> vbo = std::make_shared<VertexBuffer>(vertices, sizeof(vertices));
 	vbo->setLayout(VertexLayout({
 		VertexAttribute("position", GLDataType::Float2),
 		VertexAttribute("1", GLDataType::Float2)
-		}));
+	}));
 
 	std::shared_ptr<IndexBuffer> ibo = std::make_shared<IndexBuffer>(indices, 6);
 
 	vao->setIndexBuffer(ibo);
 	vao->setVertexBuffer(vbo);
 
-	shader = std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl");
+	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 }
 
 void MapLayer::update()
 {
 	if (Keyboard::isKeyPressed(GLFW_KEY_W))
-	{
 		speed += 1.f;
-	}
 
 	if (Keyboard::isKeyPressed(GLFW_KEY_S))
-	{
 		speed -= 1.f;
-	}
-
-	//std::cout << speed << std::endl;
 
 	if (Keyboard::getKeyState(GLFW_KEY_UP))
-	{
 		view->move({ 0.f, speed });
-	}
 
 	if (Keyboard::getKeyState(GLFW_KEY_DOWN))
-	{
 		view->move({ 0.f, -speed });
-	}
 
 	if (Keyboard::getKeyState(GLFW_KEY_LEFT))
-	{
 		view->move({ -speed, 0.f });
-	}
 
 	if (Keyboard::getKeyState(GLFW_KEY_RIGHT))
-	{
 		view->move({ speed, 0.f });
-	}
 }
 
 void MapLayer::render()
 {
+	auto shader = ShaderManager::get("Texture");
 	shader->bind();
 	shader->setInt("ourTexture", 0);
 	shader->setMat4("view", view->getMatrix());
 	vao->bind();
 
 	auto size = map->getSize();
-	for (int x = -(size.x / 2); x < (size.x / 2); x++)
-		for (int y = -(size.y / 2); y < (size.y / 2); y++)
+	for (int x = 0; x < size.x; x++)
+		for (int y = 0; y < size.y; y++)
 		{
 			TerrainType type = map->getTile(glm::ivec3(x, y, -x-y))->getTerrainType();
 
 			switch (type)
 			{
 			case TerrainType::Flatland:
-				blue->bind();
+				TextureManager::get("blue")->bind();
 				break;
 			case TerrainType::Hill:
-				orange->bind();
+				TextureManager::get("orange")->bind();
 				break;
 			case TerrainType::Mountain:
-				grey->bind();
-				break;
-			default:
+				TextureManager::get("grey")->bind();
 				break;
 			}
 
@@ -119,5 +104,4 @@ void MapLayer::render()
 	
 	vao->unbind();
 	shader->unbind();
-	//texture->unbind();
 }

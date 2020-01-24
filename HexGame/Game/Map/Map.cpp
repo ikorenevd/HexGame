@@ -7,14 +7,11 @@
 Map::Map(const glm::ivec2& s) :
 	size(s)
 {
-	size.x += size.x % 2;
-	size.y += size.y % 2;
-
 	tiles.resize(size.x * size.y);
 
 	int a = 0;
-	for (int x = -(size.x / 2); x < (size.x / 2); x++)
-		for (int y = -(size.y / 2); y < (size.y / 2); y++)
+	for (int x = 0; x < size.x; x++)
+		for (int y = 0; y < size.y; y++)
 		{
 			tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), (TerrainType)(rand() % 3));
 			a++;

@@ -108,6 +108,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Core\Application.hpp" />
     <ClInclude Include="Engine\Core\Layer.hpp" />
+    <ClInclude Include="Engine\Core\Manager.hpp" />
     <ClInclude Include="Engine\Core\OpenGL.hpp" />
     <ClInclude Include="Engine\Core\Window.hpp" />
     <ClInclude Include="Engine\Engine.hpp" />
