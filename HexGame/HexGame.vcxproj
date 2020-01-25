@@ -95,6 +95,7 @@
     <ClCompile Include="Engine\Graphics\Shader.cpp" />
     <ClCompile Include="Engine\Graphics\Texture.cpp" />
     <ClCompile Include="Engine\Graphics\Buffers\VertexBuffer.cpp" />
+    <ClCompile Include="Engine\Graphics\Transformable.cpp" />
     <ClCompile Include="Engine\Graphics\View.cpp" />
     <ClCompile Include="Engine\Input\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Mouse.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="Engine\Graphics\Shader.hpp" />
     <ClInclude Include="Engine\Graphics\Texture.hpp" />
     <ClInclude Include="Engine\Graphics\Buffers\VertexBuffer.hpp" />
+    <ClInclude Include="Engine\Graphics\Transformable.hpp" />
     <ClInclude Include="Engine\Graphics\View.hpp" />
     <ClInclude Include="Engine\Input\Keyboard.hpp" />
     <ClInclude Include="Engine\Input\Mouse.hpp" />

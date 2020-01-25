@@ -80,9 +80,9 @@ void MapLayer::render()
 	for (int x = 0; x < size.x; x++)
 		for (int y = 0; y < size.y; y++)
 		{
-			TerrainType type = map->getTile(glm::ivec3(x, y, -x-y))->getTerrainType();
+			auto tile = map->getTile(glm::ivec3(x, y, -x-y));
 
-			switch (type)
+			switch (tile->getTerrainType())
 			{
 			case TerrainType::Flatland:
 				TextureManager::get("blue")->bind();
@@ -95,9 +95,7 @@ void MapLayer::render()
 				break;
 			}
 
-			glm::mat4 tranform = glm::translate(glm::mat4(1.f), glm::vec3(x, y, 0.f));
-			glm::mat4 transform = glm::scale(glm::mat4(1.f), glm::vec3(100, 100, 1.f)) * glm::translate(glm::mat4(1.f), glm::vec3((float)(x + (float)y / 2) * 0.9f, (float)y * 0.80f, 0.f));
-			shader->setMat4("transform", transform);
+			shader->setMat4("transform", tile->getTransform());
 
 			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 		}

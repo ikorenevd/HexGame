@@ -4,7 +4,7 @@
 
 #include <Game/Map/TerrainType.hpp>
 
-class Tile
+class Tile : public Transformable
 {
 public:
 	Tile(const glm::ivec3& coordinates, TerrainType type);
