@@ -4,7 +4,7 @@
 
 #include <Game/Map/TerrainType.hpp>
 
-class Tile : public Transformable
+class Tile : public GameObject
 {
 public:
 	Tile(const glm::ivec3& coordinates, TerrainType type);
@@ -14,6 +14,8 @@ public:
 	TerrainType getTerrainType() const;
 
 	bool isCrossable() const;
+
+	void update(const glm::vec2& mouseCoord) override;
 private:
 	glm::ivec3 coordinates;
 	TerrainType type;

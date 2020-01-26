@@ -155,6 +155,9 @@
     <ClInclude Include="Engine\Graphics\Transformable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Core\GameObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\TestVert.glsl" />

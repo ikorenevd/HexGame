@@ -74,6 +74,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Libs\GLEW\include;$(SolutionDir)Libs\GLFW\include;$(SolutionDir)Libs\GLM;$(SolutionDir)Libs\SOIL\src;$(SolutionDir)HexGame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Core\Application.hpp" />
+    <ClInclude Include="Engine\Core\GameObject.hpp" />
     <ClInclude Include="Engine\Core\Layer.hpp" />
     <ClInclude Include="Engine\Core\Manager.hpp" />
     <ClInclude Include="Engine\Core\OpenGL.hpp" />

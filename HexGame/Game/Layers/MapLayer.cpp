@@ -6,6 +6,7 @@
 #include <Game/Map/Map.hpp>
 #include <Game/Map/Tile.hpp>
 #include <Game/Map/TerrainType.hpp>
+#include <Game/Map/HexUtils.hpp>
 
 MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	Layer("MapLayer"),
@@ -19,10 +20,10 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 	float vertices[] =
 	{
-		0.5f,  0.5f, 1.f, 1.f,
-		0.5f, -0.5f, 1.f, 0.f,
-		-0.5f, -0.5f, 0.f,0.f,
-		-0.5f,  0.5f, 0.f, 1.f
+		40.f,  40.f, 1.f, 1.f,
+		40.f, -40.f, 1.f, 0.f,
+		-40.f, -40.f, 0.f,0.f,
+		-40.f,  40.f, 0.f, 1.f
 	};
 
 	unsigned int indices[] =
@@ -66,6 +67,12 @@ void MapLayer::update()
 
 	if (Keyboard::getKeyState(GLFW_KEY_RIGHT))
 		view->move({ speed, 0.f });
+
+	auto pos = Mouse::getCoordinates();
+
+	auto p = glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f));
+
+	map->update(glm::vec2(p.x, p.y));
 }
 
 void MapLayer::render()

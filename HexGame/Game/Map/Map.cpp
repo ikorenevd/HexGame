@@ -25,41 +25,30 @@ const glm::ivec2& Map::getSize() const
 
 const std::shared_ptr<Tile>& Map::getTile(const glm::ivec3& coordinates) const
 {
-	for (const std::shared_ptr<Tile>& tile : tiles)
-	{
-		if (tile->getCoordinates() == coordinates)
-		{
-			return tile;
-		}
-	}
-
-	if (coordinates.x < 0 && coordinates.x >= size.x && coordinates.y < 0 && coordinates.y >= size.y)
+	if (coordinates.x < 0 || coordinates.x > size.x || coordinates.y < 0 || coordinates.y > size.y)
 		return nullptr;
 
-	return nullptr;
-}
+	if (coordinates.x + coordinates.y + coordinates.z != 0)
+		return nullptr;
 
-const std::vector<std::shared_ptr<Tile>>& Map::getNeighbors(const std::shared_ptr<Tile>& tile) const
-{
-	std::vector<std::shared_ptr<Tile>> vec;
+	//for (const std::shared_ptr<Tile>& tile : tiles)
+	//{
+	//	if (tile->getCoordinates() == coordinates)
+	//		return nullptr;
+	//}
 
-	if (tile == nullptr)
-		return vec;
-
-	for (const glm::ivec3& offset : HexUtils::neighborsCoordinates)
-	{
-		auto t = getTile(tile->getCoordinates() + offset);
-
-		if (t != nullptr)
-		{
-			vec.push_back(t);
-		}
-	}
-
-	return vec;
+	return tiles[coordinates.x * size.x + coordinates.y];
 }
 
 const std::vector<std::shared_ptr<Tile>>& Map::getTiles() const
 {
 	return tiles;
+}
+
+void Map::update(const glm::vec2& mouseCoord)
+{
+	for (auto tile : tiles)
+	{
+		tile->update(mouseCoord);
+	}
 }

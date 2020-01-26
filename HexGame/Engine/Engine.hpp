@@ -4,6 +4,7 @@
 #include <Engine/Core/Window.hpp>
 #include <Engine/Core/Layer.hpp>
 #include <Engine/Core/Application.hpp>
+#include <Engine/Core/GameObject.hpp>
 
 #include <Engine/Graphics/GLDataType.hpp>
 #include <Engine/Graphics/Shader.hpp>

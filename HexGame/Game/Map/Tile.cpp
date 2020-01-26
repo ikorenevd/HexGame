@@ -6,8 +6,8 @@ Tile::Tile(const glm::ivec3& coordinates, TerrainType type) :
 	coordinates(coordinates),
 	type(type)
 {
-	setPosition(glm::vec2((float)(coordinates.x + (float)coordinates.y / 2) * 0.9f, (float)coordinates.y * 0.90f * 0.86f));
-	setScale(glm::vec2(80.f)); // размер
+	//setScale(glm::vec2(80.f)); // размер
+	setPosition(glm::vec2((float)(coordinates.x + (float)coordinates.y / 2) * 80.f, (float)coordinates.y * 0.86f * 80.f));
 }
 
 const glm::ivec3& Tile::getCoordinates() const
@@ -23,4 +23,12 @@ TerrainType Tile::getTerrainType() const
 bool Tile::isCrossable() const
 {
 	return isTerrainCrossable(type);
+}
+
+void Tile::update(const glm::vec2& mouseCoord)
+{
+	if ((mouseCoord.x - getPosition().x) * (mouseCoord.x - getPosition().x)+ (mouseCoord.y - getPosition().y) * (mouseCoord.y - getPosition().y) <= (40.f  * 0.86f) * (40.f * 0.86f))
+	{
+		std::cout << coordinates.x << " " << coordinates.y << std::endl;
+	}
 }
