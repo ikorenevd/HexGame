@@ -27,8 +27,19 @@ bool Tile::isCrossable() const
 
 void Tile::update(const glm::vec2& mouseCoord)
 {
-	if ((mouseCoord.x - getPosition().x) * (mouseCoord.x - getPosition().x)+ (mouseCoord.y - getPosition().y) * (mouseCoord.y - getPosition().y) <= (40.f  * 0.86f) * (40.f * 0.86f))
-	{
-		std::cout << coordinates.x << " " << coordinates.y << std::endl;
-	}
+		if ((mouseCoord.x - getPosition().x) * (mouseCoord.x - getPosition().x)+ (mouseCoord.y - getPosition().y) * (mouseCoord.y - getPosition().y) <= (40.f  * 0.86f) * (40.f * 0.86f))
+		{
+			if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+			{
+				type = TerrainType::Flatland;
+			}
+			if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
+			{
+				type = TerrainType::Mountain;
+			}
+			if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE))
+			{
+				type = TerrainType::Hill;
+			}
+		}
 }
