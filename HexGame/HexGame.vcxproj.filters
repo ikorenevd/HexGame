@@ -75,6 +75,9 @@
     <ClCompile Include="Engine\Graphics\Transformable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Buildings\Buildings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Engine.hpp">

@@ -31,11 +31,11 @@ const std::shared_ptr<Tile>& Map::getTile(const glm::ivec3& coordinates) const
 	if (coordinates.x + coordinates.y + coordinates.z != 0)
 		return nullptr;
 
-	//for (const std::shared_ptr<Tile>& tile : tiles)
-	//{
-	//	if (tile->getCoordinates() == coordinates)
-	//		return nullptr;
-	//}
+	for (const std::shared_ptr<Tile>& tile : tiles)
+	{
+		if (tile->getCoordinates() == coordinates)
+			return tile;
+	}
 
 	return tiles[coordinates.x * size.x + coordinates.y];
 }

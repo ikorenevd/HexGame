@@ -46,7 +46,7 @@ const glm::mat4& Transformable::getTransform() const
 	if (dirty)
 	{
 		// recalculate matrix
-		matrix = glm::scale(glm::mat4(1.f), glm::vec3(scale, 1.f)) * glm::translate(glm::mat4(1.f), glm::vec3(position, 0.f));
+		matrix = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(position, 0.f)), glm::vec3(scale, 1.f));
 
 		dirty = false;
 	}
