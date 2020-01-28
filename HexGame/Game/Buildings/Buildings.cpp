@@ -9,6 +9,18 @@ Building::Building(const std::shared_ptr<Tile>& tile) :
 	setScale(glm::vec2(60.f));
 }
 
+void Building::setTile(const std::shared_ptr<Tile>& value)
+{
+	tile = value;
+
+	setPosition(tile->getPosition());
+}
+
+const std::shared_ptr<Tile>& Building::getTile() const
+{
+	return tile;
+}
+
 ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :
 	Building(tile)
 {

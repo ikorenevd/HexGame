@@ -53,3 +53,8 @@ const glm::mat4& Transformable::getTransform() const
 
 	return matrix;
 }
+
+bool Transformable::contains(const glm::vec2& point) const
+{
+	return false;
+}

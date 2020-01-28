@@ -15,7 +15,7 @@ public:
 
 	const std::vector<std::shared_ptr<Tile>>& getTiles() const;
 
-	void update(const glm::vec2& mouseCoord);	
+	const std::vector<std::shared_ptr<Tile>> getNeighbors(const std::shared_ptr<Tile>& tile) const;
 private:
 	glm::ivec2 size;
 

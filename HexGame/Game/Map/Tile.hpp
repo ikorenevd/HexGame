@@ -11,11 +11,12 @@ public:
 
 	const glm::ivec3& getCoordinates() const;
 
+	void setTerrainType(TerrainType value);
 	TerrainType getTerrainType() const;
 
 	bool isCrossable() const;
 
-	void update(const glm::vec2& mouseCoord) override;
+	bool contains(const glm::vec2& point) const override;
 private:
 	glm::ivec3 coordinates;
 	TerrainType type;

@@ -1,4 +1,4 @@
-#include <Game/Layers/MapLayer.hpp>
+﻿#include <Game/Layers/MapLayer.hpp>
 
 #include <Engine/Core/Manager.hpp>
 #include <Engine/Graphics/Texture.hpp>
@@ -48,12 +48,12 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
-	factory = std::make_shared<Building>(map->getTile({ 1,1,-2 }));
+	factory = std::make_shared<Building>(map->getTile({ 0,0,0 }));
 }
 
 void MapLayer::update()
 {
-	if (Keyboard::isKeyPressed(GLFW_KEY_W))
+	if (Keyboard::isKeyPressed(GLFW_KEY_Q))
 		speed += 1.f;
 
 	if (Keyboard::isKeyPressed(GLFW_KEY_S))
@@ -79,43 +79,64 @@ void MapLayer::update()
 
 	auto pos = Mouse::getCoordinates();
 
-	auto p = glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f));
+	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
-	map->update(glm::vec2(p.x, p.y));
+	auto tiles = map->getTiles();
+	for (const std::shared_ptr<Tile>& tile : tiles)
+	{
+		if (Mouse::getButtonState(GLFW_MOUSE_BUTTON_LEFT))
+			if (tile->contains(p))
+				tile->setTerrainType(TerrainType::Flatland);
+
+		if (Mouse::getButtonState(GLFW_MOUSE_BUTTON_MIDDLE))
+			if (tile->contains(p))
+				tile->setTerrainType(TerrainType::Mountain);
+
+		if (Mouse::getButtonState(GLFW_MOUSE_BUTTON_RIGHT))
+			if (tile->contains(p))
+				factory->setTile(tile);
+
+
+		// вроде как даже работает
+		std::vector<std::shared_ptr<Tile>> ts;
+		if (Mouse::getButtonState((GLFW_MOUSE_BUTTON_1)))
+			if (tile->contains(p))
+			{
+				ts = map->getNeighbors(tile);
+			}
+	}
 }
 
 void MapLayer::render()
 {
+	// колхозный рендер
 	auto shader = ShaderManager::get("Texture");
 	shader->bind();
 	shader->setInt("ourTexture", 0);
 	shader->setMat4("view", view->getMatrix());
 	vao->bind();
 
-	auto size = map->getSize();
-	for (int x = 0; x < size.x; x++)
-		for (int y = 0; y < size.y; y++)
+	auto tiles = map->getTiles();
+	for (const std::shared_ptr<Tile>& tile : tiles)
+	{
+		switch (tile->getTerrainType())
 		{
-			auto tile = map->getTile(glm::ivec3(x, y, -x-y));
-
-			switch (tile->getTerrainType())
-			{
-			case TerrainType::Flatland:
-				TextureManager::get("blue")->bind();
-				break;
-			case TerrainType::Hill:
-				TextureManager::get("orange")->bind();
-				break;
-			case TerrainType::Mountain:
-				TextureManager::get("grey")->bind();
-				break;
-			}
-
-			shader->setMat4("transform", tile->getTransform());
-
-			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+		case TerrainType::Flatland:
+			TextureManager::get("blue")->bind();
+			break;
+		case TerrainType::Hill:
+			TextureManager::get("orange")->bind();
+			break;
+		case TerrainType::Mountain:
+			TextureManager::get("grey")->bind();
+			break;
 		}
-	
+
+		shader->setMat4("transform", tile->getTransform());
+
+		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+	}
+
 	TextureManager::get("factory")->bind();
 	shader->setMat4("transform", factory->getTransform());
 	glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);

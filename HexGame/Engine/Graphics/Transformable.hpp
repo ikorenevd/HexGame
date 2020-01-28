@@ -17,6 +17,8 @@ public:
 	const glm::vec2& getScale() const;
 
 	const glm::mat4& getTransform() const;
+
+	virtual bool contains(const glm::vec2& point) const; // must be override
 private:
 	mutable glm::mat4 matrix;
 
