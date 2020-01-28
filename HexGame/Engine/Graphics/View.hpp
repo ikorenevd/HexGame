@@ -13,6 +13,9 @@ public:
 	void setSize(const glm::vec2& value);
 	const glm::vec2& getSize() const;
 
+	void setScale(float value);
+	float getScale() const;
+
 	void setCenter(const glm::vec2& value);
 	const glm::vec2& getCenter() const;
 
@@ -22,6 +25,8 @@ public:
 private:
 	glm::vec2 center;
 	glm::vec2 size;
+
+	float scale;
 
 	mutable glm::mat4 matrix;
 

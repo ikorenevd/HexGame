@@ -179,5 +179,8 @@
     <Image Include="Assets\Textures\grey.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Assets\Textures\Buildings\factory.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

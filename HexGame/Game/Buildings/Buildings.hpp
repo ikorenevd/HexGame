@@ -8,7 +8,7 @@ public:
 	Building(const std::shared_ptr<Tile>& tile);
 
 	const std::shared_ptr<Tile>& getTile() const;
-public:
+private:
 	std::shared_ptr<Tile> tile;
 };
 

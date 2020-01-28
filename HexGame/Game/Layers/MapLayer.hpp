@@ -2,6 +2,8 @@
 
 #include <Engine/Engine.hpp>
 
+#include <Game/Buildings/Buildings.hpp>
+
 class Map;
 
 class MapLayer : public Layer
@@ -12,6 +14,7 @@ public:
 	virtual void update() override;
 	virtual void render() override;
 private:
+	std::shared_ptr<Building> factory;
 	std::shared_ptr<Map> map;
 
 	std::shared_ptr<View> view;

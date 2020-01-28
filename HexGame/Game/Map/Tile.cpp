@@ -7,7 +7,7 @@ Tile::Tile(const glm::ivec3& coordinates, TerrainType type) :
 	type(type)
 {
 	setScale(glm::vec2(80.f)); // размер
-	setPosition(glm::vec2((float)(coordinates.x + (float)coordinates.y / 2) * 80.f, (float)coordinates.y * 0.86f * 80.f));
+	setPosition(glm::vec2((float)(coordinates.x + (float)coordinates.y / 2) * 0.9f * 80.f, (float)coordinates.y * 0.9f * 0.86f * 80.f));
 }
 
 const glm::ivec3& Tile::getCoordinates() const

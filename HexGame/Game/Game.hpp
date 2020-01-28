@@ -20,7 +20,7 @@ public:
 
 	virtual void pushingLayers() override
 	{
-		map = std::make_shared<Map>(glm::ivec2(10, 10));
+		map = std::make_shared<Map>(glm::ivec2(20, 20));
 
 		pushLayer(new MapLayer(map));
 	}

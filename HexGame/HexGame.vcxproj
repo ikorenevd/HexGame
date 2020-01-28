@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Textures\blue.png" />
+    <Image Include="Assets\Textures\Buildings\factory.png" />
     <Image Include="Assets\Textures\grey.png" />
     <Image Include="Assets\Textures\orange.png" />
   </ItemGroup>
