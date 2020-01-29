@@ -4,6 +4,47 @@
 #include <Game/Map/TerrainType.hpp>
 #include <Game/Map/HexUtils.hpp>
 
+float lerp(int start, int end, float t)
+{
+	return start + (end - start) * t;
+}
+
+glm::vec3 vec3lerp(glm::ivec3 start, glm::ivec3 end, float t)
+{
+	return glm::vec3(lerp(start.x, end.x, t),
+					 lerp(start.y, end.y, t),
+					 lerp(start.z, end.z, t));
+}
+
+glm::ivec3 vec3round(glm::vec3 vec3coord)
+{
+	int roundX = round(vec3coord.x);
+	int roundY = round(vec3coord.y);
+	int roundZ = round(vec3coord.z);
+
+	float differenceX = abs(roundX - vec3coord.x);
+	float differenceY = abs(roundY - vec3coord.y);
+	float differenceZ = abs(roundZ - vec3coord.z);
+
+	if (differenceX > differenceY and differenceX > differenceZ)
+	{
+		roundX = - roundY - roundZ;
+	}
+	else
+	{
+		if (differenceY > differenceZ)
+		{
+			roundY = - roundX - roundZ;
+		}
+		else
+		{
+			roundZ = - roundX - roundY;
+		}
+	}
+
+	return glm::ivec3(roundX, roundY, roundZ);
+}
+
 Map::Map(const glm::ivec2& s) :
 	size(s)
 {
@@ -13,7 +54,7 @@ Map::Map(const glm::ivec2& s) :
 	for (int x = 0; x < size.x; x++)
 		for (int y = 0; y < size.y; y++)
 		{
-			tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), (TerrainType)(rand() % 3));
+			tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), (TerrainType)(0));
 			a++;
 		}
 }
@@ -90,15 +131,17 @@ const std::vector<std::shared_ptr<Tile>> Map::getPath(const std::shared_ptr<Tile
 	glm::ivec3 startCoord = start->getCoordinates();
 	glm::ivec3 endCoord = end->getCoordinates();
 
-	///
+	int distance = start->getDistance(end);
+
+	for (int i = 0; i <= distance; i++)
+	{
+		glm::ivec3 stepCoord = vec3round(vec3lerp(startCoord, endCoord, 1.f / distance * i));
+
+		std::shared_ptr<Tile> tile = getTile(stepCoord);
+
+		if (tile != nullptr)
+			result.push_back(tile);
+	}
 
 	return result;
-}
-
-const int Map::getDistance(const std::shared_ptr<Tile>& start, const std::shared_ptr<Tile>& end) const
-{
-	glm::ivec3 startCoord = start->getCoordinates();
-	glm::ivec3 endCoord = end->getCoordinates();
-
-	return (abs(startCoord.x - endCoord.x) + abs(startCoord.y - endCoord.y) + abs(startCoord.z - endCoord.z)) / 2;
 }

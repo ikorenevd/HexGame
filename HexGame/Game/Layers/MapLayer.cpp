@@ -47,8 +47,8 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	vao->setVertexBuffer(vbo);
 
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
-
-	factory = std::make_shared<Building>(map->getTile({ 0,0,0 }));
+	
+	factory = std::make_shared<Building>(map->getTile({ 2, 3, -5}));
 }
 
 void MapLayer::update()
@@ -81,7 +81,7 @@ void MapLayer::update()
 
 	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
-	// вроде как даже работает
+	// Radius Fill
 	std::vector<std::shared_ptr<Tile>> ts;
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{
@@ -90,9 +90,29 @@ void MapLayer::update()
 			if (tile->contains(p))
 			{
 				auto ts = map->getTilesInRange(tile, 3);
+
 				for (auto t : ts)
 				{
 					t->setTerrainType(TerrainType::Flatland);
+				}
+			}
+	}
+
+	// Path Fill
+	std::vector<std::shared_ptr<Tile>> pathArray;
+	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		auto tiles = map->getTiles();
+		for (auto tile : tiles) tile->setTerrainType(TerrainType::Flatland);
+
+		for (auto tile : tiles)
+			if (tile->contains(p))
+			{
+				auto pathArray = map->getPath(map->getTile(glm::ivec3( 0, 0, 0)), tile);
+
+				for (auto t : pathArray)
+				{
+					t->setTerrainType(TerrainType::Mountain);
 				}
 			}
 	}
