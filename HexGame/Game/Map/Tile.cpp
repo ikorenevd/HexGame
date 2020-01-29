@@ -39,3 +39,10 @@ bool Tile::contains(const glm::vec2& point) const
 	float radius = getScale().x / 2;
 	return (sqr(point.x - getPosition().x) + sqr(point.y - getPosition().y) <= sqr(radius * 0.86f));
 }
+
+const int Tile::getDistance(const std::shared_ptr<Tile>& target) const
+{
+	glm::ivec3 targetCoordinates = target->getCoordinates();
+
+	return (abs(coordinates.x - targetCoordinates.x) + abs(coordinates.y - targetCoordinates.y) + abs(coordinates.z - targetCoordinates.z)) / 2;
+}

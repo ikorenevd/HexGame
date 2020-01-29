@@ -82,3 +82,23 @@ const std::vector<std::shared_ptr<Tile>> Map::getTilesInRange(const std::shared_
 
 	 return result;
 }
+
+const std::vector<std::shared_ptr<Tile>> Map::getPath(const std::shared_ptr<Tile>& start, const std::shared_ptr<Tile>& end) const
+{
+	std::vector<std::shared_ptr<Tile>> result;
+
+	glm::ivec3 startCoord = start->getCoordinates();
+	glm::ivec3 endCoord = end->getCoordinates();
+
+	///
+
+	return result;
+}
+
+const int Map::getDistance(const std::shared_ptr<Tile>& start, const std::shared_ptr<Tile>& end) const
+{
+	glm::ivec3 startCoord = start->getCoordinates();
+	glm::ivec3 endCoord = end->getCoordinates();
+
+	return (abs(startCoord.x - endCoord.x) + abs(startCoord.y - endCoord.y) + abs(startCoord.z - endCoord.z)) / 2;
+}
