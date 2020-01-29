@@ -39,7 +39,7 @@ const std::vector<std::shared_ptr<Tile>>& Map::getTiles() const
 
 const std::vector<std::shared_ptr<Tile>> Map::getNeighbors(const std::shared_ptr<Tile>& tile) const
 {
-	std::vector<std::shared_ptr<Tile>> tiles;
+	std::vector<std::shared_ptr<Tile>> result;
 
 	std::vector<glm::ivec3> directions =
 	{
@@ -58,9 +58,27 @@ const std::vector<std::shared_ptr<Tile>> Map::getNeighbors(const std::shared_ptr
   		std::shared_ptr<Tile> t = getTile(coord);
 		if (t != nullptr)
 		{
-			tiles.push_back(t);
+			result.push_back(t);
 		}
 	}
 
-	return tiles;
+	return result;
+}
+
+const std::vector<std::shared_ptr<Tile>> Map::getTilesInRange(const std::shared_ptr<Tile>& tile, int radius) const
+{
+	 std::vector<std::shared_ptr<Tile>> result;
+
+	 auto coord = tile->getCoordinates();
+	 for (int x = coord.x - radius; x <= coord.x + radius; x++)
+		 for (int y = coord.y - radius; y <= coord.y + radius; y++)
+			 for (int z = coord.z - radius; z <= coord.z + radius; z++)
+				 if (x + y + z == 0)
+				 {
+					 std::shared_ptr<Tile> t = getTile(glm::ivec3(x, y, z));
+					 if (t != nullptr)
+						result.push_back(getTile(glm::ivec3(x, y, z)));
+				 }
+
+	 return result;
 }

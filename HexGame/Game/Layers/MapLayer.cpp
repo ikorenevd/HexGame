@@ -53,7 +53,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 void MapLayer::update()
 {
-	if (Keyboard::isKeyPressed(GLFW_KEY_Q))
+	if (Keyboard::isKeyPressed(GLFW_KEY_W))
 		speed += 1.f;
 
 	if (Keyboard::isKeyPressed(GLFW_KEY_S))
@@ -81,28 +81,19 @@ void MapLayer::update()
 
 	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
-	auto tiles = map->getTiles();
-	for (const std::shared_ptr<Tile>& tile : tiles)
+	// вроде как даже работает
+	std::vector<std::shared_ptr<Tile>> ts;
+	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{
-		if (Mouse::getButtonState(GLFW_MOUSE_BUTTON_LEFT))
-			if (tile->contains(p))
-				tile->setTerrainType(TerrainType::Flatland);
-
-		if (Mouse::getButtonState(GLFW_MOUSE_BUTTON_MIDDLE))
-			if (tile->contains(p))
-				tile->setTerrainType(TerrainType::Mountain);
-
-		if (Mouse::getButtonState(GLFW_MOUSE_BUTTON_RIGHT))
-			if (tile->contains(p))
-				factory->setTile(tile);
-
-
-		// вроде как даже работает
-		std::vector<std::shared_ptr<Tile>> ts;
-		if (Mouse::getButtonState((GLFW_MOUSE_BUTTON_1)))
+		auto tiles = map->getTiles();
+		for (auto tile : tiles)
 			if (tile->contains(p))
 			{
-				ts = map->getNeighbors(tile);
+				auto ts = map->getTilesInRange(tile, 3);
+				for (auto t : ts)
+				{
+					t->setTerrainType(TerrainType::Flatland);
+				}
 			}
 	}
 }

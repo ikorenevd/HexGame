@@ -16,6 +16,8 @@ public:
 	const std::vector<std::shared_ptr<Tile>>& getTiles() const;
 
 	const std::vector<std::shared_ptr<Tile>> getNeighbors(const std::shared_ptr<Tile>& tile) const;
+
+	const std::vector<std::shared_ptr<Tile>> getTilesInRange(const std::shared_ptr<Tile>& tile, int radius) const;
 private:
 	glm::ivec2 size;
 
