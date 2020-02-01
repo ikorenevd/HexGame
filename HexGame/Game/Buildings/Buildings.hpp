@@ -1,40 +1,23 @@
 #include <Engine\Engine.hpp>
-#include <map>
+#include "Game/Buildings/Resourses.hpp"
+#include <unordered_map>
 
 class Tile;
-
-enum class ResourseType
-{	
-	RawWood = 0,
-	ProcessedWood,
-	Plank,
-
-	Ore,
-	PreciousOre,
-	Coal,
-	Stone,
-
-	Metal,
-	PreciousMetal,
-
-	Machine,
-	Rail,
-	Beam,
-	Wearpon,
-	Jewelry
-};
 
 class Building : public Transformable
 {
 public:
-	static int cost;
-	static int defaultUpkeep;
-	std::map<enum ResourseType, int> storage;
+	static int buildingCost;
+	static float defaultUpkeep;
+	static int defaultStorageLimit;
+	int storageLimit;
+	std::unordered_map<enum ResourseType, float> storage;
 
 	Building(const std::shared_ptr<Tile>& tile);
 
 	void setTile(const std::shared_ptr<Tile>& value);
 
+	const int getResourseAmount(enum ResourseType);
 	const std::shared_ptr<Tile>& getTile() const;
 private:
 	std::shared_ptr<Tile> tile;
@@ -49,7 +32,61 @@ public:
 class MainBuilding : public Building
 {
 public:
-	std::vector<std::shared_ptr<ExtensionBuilding>> extensionBuildings;
-
 	MainBuilding(const std::shared_ptr<Tile>& tile);
+};
+
+class Sawmill : public MainBuilding
+{
+public:
+	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
+	{
+		buildingCost = 150;
+		defaultUpkeep = 50/60.;
+		defaultStorageLimit = 100;
+		storageLimit = 100;
+
+		storage[ResourseType::RawWood] = 0;
+		storage[ResourseType::ProcessedWood] = 0;
+		storage[ResourseType::Plank] = 0;
+	}
+
+	void update()
+	{
+		if (this->getUsedStorage() < storageLimit)
+		{
+			if (storage[ResourseType::RawWood] >= 90 / 60.)
+			{
+				storage[ResourseType::ProcessedWood] += 45 / 60.;
+				storage[ResourseType::RawWood] -= 90 / 60.;
+			}
+
+			if (storage[ResourseType::ProcessedWood] >= 15 / 60.)
+			{
+				storage[ResourseType::Plank] += 45 / 60.;
+				storage[ResourseType::ProcessedWood] -= 15 / 60.;
+			}
+		}
+	}
+
+	int getUsedStorage()
+	{
+		int storageUsed = 0;
+
+		for (auto i : storage)
+		{
+			storageUsed += resourceSize(i.first) * i.second;
+		}
+
+		return storageUsed;
+	}
+
+	void extensionStorage()
+	{
+		storageLimit += defaultStorageLimit * 1.5;
+	}
+
+	void changeStorage(ResourseType type, int value)
+	{
+		storage[type] += value;
+	}
 };
