@@ -82,21 +82,21 @@ void MapLayer::update()
 	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
 	// Radius Fill
-	std::vector<std::shared_ptr<Tile>> ts;
-	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-	{
-		auto tiles = map->getTiles();
-		for (auto tile : tiles)
-			if (tile->contains(p))
-			{
-				auto ts = map->getTilesInRange(tile, 3);
+	//std::vector<std::shared_ptr<Tile>> ts;
+	//if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+	//{
+	//	auto tiles = map->getTiles();
+	//	for (auto tile : tiles)
+	//		if (tile->contains(p))
+	//		{
+	//			auto ts = map->getTilesInRange(tile, 3);
 
-				for (auto t : ts)
-				{
-					t->setTerrainType(TerrainType::Flatland);
-				}
-			}
-	}
+	//			for (auto t : ts)
+	//			{
+	//				t->setTerrainType(TerrainType::Flatland);
+	//			}
+	//		}
+	//}
 
 	// Path Fill
 	std::vector<std::shared_ptr<Tile>> pathArray;
@@ -108,13 +108,22 @@ void MapLayer::update()
 		for (auto tile : tiles)
 			if (tile->contains(p))
 			{
-				auto pathArray = map->getPath(map->getTile(glm::ivec3( 0, 0, 0)), tile);
+				auto pathArray = map->getPath(factory->getTile(), tile);
 
 				for (auto t : pathArray)
 				{
 					t->setTerrainType(TerrainType::Mountain);
 				}
 			}
+	}
+
+	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+	{
+		auto tiles = map->getTiles();
+
+		for (auto tile : tiles)
+			if (tile->contains(p))
+				factory->setTile(tile);
 	}
 }
 

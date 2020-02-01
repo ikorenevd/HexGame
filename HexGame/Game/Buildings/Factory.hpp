@@ -8,5 +8,3 @@ class Sawmill : public MainBuilding
 public:
 	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile) {};
 };
-
-class Woodworking
