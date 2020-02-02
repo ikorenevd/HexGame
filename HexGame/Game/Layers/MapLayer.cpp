@@ -46,9 +46,9 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	vao->setIndexBuffer(ibo);
 	vao->setVertexBuffer(vbo);
 
+	treasuryMoney = 100;
+
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
-	
-	factory = std::make_shared<Building>(map->getTile({ 2, 3, -5}));
 }
 
 void MapLayer::update()
@@ -79,51 +79,29 @@ void MapLayer::update()
 
 	auto pos = Mouse::getCoordinates();
 
-	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
-
-	// Radius Fill
-	/*std::vector<std::shared_ptr<Tile>> ts;
-	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+	for (auto i : buildings)
 	{
-		auto tiles = map->getTiles();
-		for (auto tile : tiles)
-			if (tile->contains(p))
-			{
-				auto ts = map->getTilesInRange(tile, 3);
+		i->update();
+		if (treasuryMoney > 0) treasuryMoney -= i->getUpkeep();
 
-				for (auto t : ts)
-				{
-					t->setTerrainType(TerrainType::Flatland);
-				}
-			}
-	}*/
-
-	// Path Fill
-	std::vector<std::shared_ptr<Tile>> pathArray;
-	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
-	{
-		auto tiles = map->getTiles();
-		for (auto tile : tiles) tile->setTerrainType(TerrainType::Flatland);
-
-		for (auto tile : tiles)
-			if (tile->contains(p))
-			{
-				auto pathArray = map->getPath(factory->getTile(), tile);
-
-				for (auto t : pathArray)
-				{
-					t->setTerrainType(TerrainType::Mountain);
-				}
-			}
+		if (Keyboard::isKeyPressed(GLFW_KEY_O))
+		{
+			std::cout << std::endl << "RawWood: " << i->getResourseAmount(ResourseType::RawWood) << ", ProcessedWood: " << i->getResourseAmount(ResourseType::ProcessedWood)  << ", Planks: " << i->getResourseAmount(ResourseType::Plank) << "   ";
+			std::cout << std::endl << "Treasury Money: " << treasuryMoney << std::endl;
+		}
 	}
 
+	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{
 		auto tiles = map->getTiles();
 
 		for (auto tile : tiles)
 			if (tile->contains(p))
-				factory->setTile(tile);
+			{
+				buildings.push_back(std::make_shared<Sawmill>(tile));
+			}
 	}
 }
 
@@ -157,9 +135,15 @@ void MapLayer::render()
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
-	TextureManager::get("factory")->bind();
-	shader->setMat4("transform", factory->getTransform());
-	glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+	for (auto i : buildings)
+	{
+		shader->setMat4("transform", i->getTransform());
+
+		TextureManager::get("factory")->bind();
+
+		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+	}
+
 	vao->unbind();
 	shader->unbind();
 }

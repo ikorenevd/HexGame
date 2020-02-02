@@ -31,7 +31,7 @@ void Building::extensionStorage()
  	storageLimit += defaultStorageLimit * 1.5;
 }
 
-int  Building::getUsedStorage()
+int Building::getUsedStorage()
 {
 	int storageUsed = 0;
 
@@ -41,6 +41,21 @@ int  Building::getUsedStorage()
 	}
 
 	return storageUsed;
+}
+
+const int Building::getResourseAmount(enum ResourseType type)
+{
+	return storage[type];
+}
+
+void Building::update()
+{
+
+}
+
+float Building::getUpkeep()
+{
+	return upkeep;
 }
 
 ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :

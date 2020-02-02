@@ -16,9 +16,12 @@ public:
 private:
 	std::shared_ptr<Building> factory;
 	std::shared_ptr<Map> map;
+	std::vector<std::shared_ptr<Building>> buildings;
 
 	std::shared_ptr<View> view;
 	float speed = 2.f;
+
+	float treasuryMoney;
 
 	std::shared_ptr<VertexArray> vao;
 };

@@ -7,8 +7,9 @@ class Tile;
 class Building : public Transformable
 {
 public:
-	static int buildingCost;
-	static float defaultUpkeep;
+	int buildingCost;
+	float defaultUpkeep;
+	float upkeep;
 	int defaultStorageLimit;
 	int storageLimit;
 	std::unordered_map<enum ResourseType, float> storage;
@@ -18,8 +19,10 @@ public:
 	void setTile(const std::shared_ptr<Tile>& value);
 	void changeStorage(ResourseType type, int value);
 	void extensionStorage();
+	virtual void update();
 
 	int getUsedStorage();
+	float getUpkeep();
 	const int getResourseAmount(enum ResourseType);
 	const std::shared_ptr<Tile>& getTile() const;
 private:
@@ -44,29 +47,30 @@ public:
 	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
 		buildingCost = 150;
-		defaultUpkeep = 50/60.;
-		defaultStorageLimit = 100;
-		storageLimit = 100;
+		defaultUpkeep, upkeep = 50 / 3600.;
+		defaultStorageLimit, storageLimit = 500;
 
-		storage[ResourseType::RawWood] = 0;
+		storage[ResourseType::RawWood] = 25;
 		storage[ResourseType::ProcessedWood] = 0;
 		storage[ResourseType::Plank] = 0;
+
+		std::cout << "Sawmill is built ";
 	}
 
-	void update()
+	void update() override
 	{
 		if (this->getUsedStorage() < storageLimit)
 		{
-			if (storage[ResourseType::RawWood] >= 90 / 60.)
+			if (storage[ResourseType::RawWood] >= 90 / 3600.)
 			{
-				storage[ResourseType::ProcessedWood] += 45 / 60.;
-				storage[ResourseType::RawWood] -= 90 / 60.;
+				storage[ResourseType::ProcessedWood] += 45 / 3600.;
+				storage[ResourseType::RawWood] -= 90 / 3600.;
 			}
 
-			if (storage[ResourseType::ProcessedWood] >= 15 / 60.)
+			if (storage[ResourseType::ProcessedWood] >= 15 / 3600.)
 			{
-				storage[ResourseType::Plank] += 45 / 60.;
-				storage[ResourseType::ProcessedWood] -= 15 / 60.;
+				storage[ResourseType::Plank] += 45 / 3600.;
+				storage[ResourseType::ProcessedWood] -= 15 / 3600.;
 			}
 		}
 	}
