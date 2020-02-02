@@ -9,33 +9,17 @@ class Building : public Transformable
 public:
 	static int buildingCost;
 	static float defaultUpkeep;
-	static int defaultStorageLimit;
+	int defaultStorageLimit;
 	int storageLimit;
 	std::unordered_map<enum ResourseType, float> storage;
 
 	Building(const std::shared_ptr<Tile>& tile);
 
 	void setTile(const std::shared_ptr<Tile>& value);
-	void changeStorage(ResourseType type, int value)
-	{
-		storage[type] += value;
-	}
-	void extensionStorage()
-	{
-		storageLimit += defaultStorageLimit * 1.5;
-	}
+	void changeStorage(ResourseType type, int value);
+	void extensionStorage();
 
-	int getUsedStorage()
-	{
-		int storageUsed = 0;
-
-		for (auto i : storage)
-		{
-			storageUsed += resourceSize(i.first) * i.second;
-		}
-
-		return storageUsed;
-	}
+	int getUsedStorage();
 	const int getResourseAmount(enum ResourseType);
 	const std::shared_ptr<Tile>& getTile() const;
 private:

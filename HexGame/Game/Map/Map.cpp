@@ -133,14 +133,17 @@ const std::vector<std::shared_ptr<Tile>> Map::getPath(const std::shared_ptr<Tile
 
 	int distance = start->getDistance(end);
 
-	for (int i = 0; i <= distance; i++)
+	if (start != end)
 	{
-		glm::ivec3 stepCoord = vec3round(vec3lerp(startCoord, endCoord, 1.f / distance * i));
+		for (int i = 0; i <= distance; i++)
+		{
+			glm::ivec3 stepCoord = vec3round(vec3lerp(startCoord, endCoord, 1.f / distance * i));
 
-		std::shared_ptr<Tile> tile = getTile(stepCoord);
+			std::shared_ptr<Tile> tile = getTile(stepCoord);
 
-		if (tile != nullptr)
-			result.push_back(tile);
+			if (tile != nullptr)
+				result.push_back(tile);
+		}
 	}
 
 	return result;
