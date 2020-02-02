@@ -1,5 +1,5 @@
 #include <Engine\Engine.hpp>
-#include "Game/Buildings/Resourses.hpp"
+#include <Game/Buildings/ResourceTypes.hpp>
 #include <unordered_map>
 
 class Tile;
@@ -16,7 +16,26 @@ public:
 	Building(const std::shared_ptr<Tile>& tile);
 
 	void setTile(const std::shared_ptr<Tile>& value);
+	void changeStorage(ResourseType type, int value)
+	{
+		storage[type] += value;
+	}
+	void extensionStorage()
+	{
+		storageLimit += defaultStorageLimit * 1.5;
+	}
 
+	int getUsedStorage()
+	{
+		int storageUsed = 0;
+
+		for (auto i : storage)
+		{
+			storageUsed += resourceSize(i.first) * i.second;
+		}
+
+		return storageUsed;
+	}
 	const int getResourseAmount(enum ResourseType);
 	const std::shared_ptr<Tile>& getTile() const;
 private:
@@ -66,27 +85,5 @@ public:
 				storage[ResourseType::ProcessedWood] -= 15 / 60.;
 			}
 		}
-	}
-
-	int getUsedStorage()
-	{
-		int storageUsed = 0;
-
-		for (auto i : storage)
-		{
-			storageUsed += resourceSize(i.first) * i.second;
-		}
-
-		return storageUsed;
-	}
-
-	void extensionStorage()
-	{
-		storageLimit += defaultStorageLimit * 1.5;
-	}
-
-	void changeStorage(ResourseType type, int value)
-	{
-		storage[type] += value;
 	}
 };

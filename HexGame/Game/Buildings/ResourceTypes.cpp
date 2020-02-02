@@ -1,25 +1,6 @@
-﻿// TO DO: мясо, шерсть, хлопок, пшено
+#pragma once
 
-enum class ResourseType
-{
-	RawWood = 0,
-	ProcessedWood,
-	Plank,
-
-	Ore,
-	PreciousOre,
-	Coal,
-	Stone,
-
-	Metal,
-	PreciousMetal,
-
-	Machine,
-	Rail,
-	Beam,
-	Wearpon,
-	Jewelry
-};
+#include <Game/Buildings/ResourceTypes.hpp>
 
 int resourceSize(ResourseType type)
 {
