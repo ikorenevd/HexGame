@@ -21,9 +21,9 @@ void Building::setTile(const std::shared_ptr<Tile>& value)
 	setPosition(tile->getPosition());
 }
 
-void Building::setActive(bool setActive)
+void Building::setFrozen(bool setActive)
 {
-	active = setActive;
+	frozen = setActive;
 }
 
 void Building::setStorage(ResourseType type, int value)
@@ -42,6 +42,11 @@ const std::shared_ptr<Tile>& Building::getTile() const
 	return tile;
 }
 
+std::shared_ptr<Texture> Building::getTexture()
+{
+	return texture;
+}
+
 int Building::getUsedStorage()
 {
 	int storageUsed = 0;
@@ -54,14 +59,19 @@ int Building::getUsedStorage()
 	return storageUsed;
 }
 
-const int Building::getResourseAmount(enum ResourseType type)
+int Building::getResourseAmount(enum ResourseType type)
 {
 	return storage[type];
 }
 
-bool Building::getActive()
+bool Building::getFrozen()
 {
-	return active;
+	return frozen;
+}
+
+bool Building::getFunctioning()
+{
+	return functioning;
 }
 
 float Building::getUpkeep()

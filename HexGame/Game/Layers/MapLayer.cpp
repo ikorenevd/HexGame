@@ -80,37 +80,32 @@ void MapLayer::update()
 		view->setScale(view->getScale() - 0.1f);
 
 	auto pos = Mouse::getCoordinates();
-
+	auto tiles = map->getTiles();
 	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
-	// Update
+	// Обновление, расчет общей стоимости содержания, расчет казны
 	totalUpkeep = 0;
 
-	for (auto i : buildings)	// Обновление и расчет общий стоимости содержания
+	for (auto i : buildings)
 	{
 		i->update();
 
-		if (i->getActive())
+		if (!i->getFrozen() and i->getFunctioning())
 			totalUpkeep += i->getUpkeep();
 		else
 			totalUpkeep += i->getUpkeep() / 5;
 	}
 
-	if (treasuryMoney > 0)		// Отключение зданий при пустой казне
-	{
-		treasuryMoney -= totalUpkeep;
-	}
-	else
-	{
-		for (auto i : buildings)
-			i->setActive(false);
-	}
+	treasuryMoney -= totalUpkeep;
 
-	// Building Сonstruction
+	// Отключение зданий при пустой казне
+	if (treasuryMoney <= 0)		
+		for (auto i : buildings)
+			i->setFrozen(true);
+
+	// Постройка зданий
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{
-		auto tiles = map->getTiles();
-
 		if (treasuryMoney - Sawmill::cost >= 0)
 		{
 			for (auto tile : tiles)
@@ -135,6 +130,42 @@ void MapLayer::update()
 					treasuryMoney -= Sawmill::cost;
 				}
 			}
+		}
+	}
+
+	// Выделение клетки
+	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		for (auto tile : tiles)
+		{
+			if (tile->contains(p))
+			{
+				if (selectedTile != tile or selectedTile == nullptr)
+				{
+					selectedTile = tile;
+				}
+				else
+				{
+					selectedTile = nullptr;
+				}
+			}
+		}
+	}
+
+	// Снос здания
+	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) and selectedTile != nullptr)
+	{
+		int i = 0;
+
+		for (auto building : buildings)
+		{
+			if (building->getTile() == selectedTile)
+			{
+				buildings.erase(buildings.begin() + i, buildings.begin() + i + 1);
+				break;
+			}
+
+			i++;
 		}
 	}
 
@@ -163,6 +194,13 @@ void MapLayer::update()
 
 		std::cout << std::endl;
 	}
+
+	for (auto tile : tiles)
+	{
+		tile->setTerrainType(TerrainType::Flatland);
+		if (selectedTile != nullptr)
+			selectedTile->setTerrainType(TerrainType::Hill);
+	}
 }
 
 void MapLayer::render()
@@ -174,6 +212,7 @@ void MapLayer::render()
 	shader->setMat4("view", view->getMatrix());
 	vao->bind();
 
+	// Отрисовка клеток
 	auto tiles = map->getTiles();
 	for (const std::shared_ptr<Tile>& tile : tiles)
 	{
@@ -195,11 +234,12 @@ void MapLayer::render()
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
+	// Отрисовка зданий
 	for (auto i : buildings)
 	{
 		shader->setMat4("transform", i->getTransform());
 
-		TextureManager::get("factory")->bind();
+		i->getTexture()->bind();
 
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}

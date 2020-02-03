@@ -23,6 +23,8 @@ private:
 
 	float treasuryMoney;
 	float totalUpkeep;
+	std::shared_ptr<Tile> selectedTile;
+
 	double lastTime;		// Debug
 
 	std::shared_ptr<VertexArray> vao;
