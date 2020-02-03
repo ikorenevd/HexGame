@@ -103,6 +103,12 @@ void MapLayer::update()
 		for (auto i : buildings)
 			i->setFrozen(true);
 
+	// Передача между зданиями
+	if (Keyboard::isKeyPressed(GLFW_KEY_T))
+		debug = true;
+
+	if (debug) buildings[0]->transportTo(buildings[1], ResourseType::ProcessedWood, 15);
+
 	// Постройка зданий
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{

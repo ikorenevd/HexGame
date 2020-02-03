@@ -14,6 +14,11 @@ void Building::update()
 
 }
 
+void Building::transportTo(std::shared_ptr<Building>& target, ResourseType type, int speed)
+{
+
+}
+
 void Building::setTile(const std::shared_ptr<Tile>& value)
 {
 	tile = value;
@@ -26,7 +31,7 @@ void Building::setFrozen(bool setActive)
 	frozen = setActive;
 }
 
-void Building::setStorage(ResourseType type, int value)
+void Building::setStorage(ResourseType type, float value)
 {
 	storage[type] += value;
 }

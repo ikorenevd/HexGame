@@ -26,6 +26,7 @@ private:
 	std::shared_ptr<Tile> selectedTile;
 
 	double lastTime;		// Debug
+	bool debug;
 
 	std::shared_ptr<VertexArray> vao;
 };

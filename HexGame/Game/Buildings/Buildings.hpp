@@ -23,10 +23,11 @@ public:
 	Building(const std::shared_ptr<Tile>& tile);
 
 	virtual void update();
+	virtual void transportTo(std::shared_ptr<Building>& target, ResourseType type, int speed);
 
 	void setTile(const std::shared_ptr<Tile>& value);
 	void setFrozen(bool setFrozen);
-	void setStorage(ResourseType type, int value);
+	void setStorage(ResourseType type, float value);
 	void addStorage();
 
 	std::shared_ptr<Texture> getTexture();
@@ -99,6 +100,15 @@ public:
 			{
 				functioning = false;
 			}
+		}
+	}
+
+	void transportTo(std::shared_ptr<Building>& target, ResourseType type, int speed) override
+	{
+		if (this->getResourseAmount(type) > 0)
+		{
+			this->setStorage(type, -speed / 3600.);
+			target->setStorage(type, +speed / 3600.);
 		}
 	}
 };
