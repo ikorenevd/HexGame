@@ -103,8 +103,13 @@ void MapLayer::update()
 		for (auto tile : tiles)
 			if (tile->contains(p))
 			{
-				buildings.push_back(std::make_shared<Sawmill>(tile));
-				treasuryMoney -= buildings.back()->getBuildingCost();				// Костыль?
+				buildings.push_back(std::make_shared<Sawmill>(tile));			
+					std::cout << "---Sawmill is built.   ";
+
+				buildings.back()->changeStorage(ResourseType::RawWood, 50);		// Костыль?
+					std::cout << "---Added 50 RawWood to sawmill." << std::endl;
+
+				treasuryMoney -= buildings.back()->getBuildingCost();	// Костыль?
 			}
 	}
 

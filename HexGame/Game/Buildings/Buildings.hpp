@@ -54,8 +54,6 @@ public:
 		storage[ResourseType::RawWood] = 0;
 		storage[ResourseType::ProcessedWood] = 0;
 		storage[ResourseType::Plank] = 0;
-
-		std::cout << "Sawmill is built ";
 	}
 
 	void update() override
