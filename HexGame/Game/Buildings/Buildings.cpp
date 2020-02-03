@@ -58,6 +58,11 @@ float Building::getUpkeep()
 	return upkeep;
 }
 
+int Building::getBuildingCost() const
+{
+	return buildingCost;
+}
+
 ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :
 	Building(tile)
 {

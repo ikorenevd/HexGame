@@ -46,9 +46,11 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	vao->setIndexBuffer(ibo);
 	vao->setVertexBuffer(vbo);
 
-	treasuryMoney = 100;
+	treasuryMoney = 500;
 
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
+
+	double lastTime = glfwGetTime();		// Debug
 }
 
 void MapLayer::update()
@@ -79,20 +81,21 @@ void MapLayer::update()
 
 	auto pos = Mouse::getCoordinates();
 
+	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+
+
+	// Update
+	totalUpkeep = 0;
+
 	for (auto i : buildings)
 	{
 		i->update();
-		if (treasuryMoney > 0) treasuryMoney -= i->getUpkeep();
-
-		if (Keyboard::isKeyPressed(GLFW_KEY_O))
-		{
-			std::cout << std::endl << "RawWood: " << i->getResourseAmount(ResourseType::RawWood) << ", ProcessedWood: " << i->getResourseAmount(ResourseType::ProcessedWood)  << ", Planks: " << i->getResourseAmount(ResourseType::Plank) << "   ";
-			std::cout << std::endl << "Treasury Money: " << treasuryMoney << std::endl;
-		}
+		totalUpkeep += i->getUpkeep();
 	}
 
-	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+	if (treasuryMoney > 0) treasuryMoney -= totalUpkeep;
 
+	// Building Сonstruction
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{
 		auto tiles = map->getTiles();
@@ -101,7 +104,34 @@ void MapLayer::update()
 			if (tile->contains(p))
 			{
 				buildings.push_back(std::make_shared<Sawmill>(tile));
+				treasuryMoney -= buildings.back()->getBuildingCost();				// Костыль?
 			}
+	}
+
+	// Debug
+	double currentTime = glfwGetTime();
+	if (currentTime - lastTime >= 1.0)
+	{
+		int number = 0;
+
+		std::cout << std::endl;
+
+		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
+		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
+
+		for (auto i : buildings)
+		{
+			std::cout << "Building " << number << ": ";
+			std::cout << "RawWood: " << i->getResourseAmount(ResourseType::RawWood)
+					  << ", ProcessedWood: " << i->getResourseAmount(ResourseType::ProcessedWood)
+					  << ", Planks: " << i->getResourseAmount(ResourseType::Plank) << std::endl;
+			
+			number++;
+		}
+
+		lastTime += 1;
+
+		std::cout << std::endl;
 	}
 }
 

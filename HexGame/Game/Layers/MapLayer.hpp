@@ -22,6 +22,8 @@ private:
 	float speed = 2.f;
 
 	float treasuryMoney;
+	float totalUpkeep;
+	double lastTime;		// Debug
 
 	std::shared_ptr<VertexArray> vao;
 };

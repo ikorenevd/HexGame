@@ -21,6 +21,7 @@ public:
 	void extensionStorage();
 	virtual void update();
 
+	int getBuildingCost() const;
 	int getUsedStorage();
 	float getUpkeep();
 	const int getResourseAmount(enum ResourseType);
@@ -50,7 +51,7 @@ public:
 		defaultUpkeep, upkeep = 50 / 3600.;
 		defaultStorageLimit, storageLimit = 500;
 
-		storage[ResourseType::RawWood] = 25;
+		storage[ResourseType::RawWood] = 0;
 		storage[ResourseType::ProcessedWood] = 0;
 		storage[ResourseType::Plank] = 0;
 
