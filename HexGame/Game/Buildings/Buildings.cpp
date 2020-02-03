@@ -9,6 +9,11 @@ Building::Building(const std::shared_ptr<Tile>& tile) :
 	setScale(glm::vec2(60.f));
 }
 
+void Building::update()
+{
+
+}
+
 void Building::setTile(const std::shared_ptr<Tile>& value)
 {
 	tile = value;
@@ -16,19 +21,25 @@ void Building::setTile(const std::shared_ptr<Tile>& value)
 	setPosition(tile->getPosition());
 }
 
-const std::shared_ptr<Tile>& Building::getTile() const
+void Building::setActive(bool setActive)
 {
-	return tile;
+	active = setActive;
 }
 
-void Building::changeStorage(ResourseType type, int value)
+void Building::setStorage(ResourseType type, int value)
 {
 	storage[type] += value;
 }
 
-void Building::extensionStorage()
+void Building::addStorage()
 {
- 	storageLimit += defaultStorageLimit * 1.5;
+ 	if (storageLimit < defaultStorageLimit * 4)
+		storageLimit += defaultStorageLimit * 1.5;
+}
+
+const std::shared_ptr<Tile>& Building::getTile() const
+{
+	return tile;
 }
 
 int Building::getUsedStorage()
@@ -48,9 +59,9 @@ const int Building::getResourseAmount(enum ResourseType type)
 	return storage[type];
 }
 
-void Building::update()
+bool Building::getActive()
 {
-
+	return active;
 }
 
 float Building::getUpkeep()
@@ -58,10 +69,7 @@ float Building::getUpkeep()
 	return upkeep;
 }
 
-int Building::getBuildingCost() const
-{
-	return buildingCost;
-}
+int Sawmill::cost = 150;
 
 ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :
 	Building(tile)

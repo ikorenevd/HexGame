@@ -46,7 +46,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	vao->setIndexBuffer(ibo);
 	vao->setVertexBuffer(vbo);
 
-	treasuryMoney = 500;
+	treasuryMoney = 1750;
 
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
@@ -83,34 +83,59 @@ void MapLayer::update()
 
 	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
-
 	// Update
 	totalUpkeep = 0;
 
-	for (auto i : buildings)
+	for (auto i : buildings)	// Обновление и расчет общий стоимости содержания
 	{
 		i->update();
-		totalUpkeep += i->getUpkeep();
+
+		if (i->getActive())
+			totalUpkeep += i->getUpkeep();
+		else
+			totalUpkeep += i->getUpkeep() / 5;
 	}
 
-	if (treasuryMoney > 0) treasuryMoney -= totalUpkeep;
+	if (treasuryMoney > 0)		// Отключение зданий при пустой казне
+	{
+		treasuryMoney -= totalUpkeep;
+	}
+	else
+	{
+		for (auto i : buildings)
+			i->setActive(false);
+	}
 
 	// Building Сonstruction
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{
 		auto tiles = map->getTiles();
 
-		for (auto tile : tiles)
-			if (tile->contains(p))
+		if (treasuryMoney - Sawmill::cost >= 0)
+		{
+			for (auto tile : tiles)
 			{
-				buildings.push_back(std::make_shared<Sawmill>(tile));			
+				if (tile->contains(p))
+				{
+					bool exit = false;
+
+					for (auto build : buildings)
+						if (build->getTile() == tile)
+							exit = true;
+
+					if (exit)
+						break;
+
+					buildings.push_back(std::make_shared<Sawmill>(tile));
 					std::cout << "---Sawmill is built.   ";
 
-				buildings.back()->changeStorage(ResourseType::RawWood, 50);		// Костыль?
+					buildings.back()->setStorage(ResourseType::RawWood, 25);
 					std::cout << "---Added 50 RawWood to sawmill." << std::endl;
 
-				treasuryMoney -= buildings.back()->getBuildingCost();	// Костыль?
+					treasuryMoney -= Sawmill::cost;
+				}
 			}
+		}
 	}
 
 	// Debug
