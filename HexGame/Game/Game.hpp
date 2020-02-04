@@ -9,6 +9,7 @@
 #include <Game/Map/Tile.hpp>
 
 #include <Game/Layers/MapLayer.hpp>
+#include <Game/Layers/ButtonsLayer.hpp>
 
 class Game : public Application
 {
@@ -22,6 +23,7 @@ public:
 	{
 		map = std::make_shared<Map>(glm::ivec2(20, 20));
 
+		pushLayer(new ButtonsLayer);
 		pushLayer(new MapLayer(map));
 	}
 private:

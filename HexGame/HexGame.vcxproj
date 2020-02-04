@@ -101,6 +101,8 @@
     <ClCompile Include="Engine\Input\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Mouse.cpp" />
     <ClCompile Include="Game\Buildings\Buildings.cpp" />
+    <ClCompile Include="Game\Buildings\ResourceTypes.cpp" />
+    <ClCompile Include="Game\Layers\ButtonsLayer.cpp" />
     <ClCompile Include="Game\Layers\MapLayer.cpp" />
     <ClCompile Include="Game\Map\HexUtils.cpp" />
     <ClCompile Include="Game\Map\Map.cpp" />
@@ -130,7 +132,9 @@
     <ClInclude Include="Engine\Input\Mouse.hpp" />
     <ClInclude Include="Game\Buildings\Buildings.hpp" />
     <ClInclude Include="Game\Buildings\Factory.hpp" />
+    <ClInclude Include="Game\Buildings\ResourceTypes.hpp" />
     <ClInclude Include="Game\Game.hpp" />
+    <ClInclude Include="Game\Layers\ButtonsLayer.hpp" />
     <ClInclude Include="Game\Layers\MapLayer.hpp" />
     <ClInclude Include="Game\Map\HexUtils.hpp" />
     <ClInclude Include="Game\Map\Map.hpp" />
@@ -147,6 +151,8 @@
   <ItemGroup>
     <Image Include="Assets\Textures\blue.png" />
     <Image Include="Assets\Textures\Buildings\factory.png" />
+    <Image Include="Assets\Textures\Buildings\felled.png" />
+    <Image Include="Assets\Textures\Buildings\mine.png" />
     <Image Include="Assets\Textures\grey.png" />
     <Image Include="Assets\Textures\orange.png" />
   </ItemGroup>
