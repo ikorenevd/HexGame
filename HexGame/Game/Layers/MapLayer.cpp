@@ -90,7 +90,7 @@ void MapLayer::update()
 	{
 		i->update();
 
-		if (!i->getFrozen() and i->getFunctioning())
+		if (!i->isFrozen() and i->isFunctioning())
 			totalUpkeep += i->getUpkeep();
 		else
 			totalUpkeep += i->getUpkeep() / 5;
@@ -103,11 +103,65 @@ void MapLayer::update()
 		for (auto i : buildings)
 			i->setFrozen(true);
 
+	// Выбор здания для постройки
+	/*class Button;
+
+	std::vector<Button> buttons;
+
+	if (selectedTile != nullptr)
+	{
+		if (Keyboard::isKeyPressed(GLFW_KEY_O))
+		{
+			for (auto btn : buttons)
+			{
+				if (btn[i]->contains(p1))
+				{
+					bu
+				}
+			}
+		}
+	}*/
+
 	// Передача между зданиями
 	if (Keyboard::isKeyPressed(GLFW_KEY_T))
-		debug = true;
+	{
+		for (auto building : buildings)
+		{
+			if (building->getTile() == selectedTile)
+			{
+				transportFrom = building;
+				transportWaiting = true;
+				break;
+			}
+		}
+	}
 
-	if (debug) buildings[0]->transportTo(buildings[1], ResourseType::ProcessedWood, 15);
+	// Выход из выбора здания для транспортировки
+	if (Keyboard::isKeyPressed(GLFW_KEY_ESCAPE))
+	{
+		transportWaiting = false;
+		transportFrom;
+	}
+
+	if (transportWaiting && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+	{
+		for (auto tile : tiles)
+		{
+			if (tile->contains(p))
+			{
+				for (auto building : buildings)
+				{
+					if (building->getTile() == tile)
+					{
+						transportFrom->transportTo(ResourseType::ProcessedWood, -25);
+						building->transportTo(ResourseType::ProcessedWood, +25);
+						transportWaiting = false;
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	// Постройка зданий
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -159,7 +213,7 @@ void MapLayer::update()
 	}
 
 	// Снос здания
-	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) and selectedTile != nullptr)
+	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && selectedTile != nullptr)
 	{
 		int i = 0;
 
@@ -167,7 +221,7 @@ void MapLayer::update()
 		{
 			if (building->getTile() == selectedTile)
 			{
-				buildings.erase(buildings.begin() + i, buildings.begin() + i + 1);
+				buildings.erase(buildings.begin() + i);
 				break;
 			}
 
@@ -182,7 +236,6 @@ void MapLayer::update()
 		int number = 0;
 
 		std::cout << std::endl;
-
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 

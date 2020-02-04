@@ -14,7 +14,6 @@ public:
 	virtual void update() override;
 	virtual void render() override;
 private:
-	std::shared_ptr<Building> factory;
 	std::shared_ptr<Map> map;
 	std::vector<std::shared_ptr<Building>> buildings;
 
@@ -24,9 +23,11 @@ private:
 	float treasuryMoney;
 	float totalUpkeep;
 	std::shared_ptr<Tile> selectedTile;
+	std::shared_ptr<Building> transportStart;
+	std::shared_ptr<Building> transportEnd;
+	bool transportWaiting;
 
 	double lastTime;		// Debug
-	bool debug;
 
 	std::shared_ptr<VertexArray> vao;
 };

@@ -10,6 +10,7 @@ class Building : public Transformable
 public:
 	bool frozen;
 	bool functioning;
+	bool isTransporting;
 
 	float defaultUpkeep;
 	float upkeep;
@@ -17,24 +18,33 @@ public:
 	int defaultStorageLimit;
 	int storageLimit;
 
-	std::unordered_map<enum ResourseType, float> storage;
+	int speedTransporting;
+	ResourseType resourseTransporting;
+
+	std::unordered_map<ResourseType, float> storage;
 	std::shared_ptr<Texture> texture;
 
 	Building(const std::shared_ptr<Tile>& tile);
 
-	virtual void update();
-	virtual void transportTo(std::shared_ptr<Building>& target, ResourseType type, int speed);
+	~Building()
+	{
+		std::cout << "Deleted" << std::endl;
+	}
 
+	virtual void update();
+
+	void transportTo(ResourseType resourseTransporting, int speedTransporting);
 	void setTile(const std::shared_ptr<Tile>& value);
 	void setFrozen(bool setFrozen);
 	void setStorage(ResourseType type, float value);
 	void addStorage();
 
 	std::shared_ptr<Texture> getTexture();
-	bool getFrozen();
-	bool getFunctioning();
+	bool isFrozen();
+	bool isFunctioning();
+	bool isStorageFull();
 	int getUsedStorage();
-	int getResourseAmount(enum ResourseType);
+	int getResourseAmount(ResourseType);
 	float getUpkeep();
 	const std::shared_ptr<Tile>& getTile() const;
 private:
@@ -62,6 +72,8 @@ public:
 	{
 		frozen = false;
 		functioning = true;
+		isTransporting = false;
+
 		defaultUpkeep, upkeep = 50 / 3600.;
 		defaultStorageLimit, storageLimit = 500;
 
@@ -76,7 +88,7 @@ public:
 	{
 		if (!frozen)
 		{
-			if (this->getUsedStorage() < storageLimit)
+			if ( !isStorageFull() )
 			{
 				functioning = true;
 
@@ -100,15 +112,11 @@ public:
 			{
 				functioning = false;
 			}
-		}
-	}
 
-	void transportTo(std::shared_ptr<Building>& target, ResourseType type, int speed) override
-	{
-		if (this->getResourseAmount(type) > 0)
-		{
-			this->setStorage(type, -speed / 3600.);
-			target->setStorage(type, +speed / 3600.);
+			if (isTransporting && storage[resourseTransporting] >= 0)
+			{
+				storage[resourseTransporting] += speedTransporting/3600.;
+			}
 		}
 	}
 };

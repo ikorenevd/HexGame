@@ -14,9 +14,11 @@ void Building::update()
 
 }
 
-void Building::transportTo(std::shared_ptr<Building>& target, ResourseType type, int speed)
+void Building::transportTo(ResourseType type, int speed)
 {
-
+	isTransporting = true;
+	resourseTransporting = type;
+	speedTransporting = speed;
 }
 
 void Building::setTile(const std::shared_ptr<Tile>& value)
@@ -64,17 +66,17 @@ int Building::getUsedStorage()
 	return storageUsed;
 }
 
-int Building::getResourseAmount(enum ResourseType type)
+int Building::getResourseAmount(ResourseType type)
 {
 	return storage[type];
 }
 
-bool Building::getFrozen()
+bool Building::isFrozen()
 {
 	return frozen;
 }
 
-bool Building::getFunctioning()
+bool Building::isFunctioning()
 {
 	return functioning;
 }
@@ -82,6 +84,11 @@ bool Building::getFunctioning()
 float Building::getUpkeep()
 {
 	return upkeep;
+}
+
+bool Building::isStorageFull()
+{
+	return getUsedStorage() >= storageLimit;
 }
 
 int Sawmill::cost = 150;
