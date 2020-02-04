@@ -81,13 +81,15 @@ void MapLayer::update()
 	if (Keyboard::getKeyState(GLFW_KEY_H))
 		view->setScale(view->getScale() - 0.1f);
 
+
+	// Переменные
 	auto pos = Mouse::getCoordinates();
 	auto tiles = map->getTiles();
 	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+	bool debug = false;
 
-	// Обновление, расчет общей стоимости содержания, расчет казны
+	// Обновление состояние зданий, общей стоимости их содержания и казны города
 	totalUpkeep = 0;
-
 	for (auto i : buildings)
 	{
 		i->update();
@@ -97,7 +99,6 @@ void MapLayer::update()
 		else
 			totalUpkeep += i->getUpkeep() / 5;
 	}
-
 	treasuryMoney -= totalUpkeep;
 
 	// Отключение зданий при пустой казне
@@ -105,24 +106,6 @@ void MapLayer::update()
 		for (auto i : buildings)
 			i->setFrozen(true);
 
-	// Выбор здания для постройки
-	/*class Button;
-
-	std::vector<Button> buttons;
-
-	if (selectedTile != nullptr)
-	{
-		if (Keyboard::isKeyPressed(GLFW_KEY_O))
-		{
-			for (auto btn : buttons)
-			{
-				if (btn[i]->contains(p1))
-				{
-					bu
-				}
-			}
-		}
-	}*/
 
 	// Постройка зданий
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -143,10 +126,7 @@ void MapLayer::update()
 						break;
 
 					buildings.push_back(std::make_shared<Sawmill>(tile));
-					std::cout << "---Sawmill is built.   ";
-
-					buildings.back()->setStorage(ResourseType::RawWood, 25);
-					std::cout << "---Added 50 RawWood to sawmill." << std::endl;
+					std::cout << "---Building is built.   ";
 
 					treasuryMoney -= Sawmill::cost;
 				}
@@ -162,13 +142,9 @@ void MapLayer::update()
 			if (tile->contains(p))
 			{
 				if (selectedTile != tile or selectedTile == nullptr)
-				{
 					selectedTile = tile;
-				}
 				else
-				{
 					selectedTile = nullptr;
-				}
 			}
 		}
 	}
@@ -190,9 +166,25 @@ void MapLayer::update()
 		}
 	}
 
+	// Общие ресурсы карты
+	if (glfwGetTime() - lastTime >= 1)
+	{
+		storageMap = {};
+
+		for (std::shared_ptr<Building> building : buildings)
+		{
+			for (int i = 0; i < 15; i++)
+			{
+				storageMap[(ResourseType)i] += building->getResourseAmount((ResourseType)i);
+			}
+		}
+
+		debug = true;
+		lastTime += 1;
+	}
+
 	// Debug
-	double currentTime = glfwGetTime();
-	if (currentTime - lastTime >= 1.0)
+	if (debug)
 	{
 		int number = 0;
 
@@ -210,14 +202,19 @@ void MapLayer::update()
 			number++;
 		}
 
-		lastTime += 1;
+		for (int i = 0; i < 15; i++)
+		{
+			if (storageMap[(ResourseType)i] != 0) std::cout << "Map Storage: " << storageMap[(ResourseType)i] << std::endl;
+		}
 
 		std::cout << std::endl;
 	}
 
+	// Подсветка выделенной клетки
 	for (auto tile : tiles)
 	{
 		tile->setTerrainType(TerrainType::Flatland);
+
 		if (selectedTile != nullptr)
 			selectedTile->setTerrainType(TerrainType::Hill);
 	}
@@ -225,7 +222,7 @@ void MapLayer::update()
 
 void MapLayer::render()
 {
-	// колхозный рендер
+	// Колхозный рендер
 	auto shader = ShaderManager::get("Texture");
 	shader->bind();
 	shader->setInt("ourTexture", 0);
