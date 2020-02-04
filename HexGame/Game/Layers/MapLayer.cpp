@@ -13,6 +13,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	map(map)
 {
 	view = std::make_shared<View>(glm::ivec2(1280, 720));
+	buttonView = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	TextureManager::add("orange", std::make_shared<Texture>("Assets\\Textures\\orange.png", ColorModel::RGBA));
 	TextureManager::add("blue", std::make_shared<Texture>("Assets\\Textures\\blue.png", ColorModel::RGBA));
@@ -52,7 +53,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
-	double lastTime = glfwGetTime();		// Debug
+	double lastTime = glfwGetTime();
 }
 
 void MapLayer::update()
@@ -89,7 +90,17 @@ void MapLayer::update()
 	bool debug = false;
 
 	// Кнопки
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.8, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("factory"), "Sawmill"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.6, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("felled"), "Felled"));
 
+	for (auto button : buttons)
+	{
+		if (button->contains(p) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+		{
+			waitingBuilding = true;
+			pressedButton = button;
+		}
+	}
 
 	// Обновление состояние зданий, общей стоимости их содержания и казны города
 	totalUpkeep = 0;
@@ -109,11 +120,10 @@ void MapLayer::update()
 		for (auto i : buildings)
 			i->setFrozen(true);
 
-
 	// Постройка зданий
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && waitingBuilding)
 	{
-		if (treasuryMoney - Sawmill::cost >= 0)
+		if (treasuryMoney - buttons[0]->getBuildingCost() >= 0)
 		{
 			for (auto tile : tiles)
 			{
@@ -128,11 +138,13 @@ void MapLayer::update()
 					if (exit)
 						break;
 
-					buildings.push_back(std::make_shared<Sawmill>(tile));
-					waitingBuilding = false;
+					buildings.push_back(pressedButton->buildBuilding(tile));
 					std::cout << "---Building is built.   ";
 
-					treasuryMoney -= Sawmill::cost;
+					treasuryMoney -= pressedButton->getBuildingCost();
+
+					waitingBuilding = false;
+					pressedButton;
 				}
 			}
 		}
@@ -257,6 +269,18 @@ void MapLayer::render()
 
 	// Отрисовка зданий
 	for (auto i : buildings)
+	{
+		shader->setMat4("transform", i->getTransform());
+
+		i->getTexture()->bind();
+
+		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+	}
+
+	// Кнопки
+	shader->setMat4("view", buttonView->getMatrix());
+
+	for (auto i : buttons)
 	{
 		shader->setMat4("transform", i->getTransform());
 

@@ -1,12 +1,11 @@
 #pragma once
 
 #include <map>
-
 #include <Engine/Engine.hpp>
-
 #include <Engine/Core/Manager.hpp>
+#include <Game/Buildings/Buildings.hpp>
 
-class Button : Transformable
+class Button : public Transformable
 {
 public:
 	Button(const glm::vec2& pos, const glm::vec2& scale, const std::shared_ptr<Texture>& texture, const std::string& name);
@@ -14,26 +13,11 @@ public:
 	bool contains(const glm::vec2& point) const;
 
 	const std::shared_ptr<Texture>& getTexture() const;
-	void setTexture(const std::shared_ptr<Texture>& value);
 
-	const std::string& getName() const;
+	std::shared_ptr<Building> buildBuilding(std::shared_ptr<Tile> tile);
+	int getBuildingCost();
 private:
 	std::shared_ptr<Texture> texture;
 
 	std::string name;
 };
-
-class ButtonsLayer : public Layer
-{
-public:
-	ButtonsLayer();
-
-	const std::shared_ptr<Button>& getButton(const std::string& name) const;
-
-	virtual void update() override;
-private:
-	std::vector<std::shared_ptr<Button>> buttons;
-
-	std::shared_ptr<View> view;
-};
-

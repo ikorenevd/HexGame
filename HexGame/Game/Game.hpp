@@ -23,7 +23,6 @@ public:
 	{
 		map = std::make_shared<Map>(glm::ivec2(20, 20));
 
-		pushLayer(new ButtonsLayer);
 		pushLayer(new MapLayer(map));
 	}
 private:
