@@ -16,7 +16,6 @@ public:
 private:
 	std::shared_ptr<Map> map;
 	std::vector<std::shared_ptr<Building>> buildings;
-	std::unordered_map<ResourseType, float> storageMap;
 
 	std::shared_ptr<View> view;
 	float speed = 2.f;
@@ -25,7 +24,7 @@ private:
 	float totalUpkeep;
 	std::shared_ptr<Tile> selectedTile;
 
-	double lastTime;
+	double lastTime;		// Debug
 
 	std::shared_ptr<VertexArray> vao;
 };
