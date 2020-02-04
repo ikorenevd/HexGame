@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Engine/Engine.hpp>
-
 #include <Game/Buildings/Buildings.hpp>
 
 class Map;
@@ -21,6 +20,7 @@ private:
 	std::shared_ptr<View> view;
 	float speed = 2.f;
 
+	bool waitingBuilding;
 	float treasuryMoney;
 	float totalUpkeep;
 	std::shared_ptr<Tile> selectedTile;

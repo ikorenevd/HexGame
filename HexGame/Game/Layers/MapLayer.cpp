@@ -88,6 +88,9 @@ void MapLayer::update()
 	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 	bool debug = false;
 
+	// Кнопки
+
+
 	// Обновление состояние зданий, общей стоимости их содержания и казны города
 	totalUpkeep = 0;
 	for (auto i : buildings)
@@ -108,7 +111,7 @@ void MapLayer::update()
 
 
 	// Постройка зданий
-	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && waitingBuilding)
 	{
 		if (treasuryMoney - Sawmill::cost >= 0)
 		{
@@ -126,6 +129,7 @@ void MapLayer::update()
 						break;
 
 					buildings.push_back(std::make_shared<Sawmill>(tile));
+					waitingBuilding = false;
 					std::cout << "---Building is built.   ";
 
 					treasuryMoney -= Sawmill::cost;
