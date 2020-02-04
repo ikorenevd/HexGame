@@ -18,6 +18,8 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("blue", std::make_shared<Texture>("Assets\\Textures\\blue.png", ColorModel::RGBA));
 	TextureManager::add("grey", std::make_shared<Texture>("Assets\\Textures\\grey.png", ColorModel::RGBA));
 	TextureManager::add("factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\factory.png", ColorModel::RGBA));
+	TextureManager::add("felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\felled.png", ColorModel::RGBA));
+	TextureManager::add("mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\mine.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{

@@ -85,6 +85,8 @@ bool Building::isStorageFull()
 }
 
 int Sawmill::cost = 150;
+int Felled::cost = 200;
+int Mine::cost = 250;
 
 ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :
 	Building(tile)
