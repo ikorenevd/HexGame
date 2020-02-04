@@ -210,9 +210,11 @@ void MapLayer::update()
 		std::cout << std::endl;
 	}
 
+	// Подсветка выделенной клетки
 	for (auto tile : tiles)
 	{
 		tile->setTerrainType(TerrainType::Flatland);
+
 		if (selectedTile != nullptr)
 			selectedTile->setTerrainType(TerrainType::Hill);
 	}

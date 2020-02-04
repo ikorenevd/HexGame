@@ -16,7 +16,7 @@ public:
 private:
 	std::shared_ptr<Map> map;
 	std::vector<std::shared_ptr<Building>> buildings;
-	std::unordered_map<ResourseType, float> storageMap;
+	std::unordered_map<ResourseType, int> storageMap;
 
 	std::shared_ptr<View> view;
 	float speed = 2.f;
