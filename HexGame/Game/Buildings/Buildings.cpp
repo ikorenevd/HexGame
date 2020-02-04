@@ -14,13 +14,6 @@ void Building::update()
 
 }
 
-void Building::transportTo(ResourseType type, int speed)
-{
-	isTransporting = true;
-	resourseTransporting = type;
-	speedTransporting = speed;
-}
-
 void Building::setTile(const std::shared_ptr<Tile>& value)
 {
 	tile = value;

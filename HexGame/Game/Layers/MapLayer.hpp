@@ -23,9 +23,6 @@ private:
 	float treasuryMoney;
 	float totalUpkeep;
 	std::shared_ptr<Tile> selectedTile;
-	std::shared_ptr<Building> transportStart;
-	std::shared_ptr<Building> transportEnd;
-	bool transportWaiting;
 
 	double lastTime;		// Debug
 

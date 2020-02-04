@@ -122,47 +122,6 @@ void MapLayer::update()
 		}
 	}*/
 
-	// Передача между зданиями
-	if (Keyboard::isKeyPressed(GLFW_KEY_T))
-	{
-		for (auto building : buildings)
-		{
-			if (building->getTile() == selectedTile)
-			{
-				transportFrom = building;
-				transportWaiting = true;
-				break;
-			}
-		}
-	}
-
-	// Выход из выбора здания для транспортировки
-	if (Keyboard::isKeyPressed(GLFW_KEY_ESCAPE))
-	{
-		transportWaiting = false;
-		transportFrom;
-	}
-
-	if (transportWaiting && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-	{
-		for (auto tile : tiles)
-		{
-			if (tile->contains(p))
-			{
-				for (auto building : buildings)
-				{
-					if (building->getTile() == tile)
-					{
-						transportFrom->transportTo(ResourseType::ProcessedWood, -25);
-						building->transportTo(ResourseType::ProcessedWood, +25);
-						transportWaiting = false;
-						break;
-					}
-				}
-			}
-		}
-	}
-
 	// Постройка зданий
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 	{

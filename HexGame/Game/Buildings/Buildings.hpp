@@ -10,7 +10,6 @@ class Building : public Transformable
 public:
 	bool frozen;
 	bool functioning;
-	bool isTransporting;
 
 	float defaultUpkeep;
 	float upkeep;
@@ -18,22 +17,13 @@ public:
 	int defaultStorageLimit;
 	int storageLimit;
 
-	int speedTransporting;
-	ResourseType resourseTransporting;
-
 	std::unordered_map<ResourseType, float> storage;
 	std::shared_ptr<Texture> texture;
 
 	Building(const std::shared_ptr<Tile>& tile);
 
-	~Building()
-	{
-		std::cout << "Deleted" << std::endl;
-	}
-
 	virtual void update();
 
-	void transportTo(ResourseType resourseTransporting, int speedTransporting);
 	void setTile(const std::shared_ptr<Tile>& value);
 	void setFrozen(bool setFrozen);
 	void setStorage(ResourseType type, float value);
@@ -72,7 +62,6 @@ public:
 	{
 		frozen = false;
 		functioning = true;
-		isTransporting = false;
 
 		defaultUpkeep, upkeep = 50 / 3600.;
 		defaultStorageLimit, storageLimit = 500;
@@ -111,11 +100,6 @@ public:
 			else
 			{
 				functioning = false;
-			}
-
-			if (isTransporting && storage[resourseTransporting] >= 0)
-			{
-				storage[resourseTransporting] += speedTransporting/3600.;
 			}
 		}
 	}
