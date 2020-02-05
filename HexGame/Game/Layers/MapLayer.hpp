@@ -18,8 +18,8 @@ private:
 	std::vector<std::shared_ptr<Button>> buttons;
 	std::unordered_map<ResourseType, int> storageMap;
 
-	std::shared_ptr<View> view;
-	std::shared_ptr<View> buttonView;
+	std::shared_ptr<View> viewGame;
+	std::shared_ptr<View> viewUI;
 	float speed = 2.f;
 
 	bool treasuryEmpty;

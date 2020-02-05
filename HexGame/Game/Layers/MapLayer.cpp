@@ -12,8 +12,10 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	Layer("MapLayer"),
 	map(map)
 {
-	view = std::make_shared<View>(glm::ivec2(1280, 720));
-	buttonView = std::make_shared<View>(glm::ivec2(1280, 720));
+	viewGame = std::make_shared<View>(glm::ivec2(1280, 720));
+	viewGame->move({ 800, 750 });
+
+	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
 	TextureManager::add("orange", std::make_shared<Texture>("Assets\\Textures\\orange.png", ColorModel::RGBA));
@@ -57,9 +59,9 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	double lastTime = glfwGetTime();
 
 	// Кнопки
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.8, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("factory"), "Sawmill"));
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.6, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("felled"), "Felled"));
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.4, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("mine"), "Mine"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.8, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("factory"), "Sawmill"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.6, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("felled"), "Felled"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.4, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("mine"), "Mine"));
 }
 
 void MapLayer::update()
@@ -72,26 +74,28 @@ void MapLayer::update()
 		speed -= 1.f;
 
 	if (Keyboard::getKeyState(GLFW_KEY_UP))
-		view->move({ 0.f, speed });
+		viewGame->move({ 0.f, speed });
 
 	if (Keyboard::getKeyState(GLFW_KEY_DOWN))
-		view->move({ 0.f, -speed });
+		viewGame->move({ 0.f, -speed });
 
 	if (Keyboard::getKeyState(GLFW_KEY_LEFT))
-		view->move({ -speed, 0.f });
+		viewGame->move({ -speed, 0.f });
 
 	if (Keyboard::getKeyState(GLFW_KEY_RIGHT))
-		view->move({ speed, 0.f });
+		viewGame->move({ speed, 0.f });
 
 	if (Keyboard::getKeyState(GLFW_KEY_Y))
-		view->setScale(view->getScale() + 0.1f);
+		viewGame->setScale(viewGame->getScale() + 0.1f);
 
 	if (Keyboard::getKeyState(GLFW_KEY_H))
-		view->setScale(view->getScale() - 0.1f);
+		viewGame->setScale(viewGame->getScale() - 0.1f);
 
 	// Переменные
 	glm::vec2 mousePosition = Mouse::getCoordinates();			// Корень, поясни, что это. Пора готовиться к защите
-	glm::vec2 cursor(glm::unProject(glm::vec3{mousePosition, 1.f}, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+	glm::vec2 cursorGame(glm::unProject(glm::vec3{mousePosition, 1.f}, glm::mat4(1.f), viewGame->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+	glm::vec2 cursorUI(glm::unProject(glm::vec3{ mousePosition, 1.f }, glm::mat4(1.f), viewUI->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+
 	auto allTiles = map->getTiles();
 	bool debug = false;
 
@@ -141,14 +145,14 @@ void MapLayer::update()
 			}
 		}
 
-		debug = true;
+		debug = true;		// Debug
 		lastTime++;
 	}
 
 	// Кнопки
 	for (auto button : buttons)
 	{
-		if (button->contains(cursor) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+		if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 			selectedBuilding = button;
 	}
 
@@ -157,7 +161,7 @@ void MapLayer::update()
 	{
 		for (auto tile : allTiles)
 		{
-			if (tile->contains(cursor))
+			if (tile->contains(cursorGame))
 			{
 				if (selectedTile != tile || selectedTile == nullptr)
 					selectedTile = tile;
@@ -175,9 +179,11 @@ void MapLayer::update()
 		bool tileUsed = false;
 		for (auto building : buildings)
 		{
-			tileUsed = (building->getTile() == selectedTile);
-			if (tileUsed)
+			if (building->getTile() == selectedTile)
+			{
+				tileUsed = true;
 				break;
+			}
 		}
 
 		if (!tileUsed)
@@ -236,10 +242,9 @@ void MapLayer::update()
 		std::cout << std::endl;
 	}
 
-	// Подсветка выделенной клетки
 	for (auto tile : allTiles)
 	{
-		tile->setTerrainType(TerrainType::Flatland);
+		tile->setTerrainType(TerrainType::Mountain);
 
 		if (selectedTile != nullptr)
 			selectedTile->setTerrainType(TerrainType::Hill);
@@ -252,7 +257,7 @@ void MapLayer::render()
 	auto shader = ShaderManager::get("Texture");
 	shader->bind();
 	shader->setInt("ourTexture", 0);
-	shader->setMat4("view", view->getMatrix());
+	shader->setMat4("view", viewGame->getMatrix());
 	vao->bind();
 
 	// Отрисовка клеток
@@ -288,7 +293,7 @@ void MapLayer::render()
 	}
 
 	// Отрисовка кнопок
-	shader->setMat4("view", buttonView->getMatrix());
+	shader->setMat4("view", viewUI->getMatrix());
 
 	for (auto button : buttons)
 	{
