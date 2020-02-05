@@ -15,6 +15,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	view = std::make_shared<View>(glm::ivec2(1280, 720));
 	buttonView = std::make_shared<View>(glm::ivec2(1280, 720));
 
+	// Текстуры
 	TextureManager::add("orange", std::make_shared<Texture>("Assets\\Textures\\orange.png", ColorModel::RGBA));
 	TextureManager::add("blue", std::make_shared<Texture>("Assets\\Textures\\blue.png", ColorModel::RGBA));
 	TextureManager::add("grey", std::make_shared<Texture>("Assets\\Textures\\grey.png", ColorModel::RGBA));
@@ -63,6 +64,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 void MapLayer::update()
 {
+	// Взаимодействие пользователя с программой
 	if (Keyboard::isKeyPressed(GLFW_KEY_W))
 		speed += 1.f;
 
@@ -87,78 +89,107 @@ void MapLayer::update()
 	if (Keyboard::getKeyState(GLFW_KEY_H))
 		view->setScale(view->getScale() - 0.1f);
 
-
 	// Переменные
-	auto pos = Mouse::getCoordinates();
-	auto tiles = map->getTiles();
-	glm::vec2 p(glm::unProject(glm::vec3{ pos, 1.f }, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+	glm::vec2 mousePosition = Mouse::getCoordinates();			// Корень, поясни, что это. Пора готовиться к защите
+	glm::vec2 cursor(glm::unProject(glm::vec3{mousePosition, 1.f}, glm::mat4(1.f), view->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+	auto allTiles = map->getTiles();
 	bool debug = false;
+
+	// Обновление состояние зданий, общей стоимости их содержания и казны города
+	totalUpkeep = 0;
+
+	for (auto building : buildings)
+	{
+		building->update();
+
+		if (!building->isFrozen() and building->isFunctioning())
+			totalUpkeep += building->getUpkeep();
+		else
+			totalUpkeep += building->getUpkeep() / 5;
+	}
+
+	treasuryMoney -= totalUpkeep;
+
+	// Отключение зданий при пустой казне
+	if (treasuryMoney <= 0 && !treasuryEmpty)
+	{
+		treasuryEmpty = true;
+
+		for (auto building : buildings)
+			building->setFrozen(true);
+	}
+
+	// Включение зданий при положительной казне
+	if (treasuryMoney > 0 && !treasuryEmpty)
+	{
+		treasuryEmpty = false;
+
+		for (auto building : buildings)
+			building->setFrozen(false);
+	}
+
+	// Расчет общих ресурсов карты
+	if (glfwGetTime() - lastTime >= 1)
+	{
+		storageMap = {};
+
+		for (std::shared_ptr<Building> building : buildings)
+		{
+			for (int i = 0; i < 15; i++)
+			{
+				storageMap[(ResourseType)i] += building->getResourseAmount((ResourseType)i);
+			}
+		}
+
+		debug = true;
+		lastTime++;
+	}
 
 	// Кнопки
 	for (auto button : buttons)
 	{
-		if (button->contains(p) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-		{
-			waitingBuilding = true;
-			pressedButton = button;
-		}
-	}
-
-	// Обновление состояние зданий, общей стоимости их содержания и казны города
-	totalUpkeep = 0;
-	for (auto i : buildings)
-	{
-		i->update();
-
-		if (!i->isFrozen() and i->isFunctioning())
-			totalUpkeep += i->getUpkeep();
-		else
-			totalUpkeep += i->getUpkeep() / 5;
-	}
-	treasuryMoney -= totalUpkeep;
-
-	// Отключение зданий при пустой казне
-	if (treasuryMoney <= 0)		
-		for (auto i : buildings)
-			i->setFrozen(true);
-
-	// Постройка зданий
-	if (selectedTile != nullptr && waitingBuilding)
-	{
-		bool exit = false;
-		for (auto building : buildings)
-		{
-			exit = (building->getTile()->getCoordinates() == selectedTile->getCoordinates());
-			if (exit)
-				break;
-		}
-
-		if (!exit)
-			if (treasuryMoney - buttons[0]->getBuildingCost() >= 0)
-			{
-				buildings.push_back(pressedButton->buildBuilding(selectedTile));
-				std::cout << "---Building is built.   ";
-
-				treasuryMoney -= pressedButton->getBuildingCost();
-
-				waitingBuilding = false;
-				pressedButton;
-			}
+		if (button->contains(cursor) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+			selectedBuilding = button;
 	}
 
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
-		for (auto tile : tiles)
+		for (auto tile : allTiles)
 		{
-			if (tile->contains(p))
+			if (tile->contains(cursor))
 			{
 				if (selectedTile != tile || selectedTile == nullptr)
 					selectedTile = tile;
 				else
 					selectedTile = nullptr;
+
+				selectedBuilding = nullptr;
 			}
 		}
+	}
+
+	// Постройка зданий
+	if (selectedTile != nullptr && selectedBuilding != nullptr)
+	{
+		bool tileUsed = false;
+		for (auto building : buildings)
+		{
+			tileUsed = (building->getTile() == selectedTile);
+			if (tileUsed)
+				break;
+		}
+
+		if (!tileUsed)
+			if (treasuryMoney - buttons[0]->getBuildingCost() >= 0)
+			{
+				buildings.push_back(selectedBuilding->buildBuilding(selectedTile));
+				std::cout << "---Building is built.   ";
+
+				treasuryMoney -= selectedBuilding->getBuildingCost();
+
+				selectedBuilding = nullptr;
+			}
 	}
 
 	// Снос здания
@@ -176,23 +207,6 @@ void MapLayer::update()
 
 			i++;
 		}
-	}
-
-	// Общие ресурсы карты
-	if (glfwGetTime() - lastTime >= 1)
-	{
-		storageMap = {};
-
-		for (std::shared_ptr<Building> building : buildings)
-		{
-			for (int i = 0; i < 15; i++)
-			{
-				storageMap[(ResourseType)i] += building->getResourseAmount((ResourseType)i);
-			}
-		}
-
-		debug = true;
-		lastTime += 1;
 	}
 
 	// Debug
@@ -223,7 +237,7 @@ void MapLayer::update()
 	}
 
 	// Подсветка выделенной клетки
-	for (auto tile : tiles)
+	for (auto tile : allTiles)
 	{
 		tile->setTerrainType(TerrainType::Flatland);
 
@@ -264,23 +278,23 @@ void MapLayer::render()
 	}
 
 	// Отрисовка зданий
-	for (auto i : buildings)
+	for (auto building : buildings)
 	{
-		shader->setMat4("transform", i->getTransform());
+		shader->setMat4("transform", building->getTransform());
 
-		i->getTexture()->bind();
+		building->getTexture()->bind();
 
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
-	// Кнопки
+	// Отрисовка кнопок
 	shader->setMat4("view", buttonView->getMatrix());
 
-	for (auto i : buttons)
+	for (auto button : buttons)
 	{
-		shader->setMat4("transform", i->getTransform());
+		shader->setMat4("transform", button->getTransform());
 
-		i->getTexture()->bind();
+		button->getTexture()->bind();
 
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}

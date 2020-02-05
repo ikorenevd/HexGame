@@ -22,11 +22,11 @@ private:
 	std::shared_ptr<View> buttonView;
 	float speed = 2.f;
 
-	bool waitingBuilding;
+	bool treasuryEmpty;
 	float treasuryMoney;
 	float totalUpkeep;
 	double lastTime;
-	std::shared_ptr<Button> pressedButton;
+	std::shared_ptr<Button> selectedBuilding;
 	std::shared_ptr<Tile> selectedTile;
 
 	std::shared_ptr<VertexArray> vao;
