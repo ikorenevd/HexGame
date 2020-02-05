@@ -93,7 +93,7 @@ void MapLayer::update()
 
 	// Переменные
 	glm::vec2 mousePosition = Mouse::getCoordinates();			// Корень, поясни, что это. Пора готовиться к защите
-	glm::vec2 cursorGame(glm::unProject(glm::vec3{mousePosition, 1.f}, glm::mat4(1.f), viewGame->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
+	glm::vec2 cursorGame(glm::unProject(glm::vec3{ mousePosition, 1.f }, glm::mat4(1.f), viewGame->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 	glm::vec2 cursorUI(glm::unProject(glm::vec3{ mousePosition, 1.f }, glm::mat4(1.f), viewUI->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
 	auto allTiles = map->getTiles();
@@ -124,7 +124,7 @@ void MapLayer::update()
 	}
 
 	// Включение зданий при положительной казне
-	if (treasuryMoney > 0 && !treasuryEmpty)
+	if (treasuryMoney > 0 && treasuryEmpty)
 	{
 		treasuryEmpty = false;
 
