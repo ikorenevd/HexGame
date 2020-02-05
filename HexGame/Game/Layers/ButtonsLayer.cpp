@@ -32,10 +32,12 @@ std::shared_ptr<Building> Button::buildBuilding(std::shared_ptr<Tile> tile)
 {
 	if (name == "Sawmill") return std::make_shared<Sawmill>(tile);
 	if (name == "Felled") return std::make_shared<Felled>(tile);
+	if (name == "Mine") return std::make_shared<Mine>(tile);
 }
 
 int Button::getBuildingCost()
 {
 	if (name == "Sawmill") return Sawmill::cost;
 	if (name == "Felled") return Felled::cost;
+	if (name == "Mine") return Mine::cost;
 }

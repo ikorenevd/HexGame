@@ -54,6 +54,11 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
 	double lastTime = glfwGetTime();
+
+	// Кнопки
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.8, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("factory"), "Sawmill"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.6, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("felled"), "Felled"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.4, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("mine"), "Mine"));
 }
 
 void MapLayer::update()
@@ -90,9 +95,6 @@ void MapLayer::update()
 	bool debug = false;
 
 	// Кнопки
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.8, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("factory"), "Sawmill"));
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-buttonView->getSize().x / 2 * 0.6, -buttonView->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("felled"), "Felled"));
-
 	for (auto button : buttons)
 	{
 		if (button->contains(p) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -121,33 +123,27 @@ void MapLayer::update()
 			i->setFrozen(true);
 
 	// Постройка зданий
-	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT) && waitingBuilding)
+	if (selectedTile != nullptr && waitingBuilding)
 	{
-		if (treasuryMoney - buttons[0]->getBuildingCost() >= 0)
+		bool exit = false;
+		for (auto building : buildings)
 		{
-			for (auto tile : tiles)
-			{
-				if (tile->contains(p))
-				{
-					bool exit = false;
-
-					for (auto build : buildings)
-						if (build->getTile() == tile)
-							exit = true;
-
-					if (exit)
-						break;
-
-					buildings.push_back(pressedButton->buildBuilding(tile));
-					std::cout << "---Building is built.   ";
-
-					treasuryMoney -= pressedButton->getBuildingCost();
-
-					waitingBuilding = false;
-					pressedButton;
-				}
-			}
+			exit = (building->getTile()->getCoordinates() == selectedTile->getCoordinates());
+			if (exit)
+				break;
 		}
+
+		if (!exit)
+			if (treasuryMoney - buttons[0]->getBuildingCost() >= 0)
+			{
+				buildings.push_back(pressedButton->buildBuilding(selectedTile));
+				std::cout << "---Building is built.   ";
+
+				treasuryMoney -= pressedButton->getBuildingCost();
+
+				waitingBuilding = false;
+				pressedButton;
+			}
 	}
 
 	// Выделение клетки
@@ -157,7 +153,7 @@ void MapLayer::update()
 		{
 			if (tile->contains(p))
 			{
-				if (selectedTile != tile or selectedTile == nullptr)
+				if (selectedTile != tile || selectedTile == nullptr)
 					selectedTile = tile;
 				else
 					selectedTile = nullptr;
