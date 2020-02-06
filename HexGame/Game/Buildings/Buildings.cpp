@@ -6,7 +6,7 @@ Building::Building(const std::shared_ptr<Tile>& tile) :
 	tile(tile)
 {
 	setPosition(tile->getPosition());
-	setScale(glm::vec2(75));
+	setScale(glm::vec2(50));
 }
 
 void Building::update()

@@ -19,12 +19,16 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
+	TextureManager::add("Hex", std::make_shared<Texture>("Assets\\Textures\\Hex\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("SelectedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\SelectedHex.png", ColorModel::RGBA));
+
 	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Flatland.png", ColorModel::RGBA));
-	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Flatland.png", ColorModel::RGBA));
 	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Mountain.png", ColorModel::RGBA));
-	TextureManager::add("factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
-	TextureManager::add("felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
-	TextureManager::add("mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
+
+	TextureManager::add("Factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
+	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
+	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -60,9 +64,9 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	double lastTime = glfwGetTime();
 
 	// Кнопки
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.8, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("factory"), "Sawmill"));
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.6, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("felled"), "Felled"));
-	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.4, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("mine"), "Mine"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.8, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("Factory"), "Sawmill"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.6, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("Felled"), "Felled"));
+	buttons.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.4, -viewUI->getSize().y / 2 * 0.8), glm::vec2(100, 100), TextureManager::get("Mine"), "Mine"));
 }
 
 void MapLayer::update()
@@ -97,7 +101,7 @@ void MapLayer::update()
 	glm::vec2 cursorGame(glm::unProject(glm::vec3{ mousePosition, 1.f }, glm::mat4(1.f), viewGame->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 	glm::vec2 cursorUI(glm::unProject(glm::vec3{ mousePosition, 1.f }, glm::mat4(1.f), viewUI->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
-	auto allTiles = map->getTiles();
+	std::vector<std::shared_ptr<Tile>> allTiles = map->getTiles();
 	bool debug = false;
 
 	// Обновление состояние зданий, общей стоимости их содержания и казны города
@@ -199,6 +203,8 @@ void MapLayer::update()
 			}
 	}
 
+	//selectedTile = map->getTile({ 0, 0, 0 });
+
 	// Снос здания
 	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && selectedTile != nullptr)
 	{
@@ -225,16 +231,6 @@ void MapLayer::update()
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 
-		for (auto i : buildings)
-		{
-			std::cout << "Building " << number << ": ";
-			std::cout << "RawWood: " << i->getResourseAmount(ResourseType::RawWood)
-					  << ", ProcessedWood: " << i->getResourseAmount(ResourseType::ProcessedWood)
-					  << ", Planks: " << i->getResourseAmount(ResourseType::Plank) << std::endl;
-			
-			number++;
-		}
-
 		for (int i = 0; i < 15; i++)
 		{
 			if (storageMap[(ResourseType)i] != 0) std::cout << "Map Storage: " << storageMap[(ResourseType)i] << std::endl;
@@ -242,9 +238,6 @@ void MapLayer::update()
 
 		std::cout << std::endl;
 	}
-
-	if (selectedTile != nullptr)
-		selectedTile->setTerrainType(TerrainType::Hill);
 }
 
 void MapLayer::render()
@@ -257,21 +250,14 @@ void MapLayer::render()
 	vao->bind();
 
 	// Отрисовка клеток
-	auto tiles = map->getTiles();
-	for (const std::shared_ptr<Tile>& tile : tiles)
+	std::vector<std::shared_ptr<Tile>> allTiles = map->getTiles();
+
+	for (auto tile : allTiles)
 	{
-		switch (tile->getTerrainType())
-		{
-		case TerrainType::Flatland:
-			TextureManager::get("Flatland")->bind();
-			break;
-		case TerrainType::Hill:
-			TextureManager::get("Hill")->bind();
-			break;
-		case TerrainType::Mountain:
-			TextureManager::get("Mountain")->bind();
-			break;
-		}
+		if (tile == selectedTile)
+			TextureManager::get("SelectedHex")->bind();
+		else
+			TextureManager::get("Hex")->bind();
 
 		shader->setMat4("transform", tile->getTransform());
 

@@ -66,7 +66,7 @@ public:
 		defaultUpkeep, upkeep = 50 / 3600.;
 		defaultStorageLimit, storageLimit = 500;
 
-		texture = TextureManager::get("factory");
+		texture = TextureManager::get("Factory");
 
 		storage[ResourseType::RawWood] = 0;
 		storage[ResourseType::ProcessedWood] = 0;
@@ -118,7 +118,7 @@ public:
 		defaultUpkeep, upkeep = 40 / 3600.;
 		defaultStorageLimit, storageLimit = 1000;
 
-		texture = TextureManager::get("felled");
+		texture = TextureManager::get("Felled");
 
 		storage[ResourseType::RawWood] = 0;
 	}
@@ -153,7 +153,7 @@ public:
 		defaultUpkeep, upkeep = 75 / 3600.;
 		defaultStorageLimit, storageLimit = 1500;
 
-		texture = TextureManager::get("mine");
+		texture = TextureManager::get("Mine");
 
 		storage[ResourseType::RawWood] = 0;
 	}
