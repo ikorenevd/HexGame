@@ -13,17 +13,18 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	map(map)
 {
 	viewGame = std::make_shared<View>(glm::ivec2(1280, 720));
-	viewGame->move({ 800, 750 });
+	viewGame->move({ 800, 800 });
+	viewGame->setScale(1.5);
 
 	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
-	TextureManager::add("orange", std::make_shared<Texture>("Assets\\Textures\\orange.png", ColorModel::RGBA));
-	TextureManager::add("blue", std::make_shared<Texture>("Assets\\Textures\\blue.png", ColorModel::RGBA));
-	TextureManager::add("grey", std::make_shared<Texture>("Assets\\Textures\\grey.png", ColorModel::RGBA));
-	TextureManager::add("factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\factory.png", ColorModel::RGBA));
-	TextureManager::add("felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\felled.png", ColorModel::RGBA));
-	TextureManager::add("mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\mine.png", ColorModel::RGBA));
+	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
+	TextureManager::add("felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
+	TextureManager::add("mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -244,7 +245,7 @@ void MapLayer::update()
 
 	for (auto tile : allTiles)
 	{
-		tile->setTerrainType(TerrainType::Mountain);
+		//tile->setTerrainType(TerrainType::Flatland);
 
 		if (selectedTile != nullptr)
 			selectedTile->setTerrainType(TerrainType::Hill);
@@ -267,13 +268,13 @@ void MapLayer::render()
 		switch (tile->getTerrainType())
 		{
 		case TerrainType::Flatland:
-			TextureManager::get("blue")->bind();
+			TextureManager::get("Flatland")->bind();
 			break;
 		case TerrainType::Hill:
-			TextureManager::get("orange")->bind();
+			TextureManager::get("Hill")->bind();
 			break;
 		case TerrainType::Mountain:
-			TextureManager::get("grey")->bind();
+			TextureManager::get("Mountain")->bind();
 			break;
 		}
 

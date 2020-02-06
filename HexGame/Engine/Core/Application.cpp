@@ -60,7 +60,7 @@ void Application::run()
 	int updates = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0.f, 0.f, 0.f, 1.f);
+	glClearColor(.85, .85, .8, 1);
 
 	while (running)
 	{

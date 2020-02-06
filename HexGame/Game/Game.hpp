@@ -14,7 +14,7 @@
 class Game : public Application
 {
 public:
-	Game() : Application(std::string("Game"), glm::ivec2(1280, 720))
+	Game() : Application(std::string("Hex City"), glm::ivec2(1280, 720))
 	{
 		this->getWindow()->setVSync(false);
 	}
