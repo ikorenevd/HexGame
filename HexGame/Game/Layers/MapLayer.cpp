@@ -19,9 +19,9 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
-	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Flatland.png", ColorModel::RGBA));
 	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Hex.png", ColorModel::RGBA));
-	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Mountain.png", ColorModel::RGBA));
 	TextureManager::add("factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
 	TextureManager::add("felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
 	TextureManager::add("mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
@@ -243,13 +243,8 @@ void MapLayer::update()
 		std::cout << std::endl;
 	}
 
-	for (auto tile : allTiles)
-	{
-		//tile->setTerrainType(TerrainType::Flatland);
-
-		if (selectedTile != nullptr)
-			selectedTile->setTerrainType(TerrainType::Hill);
-	}
+	if (selectedTile != nullptr)
+		selectedTile->setTerrainType(TerrainType::Hill);
 }
 
 void MapLayer::render()
