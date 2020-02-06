@@ -14,9 +14,11 @@ public:
 	virtual void render() override;
 private:
 	std::shared_ptr<Map> map;
-	std::vector<std::shared_ptr<Building>> buildings;
-	std::vector<std::shared_ptr<Button>> buttons;
 	std::unordered_map<ResourseType, int> storageMap;
+	std::vector<std::shared_ptr<Building>> buildings;
+
+	std::vector<std::shared_ptr<Button>> buttonsGame;
+	std::vector<std::shared_ptr<Button>> buttonsUI;
 
 	std::shared_ptr<View> viewGame;
 	std::shared_ptr<View> viewUI;
