@@ -14,6 +14,8 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	speed(6.f)
 {
 	viewGame = std::make_shared<View>(glm::ivec2(1280, 720));
+	viewGame->move({ 200, 200 });
+
 	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
@@ -74,22 +76,22 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 void MapLayer::update()
 {
 	// Управление
-	if (Keyboard::getKeyState(GLFW_KEY_W))
+	if (Keyboard::getKeyState(GLFW_KEY_W) && viewGame->getCenter().y > -1150)
 		viewGame->move({ 0.f, speed });
 
-	if (Keyboard::getKeyState(GLFW_KEY_S))
+	if (Keyboard::getKeyState(GLFW_KEY_S) && viewGame->getCenter().y < 75)
 		viewGame->move({ 0.f, -speed });
 
-	if (Keyboard::getKeyState(GLFW_KEY_A))
+	if (Keyboard::getKeyState(GLFW_KEY_A) && viewGame->getCenter().x < -175)
 		viewGame->move({ -speed, 0.f });
 
-	if (Keyboard::getKeyState(GLFW_KEY_D))
+	if (Keyboard::getKeyState(GLFW_KEY_D) && viewGame->getCenter().x > -1750)
 		viewGame->move({ speed, 0.f });
 
-	if (Keyboard::getKeyState(GLFW_KEY_Q))
+	if (Keyboard::getKeyState(GLFW_KEY_Q) && viewGame->getScale() < 7.5)
 		viewGame->setScale(viewGame->getScale() + 0.1f);
 
-	if (Keyboard::getKeyState(GLFW_KEY_E))
+	if (Keyboard::getKeyState(GLFW_KEY_E) && viewGame->getScale() > .75)
 		viewGame->setScale(viewGame->getScale() - 0.1f);
 
 	// Переменные
@@ -294,7 +296,7 @@ void MapLayer::update()
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 		std::cout << "Map Storage:" << std::endl;
-
+		std::cout << viewGame->getCenter().y << std::endl;
 		for (int i = 0; i < 15; i++)
 		{
 			if (storageMap[(ResourseType)i] != 0) std::cout << "   " << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
