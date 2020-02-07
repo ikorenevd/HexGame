@@ -70,7 +70,7 @@ const glm::mat4& View::getMatrix() const
 	if (dirty)
 	{
 		matrix = glm::mat4(1.f);
-		matrix = matrix * glm::ortho((-size.x / 2), (size.x / 2), (-size.y / 2), (size.y / 2), -1.f, 1.f);
+		matrix = glm::ortho((-size.x / 2), (size.x / 2), (-size.y / 2), (size.y / 2));
 		matrix = glm::scale(matrix, glm::vec3(scale, scale, 1.f));
 		matrix = glm::translate(matrix, glm::vec3(center, 0.f));
 
