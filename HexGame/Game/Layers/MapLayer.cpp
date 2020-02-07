@@ -10,12 +10,10 @@
 
 MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	Layer("MapLayer"),
-	map(map)
+	map(map),
+	speed(6.f)
 {
 	viewGame = std::make_shared<View>(glm::ivec2(1280, 720));
-	viewGame->move({ 700, 800 });
-	viewGame->setScale(1.75);
-
 	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
@@ -23,6 +21,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 	TextureManager::add("Hex", std::make_shared<Texture>("Assets\\Textures\\Hex\\Hex.png", ColorModel::RGBA));
 	TextureManager::add("SelectedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\SelectedHex.png", ColorModel::RGBA));
+	TextureManager::add("SelectedTransportHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\TransportingHex.png", ColorModel::RGBA));
 
 	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Flatland.png", ColorModel::RGBA));
 	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Hill.png", ColorModel::RGBA));
@@ -64,6 +63,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
 	double lastTime = glfwGetTime();
+	bool transporting = false;
 
 	// Кнопки
 	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Sawmill"), "Sawmill"));
@@ -160,6 +160,7 @@ void MapLayer::update()
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
+		if (!transportingUI)
 		for (auto tile : allTiles)
 		{
 			if (tile->contains(cursorGame))
@@ -172,6 +173,31 @@ void MapLayer::update()
 				selectedBuilding = nullptr;
 			}
 		}
+
+		if (transportingUI)
+			for (auto tile : allTiles)
+			{
+				if (tile->contains(cursorGame) && tile != selectedTile)
+				{
+					bool inTransportTiles = false;
+					int i = 0;
+
+					for (auto check : selectedTransportTiles)
+					{
+						if (check == tile)
+						{
+							inTransportTiles = true;
+							break;
+						}
+						i++;
+					}
+
+					if (inTransportTiles)
+						selectedTransportTiles.erase(selectedTransportTiles.begin() + i);
+					else
+						selectedTransportTiles.push_back(tile);
+				}
+			}
 	}
 
 	// Постройка зданий
@@ -237,12 +263,34 @@ void MapLayer::update()
 		}
 	}
 
+	if (Keyboard::isKeyPressed(GLFW_KEY_T) && selectedTile != nullptr)
+	{
+		bool tileUsed = false;
+		for (auto building : buildings)
+		{
+			if (building->getTile() == selectedTile)
+			{
+				tileUsed = true;
+				break;
+			}
+		}
+		
+		if (tileUsed)
+		{
+			if (transportingUI)
+				transportingUI = false;
+			else
+				transportingUI = true;
+		}
+	}
+
 	// Debug
 	if (debug)
 	{
 		int number = 0;
 
 		std::cout << std::endl;
+		if (transportingUI) std::cout << "Transport to?.." << std::endl;
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 		std::cout << "Map Storage:" << std::endl;
@@ -310,6 +358,17 @@ void MapLayer::render()
 			TextureManager::get("Hex")->bind();
 
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+	}
+
+	if (transportingUI)
+	{
+		TextureManager::get("SelectedTransportHex")->bind();
+		for (auto tile : selectedTransportTiles)
+		{
+			shader->setMat4("transform", tile->getTransform());
+
+			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+		}
 	}
 
 	// Отрисовка зданий

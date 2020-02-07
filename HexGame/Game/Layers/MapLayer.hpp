@@ -24,12 +24,14 @@ private:
 	std::shared_ptr<View> viewUI;
 	float speed = 2.f;
 
+	bool transportingUI;
 	bool treasuryEmpty;
 	float treasuryMoney;
 	float totalUpkeep;
 	double lastTime;
 	std::shared_ptr<Button> selectedBuilding;
 	std::shared_ptr<Tile> selectedTile;
+	std::vector<std::shared_ptr<Tile>> selectedTransportTiles;
 
 	std::shared_ptr<VertexArray> vao;
 };
