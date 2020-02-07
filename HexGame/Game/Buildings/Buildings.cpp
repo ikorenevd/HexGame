@@ -84,9 +84,32 @@ bool Building::isStorageFull()
 	return getUsedStorage() >= storageLimit;
 }
 
-int Sawmill::cost = 150;
-int Felled::cost = 200;
-int Mine::cost = 250;
+void Building::setTransportationTarget(std::shared_ptr<Building>& building)
+{
+	int i = 0;
+	bool exist = false;
+
+	for (auto check : selectedTransportingTargets)
+	{
+		if (check == building)
+		{
+			exist = true;
+			break;
+		}
+
+		i++;
+	}
+
+	if (exist)
+		selectedTransportingTargets.erase(selectedTransportingTargets.begin() + i);
+	else
+		selectedTransportingTargets.push_back(building);
+}
+
+std::vector<std::shared_ptr<Building>> Building::getTransportationTargets()
+{
+	return selectedTransportingTargets;
+}
 
 ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :
 	Building(tile)

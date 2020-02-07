@@ -156,106 +156,109 @@ void MapLayer::update()
 	for (auto button : buttonsGame)
 	{
 		if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-			selectedBuilding = button;
+			pickedBuilding = button;
 	}
 
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
-		if (!transportingUI)
-		for (auto tile : allTiles)
-		{
-			if (tile->contains(cursorGame))
-			{
-				if (selectedTile != tile || selectedTile == nullptr)
-					selectedTile = tile;
-				else
-					selectedTile = nullptr;
-
-				selectedBuilding = nullptr;
-			}
-		}
-
 		if (transportingUI)
+		{
 			for (auto tile : allTiles)
 			{
 				if (tile->contains(cursorGame) && tile != selectedTile)
 				{
-					bool inTransportTiles = false;
-					int i = 0;
-
-					for (auto check : selectedTransportTiles)
+					for (auto building : buildings)
 					{
-						if (check == tile)
+						if (building->getTile() == tile)
 						{
-							inTransportTiles = true;
+							selectedBuilding->setTransportationTarget(building);
 							break;
 						}
-						i++;
 					}
-
-					if (inTransportTiles)
-						selectedTransportTiles.erase(selectedTransportTiles.begin() + i);
-					else
-						selectedTransportTiles.push_back(tile);
 				}
-			}
-	}
-
-	// Постройка зданий
-	if (selectedTile != nullptr && selectedBuilding != nullptr)
-	{
-		bool tileUsed = false;
-		for (auto building : buildings)
-		{
-			if (building->getTile() == selectedTile)
-			{
-				tileUsed = true;
-				break;
 			}
 		}
 
-		if (!tileUsed)
-			if (treasuryMoney - buildingCost( selectedBuilding->getBuildingType() ) >= 0)
+		if (!transportingUI)
+		{
+			for (auto tile : allTiles)
 			{
-				switch (selectedBuilding->getBuildingType())
+				if (tile->contains(cursorGame))
 				{
-					case BuildingType::Sawmill:
-						buildings.push_back(std::make_shared<Sawmill>(selectedTile));
-						treasuryMoney -= buildingCost(selectedBuilding->getBuildingType());
-						selectedBuilding = nullptr;
-						break;
+					if (selectedTile != tile || selectedTile == nullptr)
+					{
+						selectedTile = tile;
 
-					case BuildingType::Felled:
-						buildings.push_back(std::make_shared<Felled>(selectedTile));
-						treasuryMoney -= buildingCost(selectedBuilding->getBuildingType());
+						for (auto building : buildings)
+						{
+							if (building->getTile() == selectedTile)
+							{
+								selectedBuilding = building;
+								break;
+							}
+							else
+								selectedBuilding = nullptr;
+						}
+					}
+					else
+					{
+						selectedTile = nullptr;
 						selectedBuilding = nullptr;
-						break;
+					}
 
-					case BuildingType::Mine:
-						if (selectedTile->getTerrainType() == TerrainType::Mountain)
-						{
-							buildings.push_back(std::make_shared<Mine>(selectedTile));
-							treasuryMoney -= buildingCost(selectedBuilding->getBuildingType());
-						}
-						else
-						{
-							std::cout << "---Wrong terrain type!" << std::endl;
-						}
-						selectedBuilding = nullptr;
-						break;
+					pickedBuilding = nullptr;
+
+					break;
 				}
 			}
+
+			
+		}		
+	}
+
+	// Постройка зданий
+	if (pickedBuilding != nullptr && selectedBuilding == nullptr)
+	{
+            if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
+            {
+                switch (pickedBuilding->getBuildingType())
+                {
+                    case BuildingType::Sawmill:
+                        buildings.push_back(std::make_shared<Sawmill>(selectedTile));
+						selectedBuilding = buildings.back();
+                        treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+                        pickedBuilding = nullptr;
+                        break;
+
+                    case BuildingType::Felled:
+                        buildings.push_back(std::make_shared<Felled>(selectedTile));
+						selectedBuilding = buildings.back();
+                        treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+                        pickedBuilding = nullptr;
+                        break;
+
+                    case BuildingType::Mine:
+                        if (selectedTile->getTerrainType() == TerrainType::Mountain)
+                        {
+                            buildings.push_back(std::make_shared<Mine>(selectedTile));
+							selectedBuilding = buildings.back();
+                            treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+                        }
+                        pickedBuilding = nullptr;
+                        break;
+                }
+            }
 	}
 
 	// Снос здания
-	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && selectedTile != nullptr)
+	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && selectedBuilding != nullptr)
 	{
 		int i = 0;
 
 		for (auto building : buildings)
 		{
-			if (building->getTile() == selectedTile)
+			if (building == selectedBuilding)
 			{
 				buildings.erase(buildings.begin() + i);
 				break;
@@ -265,25 +268,12 @@ void MapLayer::update()
 		}
 	}
 
-	if (Keyboard::isKeyPressed(GLFW_KEY_T) && selectedTile != nullptr)
+	if (Keyboard::isKeyPressed(GLFW_KEY_T) && selectedBuilding != nullptr)
 	{
-		bool tileUsed = false;
-		for (auto building : buildings)
-		{
-			if (building->getTile() == selectedTile)
-			{
-				tileUsed = true;
-				break;
-			}
-		}
-		
-		if (tileUsed)
-		{
-			if (transportingUI)
-				transportingUI = false;
-			else
-				transportingUI = true;
-		}
+		if (transportingUI)
+			transportingUI = false;
+		else
+			transportingUI = true;
 	}
 
 	// Debug
@@ -296,7 +286,6 @@ void MapLayer::update()
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 		std::cout << "Map Storage:" << std::endl;
-		std::cout << viewGame->getCenter().y << std::endl;
 		for (int i = 0; i < 15; i++)
 		{
 			if (storageMap[(ResourseType)i] != 0) std::cout << "   " << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
@@ -365,10 +354,10 @@ void MapLayer::render()
 	if (transportingUI)
 	{
 		TextureManager::get("SelectedTransportHex")->bind();
-		for (auto tile : selectedTransportTiles)
-		{
-			shader->setMat4("transform", tile->getTransform());
 
+		for (auto building : selectedBuilding->getTransportationTargets())
+		{
+			shader->setMat4("transform", building->getTile()->getTransform());
 			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 		}
 	}
@@ -384,19 +373,8 @@ void MapLayer::render()
 	//// Интерфейс
 	shader->setMat4("view", viewUI->getMatrix());
 
-	// Проверка клетки
-	bool tileFree = true;
-	for (auto building : buildings)
-	{
-		if (building->getTile() == selectedTile)
-		{
-			tileFree = false;
-			break;
-		}
-	}
-
 	// Отрисовка кнопок
-	if (selectedTile == nullptr || tileFree)
+	if (selectedBuilding == nullptr)
 	{
 		// Без выделенной клетки
 		for (auto button : buttonsGame)

@@ -19,6 +19,7 @@ public:
 
 	std::unordered_map<ResourseType, float> storage;
 	std::shared_ptr<Texture> texture;
+	std::vector<std::shared_ptr<Building>> selectedTransportingTargets;
 
 	Building(const std::shared_ptr<Tile>& tile);
 
@@ -27,6 +28,7 @@ public:
 	void setTile(const std::shared_ptr<Tile>& value);
 	void setFrozen(bool setFrozen);
 	void setStorage(ResourseType type, float value);
+	void setTransportationTarget(std::shared_ptr<Building>& building);
 	void addStorage();
 
 	std::shared_ptr<Texture> getTexture();
@@ -36,6 +38,7 @@ public:
 	int getUsedStorage();
 	int getResourseAmount(ResourseType);
 	float getUpkeep();
+	std::vector<std::shared_ptr<Building>> getTransportationTargets();
 	const std::shared_ptr<Tile>& getTile() const;
 private:
 	std::shared_ptr<Tile> tile;
@@ -56,8 +59,6 @@ public:
 class Sawmill : public MainBuilding
 {
 public:
-	static int cost;
-
 	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
 		frozen = false;
@@ -108,8 +109,6 @@ public:
 class Felled : public MainBuilding
 {
 public:
-	static int cost;
-
 	Felled(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
 		frozen = false;
@@ -143,8 +142,6 @@ public:
 class Mine : public MainBuilding
 {
 public:
-	static int cost;
-
 	Mine(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
 		frozen = false;

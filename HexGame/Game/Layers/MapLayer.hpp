@@ -29,9 +29,9 @@ private:
 	float treasuryMoney;
 	float totalUpkeep;
 	double lastTime;
-	std::shared_ptr<Button> selectedBuilding;
+	std::shared_ptr<Button> pickedBuilding;
 	std::shared_ptr<Tile> selectedTile;
-	std::vector<std::shared_ptr<Tile>> selectedTransportTiles;
+	std::shared_ptr<Building> selectedBuilding;
 
 	std::shared_ptr<VertexArray> vao;
 };
