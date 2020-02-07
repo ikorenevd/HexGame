@@ -101,6 +101,7 @@
     <ClCompile Include="Engine\Input\Keyboard.cpp" />
     <ClCompile Include="Engine\Input\Mouse.cpp" />
     <ClCompile Include="Game\Buildings\Buildings.cpp" />
+    <ClCompile Include="Game\Buildings\BuildingTypes.cpp" />
     <ClCompile Include="Game\Buildings\ResourceTypes.cpp" />
     <ClCompile Include="Game\Layers\ButtonsLayer.cpp" />
     <ClCompile Include="Game\Layers\MapLayer.cpp" />
@@ -131,6 +132,7 @@
     <ClInclude Include="Engine\Input\Keyboard.hpp" />
     <ClInclude Include="Engine\Input\Mouse.hpp" />
     <ClInclude Include="Game\Buildings\Buildings.hpp" />
+    <ClInclude Include="Game\Buildings\BuildingTypes.hpp" />
     <ClInclude Include="Game\Buildings\Factory.hpp" />
     <ClInclude Include="Game\Buildings\ResourceTypes.hpp" />
     <ClInclude Include="Game\Game.hpp" />

@@ -73,13 +73,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 void MapLayer::update()
 {
-	// Взаимодействие пользователя с программой
-	/*if (Keyboard::isKeyPressed(GLFW_KEY_W))
-		speed += 1.f;
-
-	if (Keyboard::isKeyPressed(GLFW_KEY_S))
-		speed -= 1.f;*/
-
+	// Управление
 	if (Keyboard::getKeyState(GLFW_KEY_W))
 		viewGame->move({ 0.f, speed });
 
