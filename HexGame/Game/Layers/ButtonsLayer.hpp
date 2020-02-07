@@ -4,6 +4,7 @@
 #include <Engine/Engine.hpp>
 #include <Engine/Core/Manager.hpp>
 #include <Game/Buildings/Buildings.hpp>
+#include <Game/Buildings/BuildingTypes.hpp>
 
 class Button : public Transformable
 {
@@ -13,9 +14,8 @@ public:
 	bool contains(const glm::vec2& point) const;
 
 	const std::shared_ptr<Texture>& getTexture() const;
-
-	std::shared_ptr<Building> buildBuilding(std::shared_ptr<Tile> tile);
-	int getBuildingCost();
+	BuildingType getBuildingType();
+	std::string getName();
 private:
 	std::shared_ptr<Texture> texture;
 

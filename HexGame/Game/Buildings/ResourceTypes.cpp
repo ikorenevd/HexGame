@@ -1,8 +1,6 @@
-#pragma once
-
 #include <Game/Buildings/ResourceTypes.hpp>
 
-int resourceSize(ResourseType type)
+int getResourceSize(ResourseType type)
 {
 	switch (type)
 	{
@@ -40,6 +38,48 @@ int resourceSize(ResourseType type)
 		break;
 
 	case ResourseType::Jewelry: return 1;
+		break;
+	}
+}
+
+std::string getResourceName(ResourseType type)
+{
+	switch (type)
+	{
+	case ResourseType::RawWood: return "RawWood";
+		break;
+
+	case ResourseType::ProcessedWood: return "ProcessedWood";
+		break;
+
+	case ResourseType::Plank: return "Plank";
+		break;
+
+	case ResourseType::Ore: return "Ore";
+		break;
+
+	case ResourseType::PreciousOre: return "PreciousOre";
+		break;
+
+	case ResourseType::Coal: return "Coal";
+		break;
+
+	case ResourseType::Stone: return "Stone";
+		break;
+
+	case ResourseType::Machine: return "Machine";
+		break;
+
+	case ResourseType::Rail: return "Rail";
+		break;
+
+	case ResourseType::Beam: return "Beam";
+		break;
+
+	case ResourseType::Wearpon: return "Wearpon";
+		break;
+
+	case ResourseType::Jewelry: return "Jewelry";
 		break;
 	}
 }

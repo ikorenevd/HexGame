@@ -17,10 +17,10 @@ bool Button::contains(const glm::vec2& point) const
 	auto pos = getPosition();
 	auto size = getScale();
 
-	if ((pos.x + size.x) >= point.x &&
-		(pos.x - size.x) <= point.x &&
-		(pos.y + size.y) >= point.y &&
-		(pos.y - size.y) <= point.y)
+	if ((pos.x + size.x / 2) >= point.x &&
+		(pos.x - size.x / 2) <= point.x &&
+		(pos.y + size.y / 2) >= point.y &&
+		(pos.y - size.y / 2) <= point.y)
 	{
 		return true;
 	};
@@ -28,16 +28,14 @@ bool Button::contains(const glm::vec2& point) const
 	return false;
 }
 
-std::shared_ptr<Building> Button::buildBuilding(std::shared_ptr<Tile> tile)
+BuildingType Button::getBuildingType()
 {
-	if (name == "Sawmill") return std::make_shared<Sawmill>(tile);
-	if (name == "Felled") return std::make_shared<Felled>(tile);
-	if (name == "Mine") return std::make_shared<Mine>(tile);
+	if (name == "Sawmill") return BuildingType::Sawmill;
+	if (name == "Felled") return BuildingType::Felled;
+	if (name == "Mine") return BuildingType::Mine;
 }
 
-int Button::getBuildingCost()
+std::string Button::getName()
 {
-	if (name == "Sawmill") return Sawmill::cost;
-	if (name == "Felled") return Felled::cost;
-	if (name == "Mine") return Mine::cost;
+	return name;
 }

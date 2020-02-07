@@ -28,9 +28,9 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Hill.png", ColorModel::RGBA));
 	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Mountain.png", ColorModel::RGBA));
 
-	TextureManager::add("Factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
-	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
-	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
+	TextureManager::add("Sawmill", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Sawmill.png", ColorModel::RGBA));
+	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Felled.png", ColorModel::RGBA));
+	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -66,40 +66,40 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	double lastTime = glfwGetTime();
 
 	// Кнопки
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.925, viewUI->getSize().y / 2 * 0.875), glm::vec2(80, 80), TextureManager::get("Factory"), "Sawmill"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.925, viewUI->getSize().y / 2 * 0.65), glm::vec2(80, 80), TextureManager::get("Felled"), "Felled"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-viewUI->getSize().x / 2 * 0.925, viewUI->getSize().y / 2 * 0.425), glm::vec2(80, 80), TextureManager::get("Mine"), "Mine"));
+	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Sawmill"), "Sawmill"));
+	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 220), glm::vec2(80, 80), TextureManager::get("Felled"), "Felled"));
+	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 140), glm::vec2(80, 80), TextureManager::get("Mine"), "Mine"));
 }
 
 void MapLayer::update()
 {
 	// Взаимодействие пользователя с программой
-	if (Keyboard::isKeyPressed(GLFW_KEY_W))
+	/*if (Keyboard::isKeyPressed(GLFW_KEY_W))
 		speed += 1.f;
 
 	if (Keyboard::isKeyPressed(GLFW_KEY_S))
-		speed -= 1.f;
+		speed -= 1.f;*/
 
-	if (Keyboard::getKeyState(GLFW_KEY_UP))
+	if (Keyboard::getKeyState(GLFW_KEY_W))
 		viewGame->move({ 0.f, speed });
 
-	if (Keyboard::getKeyState(GLFW_KEY_DOWN))
+	if (Keyboard::getKeyState(GLFW_KEY_S))
 		viewGame->move({ 0.f, -speed });
 
-	if (Keyboard::getKeyState(GLFW_KEY_LEFT))
+	if (Keyboard::getKeyState(GLFW_KEY_A))
 		viewGame->move({ -speed, 0.f });
 
-	if (Keyboard::getKeyState(GLFW_KEY_RIGHT))
+	if (Keyboard::getKeyState(GLFW_KEY_D))
 		viewGame->move({ speed, 0.f });
 
-	if (Keyboard::getKeyState(GLFW_KEY_Y))
+	if (Keyboard::getKeyState(GLFW_KEY_Q))
 		viewGame->setScale(viewGame->getScale() + 0.1f);
 
-	if (Keyboard::getKeyState(GLFW_KEY_H))
+	if (Keyboard::getKeyState(GLFW_KEY_E))
 		viewGame->setScale(viewGame->getScale() - 0.1f);
 
 	// Переменные
-	glm::vec2 mousePosition = Mouse::getCoordinates();			// Корень, поясни, что это. Пора готовиться к защите
+	glm::vec2 mousePosition = Mouse::getCoordinates();
 	glm::vec2 cursorGame(glm::unProject(glm::vec3{ mousePosition, 1.f }, glm::mat4(1.f), viewGame->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 	glm::vec2 cursorUI(glm::unProject(glm::vec3{ mousePosition, 1.f }, glm::mat4(1.f), viewUI->getMatrix(), glm::vec4(0.f, 0.f, 1280.f, 720.f)));
 
@@ -194,11 +194,35 @@ void MapLayer::update()
 		}
 
 		if (!tileUsed)
-			if (treasuryMoney - buttonsGame[0]->getBuildingCost() >= 0)
+			if (treasuryMoney - buildingCost( selectedBuilding->getBuildingType() ) >= 0)
 			{
-				buildings.push_back(selectedBuilding->buildBuilding(selectedTile));
-				treasuryMoney -= selectedBuilding->getBuildingCost();
-				selectedBuilding = nullptr;
+				switch (selectedBuilding->getBuildingType())
+				{
+					case BuildingType::Sawmill:
+						buildings.push_back(std::make_shared<Sawmill>(selectedTile));
+						treasuryMoney -= buildingCost(selectedBuilding->getBuildingType());
+						selectedBuilding = nullptr;
+						break;
+
+					case BuildingType::Felled:
+						buildings.push_back(std::make_shared<Felled>(selectedTile));
+						treasuryMoney -= buildingCost(selectedBuilding->getBuildingType());
+						selectedBuilding = nullptr;
+						break;
+
+					case BuildingType::Mine:
+						if (selectedTile->getTerrainType() == TerrainType::Mountain)
+						{
+							buildings.push_back(std::make_shared<Mine>(selectedTile));
+							treasuryMoney -= buildingCost(selectedBuilding->getBuildingType());
+						}
+						else
+						{
+							std::cout << "---Wrong terrain type!" << std::endl;
+						}
+						selectedBuilding = nullptr;
+						break;
+				}
 			}
 	}
 
@@ -227,10 +251,11 @@ void MapLayer::update()
 		std::cout << std::endl;
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
+		std::cout << "Map Storage:" << std::endl;
 
 		for (int i = 0; i < 15; i++)
 		{
-			if (storageMap[(ResourseType)i] != 0) std::cout << "Map Storage: " << storageMap[(ResourseType)i] << std::endl;
+			if (storageMap[(ResourseType)i] != 0) std::cout << "   " << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
 		}
 
 		std::cout << std::endl;

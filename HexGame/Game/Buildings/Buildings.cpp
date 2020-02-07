@@ -53,7 +53,7 @@ int Building::getUsedStorage()
 
 	for (auto i : storage)
 	{
-		storageUsed += resourceSize(i.first) * i.second;
+		storageUsed += getResourceSize(i.first) * i.second;
 	}
 
 	return storageUsed;

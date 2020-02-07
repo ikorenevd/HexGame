@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 enum class ResourseType
 {
@@ -21,4 +22,5 @@ enum class ResourseType
 	Jewelry
 };
 
-int resourceSize(ResourseType);
+int getResourceSize(ResourseType);
+std::string getResourceName(ResourseType);

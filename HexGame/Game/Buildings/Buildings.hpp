@@ -66,7 +66,7 @@ public:
 		defaultUpkeep, upkeep = 50 / 3600.;
 		defaultStorageLimit, storageLimit = 500;
 
-		texture = TextureManager::get("Factory");
+		texture = TextureManager::get("Sawmill");
 
 		storage[ResourseType::RawWood] = 0;
 		storage[ResourseType::ProcessedWood] = 0;
