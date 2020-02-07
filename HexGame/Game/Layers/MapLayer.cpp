@@ -13,18 +13,20 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	map(map)
 {
 	viewGame = std::make_shared<View>(glm::ivec2(1280, 720));
-	viewGame->move({ 800, 800 });
-	viewGame->setScale(1.5);
+	viewGame->move({ 700, 800 });
+	viewGame->setScale(1.75);
 
 	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
+	TextureManager::add("Paper", std::make_shared<Texture>("Assets\\Textures\\Paper.png", ColorModel::RGBA));
+
 	TextureManager::add("Hex", std::make_shared<Texture>("Assets\\Textures\\Hex\\Hex.png", ColorModel::RGBA));
 	TextureManager::add("SelectedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\SelectedHex.png", ColorModel::RGBA));
 
-	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Flatland.png", ColorModel::RGBA));
-	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Flatland.png", ColorModel::RGBA));
-	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Flatland.png", ColorModel::RGBA));
+	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Flatland.png", ColorModel::RGBA));
+	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Hill.png", ColorModel::RGBA));
+	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Mountain.png", ColorModel::RGBA));
 
 	TextureManager::add("Factory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
 	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
@@ -195,10 +197,7 @@ void MapLayer::update()
 			if (treasuryMoney - buttonsGame[0]->getBuildingCost() >= 0)
 			{
 				buildings.push_back(selectedBuilding->buildBuilding(selectedTile));
-				std::cout << "---Building is built.   ";
-
 				treasuryMoney -= selectedBuilding->getBuildingCost();
-
 				selectedBuilding = nullptr;
 			}
 	}
@@ -243,15 +242,33 @@ void MapLayer::render()
 	auto shader = ShaderManager::get("Texture");
 	shader->bind();
 	shader->setInt("ourTexture", 0);
-	shader->setMat4("view", viewGame->getMatrix());
 	vao->bind();
 
-		// Карта
+	//// Карта
+	shader->setMat4("view", viewGame->getMatrix());
+
+	// Фон
+	TextureManager::get("Paper")->bind();
+	for (int x = -1; x < 6; x++)
+	{
+		for (int y = -1; y < 4; y++)
+		{
+			glm::mat4 transformation = glm::translate(glm::mat4(1), glm::vec3(x * 500, y * 500, 0));
+			transformation = glm::scale(transformation, glm::vec3(500, 500, 0));
+
+			shader->setMat4("transform", transformation);
+
+			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+		}
+	}
+
 	// Отрисовка клеток
 	std::vector<std::shared_ptr<Tile>> allTiles = map->getTiles();
-
 	for (auto tile : allTiles)
 	{
+		shader->setMat4("transform", tile->getTransform());
+
+		// Клетка
 		switch (tile->getTerrainType())
 		{
 		case TerrainType::Flatland:
@@ -265,20 +282,13 @@ void MapLayer::render()
 			break;
 		}
 
-		shader->setMat4("transform", tile->getTransform());
-
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
-	}
 
-	// Отрисовка обводки клеток
-	for (auto tile : allTiles)
-	{
+		// Обводка
 		if (tile == selectedTile)
 			TextureManager::get("SelectedHex")->bind();
 		else
 			TextureManager::get("Hex")->bind();
-
-		shader->setMat4("transform", tile->getTransform());
 
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
@@ -287,16 +297,15 @@ void MapLayer::render()
 	for (auto building : buildings)
 	{
 		shader->setMat4("transform", building->getTransform());
-
 		building->getTexture()->bind();
-
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
-		// Интерфейс
-	// Отрисовка кнопок
-	bool tileFree = true;
+	//// Интерфейс
+	shader->setMat4("view", viewUI->getMatrix());
 
+	// Проверка клетки
+	bool tileFree = true;
 	for (auto building : buildings)
 	{
 		if (building->getTile() == selectedTile)
@@ -306,31 +315,24 @@ void MapLayer::render()
 		}
 	}
 
+	// Отрисовка кнопок
 	if (selectedTile == nullptr || tileFree)
 	{
 		// Без выделенной клетки
-		shader->setMat4("view", viewUI->getMatrix());
-
 		for (auto button : buttonsGame)
 		{
 			shader->setMat4("transform", button->getTransform());
-
 			button->getTexture()->bind();
-
 			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 		}
 	}
 	else
 	{
 		// При выделенной клетке
-		shader->setMat4("view", viewUI->getMatrix());
-
 		for (auto button : buttonsUI)
 		{
 			shader->setMat4("transform", button->getTransform());
-
 			button->getTexture()->bind();
-
 			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 		}
 	}

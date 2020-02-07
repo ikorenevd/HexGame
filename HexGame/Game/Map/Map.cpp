@@ -54,7 +54,15 @@ Map::Map(const glm::ivec2& s) :
 	for (int x = 0; x < size.x; x++)
 		for (int y = 0; y < size.y; y++)
 		{
-			tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), TerrainType(std::rand() % 3));
+			int i = rand() % 6;
+
+			if (i <= 3)
+				tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), TerrainType::Flatland);
+			if (i == 4)
+				tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), TerrainType::Hill);
+			if (i == 5)
+				tiles[a] = std::make_shared<Tile>(glm::ivec3(x, y, -x - y), TerrainType::Mountain);
+
 			a++;
 		}
 }

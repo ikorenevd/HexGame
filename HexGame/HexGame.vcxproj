@@ -152,10 +152,15 @@
     <Image Include="Assets\Textures\Buildings\Factory01.png" />
     <Image Include="Assets\Textures\Buildings\felled.png" />
     <Image Include="Assets\Textures\Buildings\mine.png" />
-    <Image Include="Assets\Textures\Flatland.png" />
     <Image Include="Assets\Textures\Hex.png" />
+    <Image Include="Assets\Textures\Hex\Hex.png" />
+    <Image Include="Assets\Textures\Hex\SelectedHex.png" />
     <Image Include="Assets\Textures\Hill.png" />
+    <Image Include="Assets\Textures\Landscape\Flatland.png" />
+    <Image Include="Assets\Textures\Landscape\Hill.png" />
+    <Image Include="Assets\Textures\Landscape\Mountain.png" />
     <Image Include="Assets\Textures\Mountain.png" />
+    <Image Include="Assets\Textures\Paper.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
