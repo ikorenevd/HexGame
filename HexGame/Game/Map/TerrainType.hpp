@@ -4,7 +4,8 @@ enum class TerrainType
 {
 	Flatland = 0,
 	Hill,
-	Mountain
+	Mountain,
+	Forest
 };
 
 bool isTerrainCrossable(TerrainType type);

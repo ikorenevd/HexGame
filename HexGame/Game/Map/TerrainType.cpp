@@ -15,5 +15,8 @@ bool isTerrainCrossable(TerrainType type)
 	case TerrainType::Mountain:
 		return false;
 		break;
+	case TerrainType::Forest:
+		return true;
+		break;
 	}
 }

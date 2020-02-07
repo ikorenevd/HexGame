@@ -28,6 +28,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Flatland.png", ColorModel::RGBA));
 	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Hill.png", ColorModel::RGBA));
 	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Mountain.png", ColorModel::RGBA));
+	TextureManager::add("Forest", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Forest.png", ColorModel::RGBA));
 
 	TextureManager::add("Sawmill", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Sawmill.png", ColorModel::RGBA));
 	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Felled.png", ColorModel::RGBA));
@@ -232,9 +233,12 @@ void MapLayer::update()
                         break;
 
                     case BuildingType::Felled:
-                        buildings.push_back(std::make_shared<Felled>(selectedTile));
-						selectedBuilding = buildings.back();
-                        treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+						if (selectedTile->getTerrainType() == TerrainType::Forest)
+						{
+							buildings.push_back(std::make_shared<Felled>(selectedTile));
+							selectedBuilding = buildings.back();
+							treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+						}
                         pickedBuilding = nullptr;
                         break;
 
@@ -337,6 +341,9 @@ void MapLayer::render()
 			break;
 		case TerrainType::Mountain:
 			TextureManager::get("Mountain")->bind();
+			break;
+		case TerrainType::Forest:
+			TextureManager::get("Forest")->bind();
 			break;
 		}
 
