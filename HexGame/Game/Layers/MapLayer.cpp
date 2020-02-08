@@ -22,6 +22,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Paper", std::make_shared<Texture>("Assets\\Textures\\Paper.png", ColorModel::RGBA));
 
 	TextureManager::add("Hex", std::make_shared<Texture>("Assets\\Textures\\Hex\\Hex.png", ColorModel::RGBA));
+	TextureManager::add("PointedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\PointedHex.png", ColorModel::RGBA));
 	TextureManager::add("SelectedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\SelectedHex.png", ColorModel::RGBA));
 	TextureManager::add("SelectedTransportHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\TransportingHex.png", ColorModel::RGBA));
 
@@ -33,7 +34,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Sawmill", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Sawmill.png", ColorModel::RGBA));
 	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Felled.png", ColorModel::RGBA));
 	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
-	TextureManager::add("Warehouse", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
+	TextureManager::add("Warehouse", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Warehouse.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -66,8 +67,8 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
-	double lastTime = glfwGetTime();
-	bool transporting = false;
+	lastTime = glfwGetTime();
+	defaultUI = true;
 
 	// Кнопки
 	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Sawmill"), "Sawmill"));
@@ -157,42 +158,28 @@ void MapLayer::update()
 	}
 
 	// Кнопки
-	for (auto button : buttonsGame)
+	if (defaultUI)
 	{
-		if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-			pickedBuilding = button;
+		for (auto button : buttonsGame)
+		{
+			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+				pickedBuilding = button;
+		}
+	}
+
+	if (extensionUI)
+	{
+		for (auto button : buttonsUI)
+		{
+			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+				pickedBuilding = button;
+		}
 	}
 
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
 		pickedBuilding = nullptr;
-		selectedExtensionTile = nullptr;
-
-		if (extensionUI)
-		{
-			for (auto tile : map->getNeighbors(selectedTile))
-			{
-				if (tile->contains(cursorGame))
-				{
-					bool exist = false;
-
-					for (auto building : buildings)
-					{
-						if (building->getTile() == tile)
-						{
-							exist = true;
-							break;
-						}
-					}
-
-					if (!exist && selectedExtensionTile!= tile)
-						selectedExtensionTile = tile;
-					else
-						selectedExtensionTile = nullptr;
-				}
-			}
-		}
 
 		if (transportingUI)
 		{
@@ -212,7 +199,38 @@ void MapLayer::update()
 			}
 		}
 
-		if (!transportingUI && !extensionUI)
+		if (extensionUI)
+		{
+			for (auto tile : map->getNeighbors(selectedTile))
+			{
+				if (tile->contains(cursorGame))
+				{
+					if (selectedExtensionTile != tile || selectedExtensionTile == nullptr)
+					{
+						selectedExtensionTile = tile;
+
+						for (auto building : buildings)
+						{
+							if (building->getTile() == selectedExtensionTile)
+							{
+								selectedExtensionBuilding = building;
+								break;
+							}
+							else
+								selectedExtensionBuilding = nullptr;
+						}
+					}
+					else
+					{
+						selectedExtensionTile = nullptr;
+						selectedExtensionBuilding = nullptr;
+					}
+					break;
+				}
+			}
+		}
+
+		if (defaultUI)
 		{
 			for (auto tile : allTiles)
 			{
@@ -238,16 +256,16 @@ void MapLayer::update()
 						selectedTile = nullptr;
 						selectedBuilding = nullptr;
 					}
-
 					break;
 				}
 			}
-		}		
+		}
 	}
 
 	// Постройка зданий
-	if (pickedBuilding != nullptr && selectedBuilding == nullptr)
+	if (pickedBuilding != nullptr && (selectedBuilding == nullptr || selectedExtensionBuilding == nullptr))
 	{
+		if (defaultUI)
             if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
             {
                 switch (pickedBuilding->getBuildingType())
@@ -256,7 +274,6 @@ void MapLayer::update()
                         buildings.push_back(std::make_shared<Sawmill>(selectedTile));
 						selectedBuilding = buildings.back();
                         treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-						pickedBuilding = nullptr;
                         break;
 
                     case BuildingType::Felled:
@@ -265,7 +282,6 @@ void MapLayer::update()
 							buildings.push_back(std::make_shared<Felled>(selectedTile));
 							selectedBuilding = buildings.back();
 							treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-							pickedBuilding = nullptr;
 						}
                         break;
 
@@ -275,75 +291,147 @@ void MapLayer::update()
                             buildings.push_back(std::make_shared<Mine>(selectedTile));
 							selectedBuilding = buildings.back();
                             treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-							pickedBuilding = nullptr;
                         }
                         break;
                 }
             }
-	}
 
-	if (pickedBuilding != nullptr && selectedExtensionTile != nullptr && selectedExtensionBuilding == nullptr)
-	{
-		selectedBuilding->setExtension(BuildingType::Warehouse, selectedExtensionTile);
+		if (extensionUI)
+		{
+			switch (pickedBuilding->getBuildingType())
+			{
+				case BuildingType::Warehouse:
+					if (selectedBuilding->getExtensionAmount(BuildingType::Warehouse) < 2)
+					{
+						buildings.push_back(std::make_shared<Warehouse>(selectedExtensionTile, selectedBuilding));
+						selectedBuilding->setExtension(buildings.back());
+						selectedExtensionBuilding = buildings.back();
+					}
+					break;
+			}
+		}
+
 		pickedBuilding = nullptr;
 	}
 
 	// Снос здания
-	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && selectedBuilding != nullptr)
+	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr))
 	{
 		int i = 0;
 
-		for (auto building : buildings)
+		if (selectedExtensionBuilding != nullptr)
 		{
-			if (building == selectedBuilding)
+			for (auto building : buildings)
 			{
-				buildings.erase(buildings.begin() + i);
-				break;
-			}
+				if (building == selectedExtensionBuilding)
+				{
+					buildings.erase(buildings.begin() + i);
+					break;
+				}
 
-			i++;
+				i++;
+			}
+		}
+		else
+		{
+			for (auto building : buildings)
+			{
+				if (building == selectedBuilding)
+				{
+					for (auto extensionBuilding : building->getExtensionBuildings())
+					{
+						buildings.erase(buildings.begin() + i);
+					}
+
+					buildings.erase(buildings.begin() + i);
+					break;
+				}
+
+				i++;
+			}
 		}
 
-		// Проверка цели транспортировки
+		// Удаление в виде цели для транспортировки
 		for (auto building : buildings)
 		{
 			for (auto target : building->getTransportationTargets())
 			{
 				if (std::find(buildings.begin(), buildings.end(), target) == buildings.end())
-					building->deleteTransportationTarget(target);
+					building->setTransportationTarget(target);
+			}
+		}
+
+		// Удаление в виде пристройки
+		for (auto building : buildings)
+		{
+			for (auto target : building->getExtensionBuildings())
+			{
+				if (std::find(buildings.begin(), buildings.end(), target) == buildings.end())
+					building->setExtension(target);
 			}
 		}
 	}
 
-	if (Keyboard::isKeyPressed(GLFW_KEY_T) && selectedBuilding != nullptr && !extensionUI)
+	// Выбор типа интерфейса
+	if (selectedBuilding != nullptr)
 	{
-		if (transportingUI)
+		if (Keyboard::isKeyPressed(GLFW_KEY_T))
 		{
-			transportingUI = false;
-		}
-		else
-			transportingUI = true;
-	}
+			if (transportingUI)
+			{
+				transportingUI = false;
+			}
+			else
+			{
+				transportingUI = true;
+			}
 
-	if (Keyboard::isKeyPressed(GLFW_KEY_X) && selectedBuilding != nullptr && !transportingUI)
-	{
-		if (extensionUI)
-		{
 			extensionUI = false;
-			selectedExtensionTile = false;
-			selectedExtensionBuilding = false;
+			selectedExtensionBuilding = nullptr;
+			selectedExtensionTile = nullptr;
 		}
-		else
-			extensionUI = true;
+
+		if (Keyboard::isKeyPressed(GLFW_KEY_X))
+		{
+			if (extensionUI)
+			{
+				extensionUI = false;
+			}
+			else
+			{
+				extensionUI = true;
+			}
+
+			transportingUI = false;
+			selectedExtensionBuilding = nullptr;
+			selectedExtensionTile = nullptr;
+		}
+	}
+	
+	if (transportingUI || extensionUI)
+		defaultUI = false;
+	else
+		defaultUI = true;
+
+	for (auto tile : allTiles)
+	{
+		if (tile->contains(cursorGame))
+			pointedTile = tile;
 	}
 
 	// Debug
 	if (debug)
 	{
 		int number = 0;
-
 		std::cout << std::endl;
-		if (transportingUI) std::cout << "Transport to?.." << std::endl;
+
+		if (transportingUI) 
+			std::cout << "UI Mode: Transporting" << std::endl;
+		if (extensionUI) 
+			std::cout << "UI Mode: Extension" << std::endl;
+		if (defaultUI)
+			std::cout << "UI Mode: Default" << std::endl;
+
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 		std::cout << "Map Storage:" << std::endl;
@@ -351,8 +439,6 @@ void MapLayer::update()
 		{
 			if (storageMap[(ResourseType)i] != 0) std::cout << "   " << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
 		}
-
-		std::cout << std::endl;
 	}
 }
 
@@ -407,10 +493,13 @@ void MapLayer::render()
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 
 		// Обводка
+		if (tile == pointedTile)
+			TextureManager::get("Hex")->bind();
+		else
+			TextureManager::get("PointedHex")->bind();
+
 		if (tile == selectedTile)
 			TextureManager::get("SelectedHex")->bind();
-		else
-			TextureManager::get("Hex")->bind();
 
 		if (extensionUI && tile == selectedExtensionTile)
 			TextureManager::get("SelectedTransportHex")->bind();
@@ -432,13 +521,6 @@ void MapLayer::render()
 	// Отрисовка зданий
 	for (auto building : buildings)
 	{
-		for (auto extensionBuilding : building->getExtensionBuildings())
-		{
-			shader->setMat4("transform", extensionBuilding->getTransform());
-			extensionBuilding->getTexture()->bind();
-			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
-		}
-
 		shader->setMat4("transform", building->getTransform());
 		building->getTexture()->bind();
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
@@ -448,7 +530,7 @@ void MapLayer::render()
 	shader->setMat4("view", viewUI->getMatrix());
 
 	// Отрисовка кнопок
-	if (selectedBuilding == nullptr)
+	if (defaultUI)
 	{
 		// Без выделенной клетки
 		for (auto button : buttonsGame)
@@ -458,7 +540,8 @@ void MapLayer::render()
 			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 		}
 	}
-	else
+
+	if (extensionUI)
 	{
 		// При выделенной клетке
 		for (auto button : buttonsUI)

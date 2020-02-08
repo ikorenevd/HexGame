@@ -19,6 +19,8 @@ public:
 	std::shared_ptr<Texture> texture;
 	std::vector<std::shared_ptr<Building>> selectedTransportingTargets;
 	std::vector<std::shared_ptr<Building>> extensionBuildings;
+	std::shared_ptr<Building> parent;
+	BuildingType buildingType;
 
 	Building(const std::shared_ptr<Tile>& tile);
 
@@ -28,8 +30,7 @@ public:
 	void setFrozen(bool setFrozen);
 	void setStorage(ResourseType type, float value);
 	void setTransportationTarget(std::shared_ptr<Building>& building);
-	void deleteTransportationTarget(std::shared_ptr<Building>& building);
-	void setExtension(BuildingType type, std::shared_ptr<Tile>& tile);
+	void setExtension(std::shared_ptr<Building>& building);
 
 	std::shared_ptr<Texture> getTexture();
 	bool isFrozen();
@@ -38,9 +39,12 @@ public:
 	int getUsedStorage();
 	int getResourseAmount(ResourseType);
 	float getUpkeep();
+	int getExtensionAmount(BuildingType type);
+	BuildingType getBuildingType();
 	std::vector<std::shared_ptr<Building>> getTransportationTargets();
 	std::vector<std::shared_ptr<Building>> getExtensionBuildings();
 	std::shared_ptr<Tile>& getTile();
+	std::shared_ptr<Building> getParent();
 private:
 	std::shared_ptr<Tile> tile;
 };
@@ -48,7 +52,7 @@ private:
 class ExtensionBuilding : public Building
 {
 public:
-	ExtensionBuilding(const std::shared_ptr<Tile>& tile);
+	ExtensionBuilding(const std::shared_ptr<Tile>& tile, std::shared_ptr<Building>& main);
 };
 
 class MainBuilding : public Building
@@ -67,6 +71,7 @@ public:
 		upkeep = 50 / 3600.;
 		storageLimit = 500;
 
+		buildingType = BuildingType::Sawmill;
 		texture = TextureManager::get("Sawmill");
 
 		storage[ResourseType::RawWood] = 0;
@@ -114,6 +119,7 @@ public:
 		upkeep = 40 / 3600.;
 		storageLimit = 1000;
 
+		buildingType = BuildingType::Felled;
 		texture = TextureManager::get("Felled");
 
 		storage[ResourseType::RawWood] = 0;
@@ -144,6 +150,7 @@ public:
 		upkeep = 75 / 3600.;
 		storageLimit = 1500;
 
+		buildingType = BuildingType::Mine;
 		texture = TextureManager::get("Mine");
 
 		storage[ResourseType::RawWood] = 0;
@@ -170,10 +177,10 @@ public:
 class Warehouse : public ExtensionBuilding
 {
 public:
-	Warehouse(const std::shared_ptr<Tile>& tile) : ExtensionBuilding(tile)
+	Warehouse(const std::shared_ptr<Tile>& tile, std::shared_ptr<Building>& main) : ExtensionBuilding(tile, main)
 	{
-		upkeep = 75 / 3600.;
+		upkeep = 25 / 3600.;
+		buildingType = BuildingType::Warehouse;
 		texture = TextureManager::get("Warehouse");
-		std::cout << "--- Built" << std::endl;
 	}
 };

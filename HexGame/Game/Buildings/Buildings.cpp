@@ -24,12 +24,26 @@ void Building::setTile(const std::shared_ptr<Tile>& value)
 	setPosition(tile->getPosition());
 }
 
-void Building::setExtension(BuildingType type, std::shared_ptr<Tile>& tile)
+void Building::setExtension(std::shared_ptr<Building>& building)
 {
-	if (type == BuildingType::Warehouse)
+	int i = 0;
+	bool exist = false;
+
+	for (auto check : extensionBuildings)
 	{
-		extensionBuildings.push_back(std::make_shared<Warehouse>(tile));
+		if (check == building)
+		{
+			exist = true;
+			break;
+		}
+
+		i++;
 	}
+
+	if (exist)
+		extensionBuildings.erase(extensionBuildings.begin() + i);
+	else
+		extensionBuildings.push_back(building);
 }
 
 std::vector<std::shared_ptr<Building>> Building::getExtensionBuildings()
@@ -55,6 +69,24 @@ std::shared_ptr<Tile>& Building::getTile()
 std::shared_ptr<Texture> Building::getTexture()
 {
 	return texture;
+}
+
+BuildingType Building::getBuildingType()
+{
+	return buildingType;
+}
+
+int Building::getExtensionAmount(BuildingType type)
+{
+	int amount = 0;
+
+	for (auto extensionBuiding : extensionBuildings)
+	{
+		if (extensionBuiding->getBuildingType() == type)
+			amount++;
+	}
+
+	return amount;
 }
 
 int Building::getUsedStorage()
@@ -94,6 +126,11 @@ bool Building::isStorageFull()
 	return getUsedStorage() >= storageLimit;
 }
 
+std::shared_ptr<Building> Building::getParent()
+{
+	return parent;
+}
+
 void Building::setTransportationTarget(std::shared_ptr<Building>& building)
 {
 	int i = 0;
@@ -116,22 +153,6 @@ void Building::setTransportationTarget(std::shared_ptr<Building>& building)
 		selectedTransportingTargets.push_back(building);
 }
 
-void Building::deleteTransportationTarget(std::shared_ptr<Building>& building)
-{
-	int i = 0;
-
-	for (auto check : selectedTransportingTargets)
-	{
-		if (check == building)
-		{
-			selectedTransportingTargets.erase(selectedTransportingTargets.begin() + i);
-			break;
-		}
-
-		i++;
-	}
-}
-
 std::vector<std::shared_ptr<Building>> Building::getTransportationTargets()
 {
 	return selectedTransportingTargets;
@@ -140,9 +161,9 @@ std::vector<std::shared_ptr<Building>> Building::getTransportationTargets()
 
 
 
-ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) : Building(tile)
+ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile, std::shared_ptr<Building>& main) : Building(tile)
 {
-
+	parent = main;
 }
 
 MainBuilding::MainBuilding(const std::shared_ptr<Tile>& tile) : Building(tile)

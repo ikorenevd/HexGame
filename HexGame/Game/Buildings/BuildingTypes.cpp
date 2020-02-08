@@ -12,5 +12,10 @@ int buildingCost(BuildingType type)
 
 	case BuildingType::Mine: return 250;
 		break;
+
+
+
+	case BuildingType::Warehouse: return 100;
+		break;
 	}
 }

@@ -24,8 +24,10 @@ private:
 	std::shared_ptr<View> viewUI;
 	float speed = 2.f;
 
-	bool transportingUI;
+	bool defaultUI;
 	bool extensionUI;
+	bool transportingUI;
+
 	bool treasuryEmpty;
 	float treasuryMoney;
 	float totalUpkeep;
@@ -35,6 +37,8 @@ private:
 	std::shared_ptr<Tile> selectedExtensionTile;
 	std::shared_ptr<Building> selectedBuilding;
 	std::shared_ptr<Building> selectedExtensionBuilding;
+
+	std::shared_ptr<Tile> pointedTile;
 
 	std::shared_ptr<VertexArray> vao;
 };
