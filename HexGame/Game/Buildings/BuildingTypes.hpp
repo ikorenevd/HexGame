@@ -4,9 +4,7 @@ enum class BuildingType
 {
 	Sawmill = 0,
 	Felled,
-	Mine,
-
-	Warehouse
+	Mine
 };
 
 int buildingCost(BuildingType);

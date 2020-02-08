@@ -33,8 +33,6 @@ BuildingType Button::getBuildingType()
 	if (name == "Sawmill") return BuildingType::Sawmill;
 	if (name == "Felled") return BuildingType::Felled;
 	if (name == "Mine") return BuildingType::Mine;
-
-	if (name == "Warehouse") return BuildingType::Warehouse;
 }
 
 std::string Button::getName()
