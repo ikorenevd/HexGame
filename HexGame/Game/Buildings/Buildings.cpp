@@ -7,6 +7,10 @@ Building::Building(const std::shared_ptr<Tile>& tile) :
 {
 	setPosition(tile->getPosition());
 	setScale(glm::vec2(50));
+
+	frozen = false;
+	functioning = true;
+	warehouseAmount = 0;
 }
 
 void Building::update()
@@ -21,9 +25,9 @@ void Building::setTile(const std::shared_ptr<Tile>& value)
 	setPosition(tile->getPosition());
 }
 
-void Building::setFrozen(bool setActive)
+void Building::setFrozen(bool setStatus)
 {
-	frozen = setActive;
+	frozen = setStatus;
 }
 
 void Building::setStorage(ResourseType type, float value)
@@ -31,10 +35,31 @@ void Building::setStorage(ResourseType type, float value)
 	storage[type] += value;
 }
 
-void Building::addStorage()
+void Building::addWarehouse(std::shared_ptr<Building>& building)
 {
- 	if (storageLimit < defaultStorageLimit * 4)
-		storageLimit += defaultStorageLimit * 1.5;
+	warehouseAmount++;
+}
+
+void Building::setTransportationTarget(std::shared_ptr<Building>& building)
+{
+	int i = 0;
+	bool exist = false;
+
+	for (auto check : selectedTargets)
+	{
+		if (check == building)
+		{
+			exist = true;
+			break;
+		}
+
+		i++;
+	}
+
+	if (exist)
+		selectedTargets.erase(selectedTargets.begin() + i);
+	else
+		selectedTargets.push_back(building);
 }
 
 const std::shared_ptr<Tile>& Building::getTile() const
@@ -84,39 +109,22 @@ bool Building::isStorageFull()
 	return getUsedStorage() >= storageLimit;
 }
 
-void Building::setTransportationTarget(std::shared_ptr<Building>& building)
+void Building::checkTransportationTargets()
 {
-	int i = 0;
-	bool exist = false;
 
-	for (auto check : selectedTransportingTargets)
-	{
-		if (check == building)
-		{
-			exist = true;
-			break;
-		}
-
-		i++;
-	}
-
-	if (exist)
-		selectedTransportingTargets.erase(selectedTransportingTargets.begin() + i);
-	else
-		selectedTransportingTargets.push_back(building);
 }
 
-std::vector<std::shared_ptr<Building>> Building::getTransportationTargets()
+std::vector<std::shared_ptr<Building>> Building::getTargets()
 {
-	return selectedTransportingTargets;
+	return selectedTargets;
 }
 
-ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :
-	Building(tile)
+int Building::getWarehouseAmount()
 {
+	return warehouseAmount;
 }
 
-MainBuilding::MainBuilding(const std::shared_ptr<Tile>& tile) :
-	Building(tile)
+std::shared_ptr<Building> Building::getParent()
 {
+	return parent;
 }

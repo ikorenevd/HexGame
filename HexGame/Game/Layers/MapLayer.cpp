@@ -33,6 +33,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Sawmill", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Sawmill.png", ColorModel::RGBA));
 	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Felled.png", ColorModel::RGBA));
 	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
+	TextureManager::add("Warehouse", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Factory01.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -66,12 +67,13 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
 	double lastTime = glfwGetTime();
-	bool transporting = false;
 
 	// Кнопки
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Sawmill"), "Sawmill"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 220), glm::vec2(80, 80), TextureManager::get("Felled"), "Felled"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 140), glm::vec2(80, 80), TextureManager::get("Mine"), "Mine"));
+	buttonsBuldings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Sawmill"), "Sawmill"));
+	buttonsBuldings.push_back(std::make_shared<Button>(glm::vec2(-575, 220), glm::vec2(80, 80), TextureManager::get("Felled"), "Felled"));
+	buttonsBuldings.push_back(std::make_shared<Button>(glm::vec2(-575, 140), glm::vec2(80, 80), TextureManager::get("Mine"), "Mine"));
+
+	buttonsExtensions.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
 }
 
 void MapLayer::update()
@@ -154,7 +156,13 @@ void MapLayer::update()
 	}
 
 	// Кнопки
-	for (auto button : buttonsGame)
+	for (auto button : buttonsBuldings)
+	{
+		if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+			pickedBuilding = button;
+	}
+
+	for (auto button : buttonsExtensions)
 	{
 		if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 			pickedBuilding = button;
@@ -163,6 +171,9 @@ void MapLayer::update()
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
+		pickedBuilding = nullptr;
+
+		// Выделение цели для транспортировки
 		if (transportingUI)
 		{
 			for (auto tile : allTiles)
@@ -181,7 +192,41 @@ void MapLayer::update()
 			}
 		}
 
-		if (!transportingUI)
+		// Выделение клетки для пристройки
+		if (extensionUI)
+		{
+			for (auto tile : allTiles)
+			{
+				if (tile->contains(cursorGame))
+				{
+					if ((selectedExtensionTile != tile || selectedExtensionTile == nullptr) && tile->getDistance(selectedBuilding->getTile()) == 1)
+					{
+						for (auto building : buildings)
+						{
+							if (building->getTile() == tile)
+							{
+								selectedExtensionTile = nullptr;
+
+								break;
+							}
+							else
+							{
+								selectedExtensionTile = tile;
+							}
+						}
+					}
+					else
+					{
+						selectedExtensionTile = nullptr;
+
+						break;
+					}
+				}
+			}
+		}
+		
+		// Выделение клетки
+		if (!transportingUI && !extensionUI)
 		{
 			for (auto tile : allTiles)
 			{
@@ -201,58 +246,69 @@ void MapLayer::update()
 							else
 								selectedBuilding = nullptr;
 						}
+
+						if (selectedBuilding != nullptr && selectedBuilding->getParent() != nullptr)
+						{
+							selectedTile = selectedBuilding->getParent()->getTile();
+							selectedBuilding = selectedBuilding->getParent();
+						}
 					}
 					else
 					{
 						selectedTile = nullptr;
 						selectedBuilding = nullptr;
 					}
-
-					pickedBuilding = nullptr;
-
 					break;
 				}
 			}
-
-			
 		}		
 	}
 
 	// Постройка зданий
-	if (pickedBuilding != nullptr && selectedBuilding == nullptr)
+	if (pickedBuilding != nullptr && selectedBuilding == nullptr && selectedTile != nullptr)
 	{
-            if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
-            {
-                switch (pickedBuilding->getBuildingType())
-                {
-                    case BuildingType::Sawmill:
-                        buildings.push_back(std::make_shared<Sawmill>(selectedTile));
+			if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
+			{
+				switch (pickedBuilding->getBuildingType())
+				{
+				case BuildingType::Sawmill:
+					buildings.push_back(std::make_shared<Sawmill>(selectedTile));
+					selectedBuilding = buildings.back();
+					treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+					pickedBuilding = nullptr;
+					break;
+
+				case BuildingType::Felled:
+					if (selectedTile->getTerrainType() == TerrainType::Forest)
+					{
+						buildings.push_back(std::make_shared<Felled>(selectedTile));
 						selectedBuilding = buildings.back();
-                        treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-                        pickedBuilding = nullptr;
-                        break;
+						treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+						pickedBuilding = nullptr;
+					}
+					break;
 
-                    case BuildingType::Felled:
-						if (selectedTile->getTerrainType() == TerrainType::Forest)
-						{
-							buildings.push_back(std::make_shared<Felled>(selectedTile));
-							selectedBuilding = buildings.back();
-							treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-						}
-                        pickedBuilding = nullptr;
-                        break;
+				case BuildingType::Mine:
+					if (selectedTile->getTerrainType() == TerrainType::Mountain)
+					{
+						buildings.push_back(std::make_shared<Mine>(selectedTile));
+						selectedBuilding = buildings.back();
+						treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+						pickedBuilding = nullptr;
+					}
+					break;
+				}
+			}
+	}
 
-                    case BuildingType::Mine:
-                        if (selectedTile->getTerrainType() == TerrainType::Mountain)
-                        {
-                            buildings.push_back(std::make_shared<Mine>(selectedTile));
-							selectedBuilding = buildings.back();
-                            treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-                        }
-                        pickedBuilding = nullptr;
-                        break;
-                }
-            }
+	if (extensionUI && selectedExtensionTile != nullptr && pickedBuilding != nullptr)
+	{
+		if (selectedBuilding->getWarehouseAmount() < 2)
+		{
+			buildings.push_back(std::make_shared<Warehouse>(selectedExtensionTile, selectedBuilding));
+			selectedBuilding->addWarehouse(buildings.back());
+			pickedBuilding = nullptr;
+		}
 	}
 
 	// Снос здания
@@ -270,6 +326,11 @@ void MapLayer::update()
 
 			i++;
 		}
+
+		for (auto building : buildings)
+		{
+			building->checkTransportationTargets();
+		}
 	}
 
 	if (Keyboard::isKeyPressed(GLFW_KEY_T) && selectedBuilding != nullptr)
@@ -280,13 +341,23 @@ void MapLayer::update()
 			transportingUI = true;
 	}
 
+	if (Keyboard::isKeyPressed(GLFW_KEY_X) && selectedBuilding != nullptr)
+	{
+		if (extensionUI)
+		{
+			extensionUI = false;
+			selectedExtensionTile = nullptr;
+		}
+		else
+			extensionUI = true;
+	}
+
 	// Debug
 	if (debug)
 	{
 		int number = 0;
 
 		std::cout << std::endl;
-		if (transportingUI) std::cout << "Transport to?.." << std::endl;
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 		std::cout << "Map Storage:" << std::endl;
@@ -358,15 +429,25 @@ void MapLayer::render()
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
+	// Выделение целей для транспортировки
 	if (transportingUI)
 	{
 		TextureManager::get("SelectedTransportHex")->bind();
 
-		for (auto building : selectedBuilding->getTransportationTargets())
+		for (auto building : selectedBuilding->getTargets())
 		{
 			shader->setMat4("transform", building->getTile()->getTransform());
 			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 		}
+	}
+
+	// Выделение клетки для пристройки
+	if (extensionUI && selectedExtensionTile != nullptr)
+	{
+		TextureManager::get("SelectedTransportHex")->bind();
+
+		shader->setMat4("transform", selectedExtensionTile->getTransform());
+		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
 	// Отрисовка зданий
@@ -384,7 +465,7 @@ void MapLayer::render()
 	if (selectedBuilding == nullptr)
 	{
 		// Без выделенной клетки
-		for (auto button : buttonsGame)
+		for (auto button : buttonsBuldings)
 		{
 			shader->setMat4("transform", button->getTransform());
 			button->getTexture()->bind();
@@ -394,7 +475,7 @@ void MapLayer::render()
 	else
 	{
 		// При выделенной клетке
-		for (auto button : buttonsUI)
+		for (auto button : buttonsExtensions)
 		{
 			shader->setMat4("transform", button->getTransform());
 			button->getTexture()->bind();
