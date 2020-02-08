@@ -11,10 +11,7 @@ public:
 	bool frozen;
 	bool functioning;
 
-	float defaultUpkeep;
 	float upkeep;
-
-	int defaultStorageLimit;
 	int storageLimit;
 
 	std::unordered_map<ResourseType, float> storage;
@@ -29,7 +26,7 @@ public:
 	void setFrozen(bool setFrozen);
 	void setStorage(ResourseType type, float value);
 	void setTransportationTarget(std::shared_ptr<Building>& building);
-	void addStorage();
+	void deleteTransportationTarget(std::shared_ptr<Building>& building);
 
 	std::shared_ptr<Texture> getTexture();
 	bool isFrozen();
@@ -39,7 +36,7 @@ public:
 	int getResourseAmount(ResourseType);
 	float getUpkeep();
 	std::vector<std::shared_ptr<Building>> getTransportationTargets();
-	const std::shared_ptr<Tile>& getTile() const;
+	std::shared_ptr<Tile>& getTile();
 private:
 	std::shared_ptr<Tile> tile;
 };
@@ -56,16 +53,15 @@ public:
 	MainBuilding(const std::shared_ptr<Tile>& tile);
 };
 
+
+
 class Sawmill : public MainBuilding
 {
 public:
 	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
-		frozen = false;
-		functioning = true;
-
-		defaultUpkeep, upkeep = 50 / 3600.;
-		defaultStorageLimit, storageLimit = 500;
+		upkeep = 50 / 3600.;
+		storageLimit = 500;
 
 		texture = TextureManager::get("Sawmill");
 
@@ -111,11 +107,8 @@ class Felled : public MainBuilding
 public:
 	Felled(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
-		frozen = false;
-		functioning = true;
-
-		defaultUpkeep, upkeep = 40 / 3600.;
-		defaultStorageLimit, storageLimit = 1000;
+		upkeep = 40 / 3600.;
+		storageLimit = 1000;
 
 		texture = TextureManager::get("Felled");
 
@@ -144,11 +137,8 @@ class Mine : public MainBuilding
 public:
 	Mine(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
-		frozen = false;
-		functioning = true;
-
-		defaultUpkeep, upkeep = 75 / 3600.;
-		defaultStorageLimit, storageLimit = 1500;
+		upkeep = 75 / 3600.;
+		storageLimit = 1500;
 
 		texture = TextureManager::get("Mine");
 

@@ -7,6 +7,9 @@ Building::Building(const std::shared_ptr<Tile>& tile) :
 {
 	setPosition(tile->getPosition());
 	setScale(glm::vec2(50));
+
+	frozen = false;
+	functioning = true;
 }
 
 void Building::update()
@@ -31,13 +34,7 @@ void Building::setStorage(ResourseType type, float value)
 	storage[type] += value;
 }
 
-void Building::addStorage()
-{
- 	if (storageLimit < defaultStorageLimit * 4)
-		storageLimit += defaultStorageLimit * 1.5;
-}
-
-const std::shared_ptr<Tile>& Building::getTile() const
+std::shared_ptr<Tile>& Building::getTile()
 {
 	return tile;
 }
@@ -106,17 +103,36 @@ void Building::setTransportationTarget(std::shared_ptr<Building>& building)
 		selectedTransportingTargets.push_back(building);
 }
 
+void Building::deleteTransportationTarget(std::shared_ptr<Building>& building)
+{
+	int i = 0;
+
+	for (auto check : selectedTransportingTargets)
+	{
+		if (check == building)
+		{
+			selectedTransportingTargets.erase(selectedTransportingTargets.begin() + i);
+			break;
+		}
+
+		i++;
+	}
+}
+
 std::vector<std::shared_ptr<Building>> Building::getTransportationTargets()
 {
 	return selectedTransportingTargets;
 }
 
-ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) :
-	Building(tile)
+
+
+
+ExtensionBuilding::ExtensionBuilding(const std::shared_ptr<Tile>& tile) : Building(tile)
 {
+
 }
 
-MainBuilding::MainBuilding(const std::shared_ptr<Tile>& tile) :
-	Building(tile)
+MainBuilding::MainBuilding(const std::shared_ptr<Tile>& tile) : Building(tile)
 {
+
 }

@@ -163,6 +163,8 @@ void MapLayer::update()
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
+		pickedBuilding = nullptr;
+
 		if (transportingUI)
 		{
 			for (auto tile : allTiles)
@@ -208,13 +210,9 @@ void MapLayer::update()
 						selectedBuilding = nullptr;
 					}
 
-					pickedBuilding = nullptr;
-
 					break;
 				}
 			}
-
-			
 		}		
 	}
 
@@ -229,7 +227,6 @@ void MapLayer::update()
                         buildings.push_back(std::make_shared<Sawmill>(selectedTile));
 						selectedBuilding = buildings.back();
                         treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-                        pickedBuilding = nullptr;
                         break;
 
                     case BuildingType::Felled:
@@ -239,7 +236,6 @@ void MapLayer::update()
 							selectedBuilding = buildings.back();
 							treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
 						}
-                        pickedBuilding = nullptr;
                         break;
 
                     case BuildingType::Mine:
@@ -249,7 +245,6 @@ void MapLayer::update()
 							selectedBuilding = buildings.back();
                             treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
                         }
-                        pickedBuilding = nullptr;
                         break;
                 }
             }
@@ -269,6 +264,25 @@ void MapLayer::update()
 			}
 
 			i++;
+		}
+
+		// Проверка цели транспортировки
+		bool exist = false;
+		std::shared_ptr<Building> check;
+		for (auto building : buildings)
+		{
+			for (auto target : building->getTransportationTargets())
+			{
+				if (target == building)
+				{
+					exist = true;
+					break;
+				}
+				else
+					check = target;
+			}
+			if (!exist)
+				building->deleteTransportationTarget(check);
 		}
 	}
 
