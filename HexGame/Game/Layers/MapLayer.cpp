@@ -352,6 +352,13 @@ void MapLayer::update()
 	}
 
 	// Выбор типа интерфейса
+	if (Keyboard::isKeyPressed(GLFW_KEY_ESCAPE))
+	{
+		defaultUI = true;
+		transportingUI = false;
+		extensionUI = false;
+	}
+
 	if (selectedBuilding != nullptr)
 	{
 		if (Keyboard::isKeyPressed(GLFW_KEY_T))
