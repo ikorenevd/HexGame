@@ -25,13 +25,16 @@ private:
 	float speed = 2.f;
 
 	bool transportingUI;
+	bool extensionUI;
 	bool treasuryEmpty;
 	float treasuryMoney;
 	float totalUpkeep;
 	double lastTime;
 	std::shared_ptr<Button> pickedBuilding;
 	std::shared_ptr<Tile> selectedTile;
+	std::shared_ptr<Tile> selectedExtensionTile;
 	std::shared_ptr<Building> selectedBuilding;
+	std::shared_ptr<Building> selectedExtensionBuilding;
 
 	std::shared_ptr<VertexArray> vao;
 };

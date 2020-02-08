@@ -1,6 +1,7 @@
 #include <Engine\Engine.hpp>
 #include <Engine\Core\Manager.hpp>
 #include <Game/Buildings/ResourceTypes.hpp>
+#include <Game/Buildings/BuildingTypes.hpp>
 #include <unordered_map>
 
 class Tile;
@@ -17,6 +18,7 @@ public:
 	std::unordered_map<ResourseType, float> storage;
 	std::shared_ptr<Texture> texture;
 	std::vector<std::shared_ptr<Building>> selectedTransportingTargets;
+	std::vector<std::shared_ptr<Building>> extensionBuildings;
 
 	Building(const std::shared_ptr<Tile>& tile);
 
@@ -27,6 +29,7 @@ public:
 	void setStorage(ResourseType type, float value);
 	void setTransportationTarget(std::shared_ptr<Building>& building);
 	void deleteTransportationTarget(std::shared_ptr<Building>& building);
+	void setExtension(BuildingType type, std::shared_ptr<Tile>& tile);
 
 	std::shared_ptr<Texture> getTexture();
 	bool isFrozen();
@@ -36,6 +39,7 @@ public:
 	int getResourseAmount(ResourseType);
 	float getUpkeep();
 	std::vector<std::shared_ptr<Building>> getTransportationTargets();
+	std::vector<std::shared_ptr<Building>> getExtensionBuildings();
 	std::shared_ptr<Tile>& getTile();
 private:
 	std::shared_ptr<Tile> tile;
@@ -160,5 +164,16 @@ public:
 				functioning = false;
 			}
 		}
+	}
+};
+
+class Warehouse : public ExtensionBuilding
+{
+public:
+	Warehouse(const std::shared_ptr<Tile>& tile) : ExtensionBuilding(tile)
+	{
+		upkeep = 75 / 3600.;
+		texture = TextureManager::get("Warehouse");
+		std::cout << "--- Built" << std::endl;
 	}
 };

@@ -1,5 +1,5 @@
 #include <Game/Buildings/Buildings.hpp>
-
+#include <Game/Buildings/BuildingTypes.hpp>
 #include <Game/Map/Tile.hpp>
 
 Building::Building(const std::shared_ptr<Tile>& tile) :
@@ -22,6 +22,19 @@ void Building::setTile(const std::shared_ptr<Tile>& value)
 	tile = value;
 
 	setPosition(tile->getPosition());
+}
+
+void Building::setExtension(BuildingType type, std::shared_ptr<Tile>& tile)
+{
+	if (type == BuildingType::Warehouse)
+	{
+		extensionBuildings.push_back(std::make_shared<Warehouse>(tile));
+	}
+}
+
+std::vector<std::shared_ptr<Building>> Building::getExtensionBuildings()
+{
+	return extensionBuildings;
 }
 
 void Building::setFrozen(bool setActive)

@@ -33,6 +33,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Sawmill", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Sawmill.png", ColorModel::RGBA));
 	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Felled.png", ColorModel::RGBA));
 	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
+	TextureManager::add("Warehouse", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -72,6 +73,8 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Sawmill"), "Sawmill"));
 	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 220), glm::vec2(80, 80), TextureManager::get("Felled"), "Felled"));
 	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 140), glm::vec2(80, 80), TextureManager::get("Mine"), "Mine"));
+
+	buttonsUI.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
 }
 
 void MapLayer::update()
@@ -164,6 +167,32 @@ void MapLayer::update()
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
 		pickedBuilding = nullptr;
+		selectedExtensionTile = nullptr;
+
+		if (extensionUI)
+		{
+			for (auto tile : map->getNeighbors(selectedTile))
+			{
+				if (tile->contains(cursorGame))
+				{
+					bool exist = false;
+
+					for (auto building : buildings)
+					{
+						if (building->getTile() == tile)
+						{
+							exist = true;
+							break;
+						}
+					}
+
+					if (!exist && selectedExtensionTile!= tile)
+						selectedExtensionTile = tile;
+					else
+						selectedExtensionTile = nullptr;
+				}
+			}
+		}
 
 		if (transportingUI)
 		{
@@ -183,7 +212,7 @@ void MapLayer::update()
 			}
 		}
 
-		if (!transportingUI)
+		if (!transportingUI && !extensionUI)
 		{
 			for (auto tile : allTiles)
 			{
@@ -227,6 +256,7 @@ void MapLayer::update()
                         buildings.push_back(std::make_shared<Sawmill>(selectedTile));
 						selectedBuilding = buildings.back();
                         treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+						pickedBuilding = nullptr;
                         break;
 
                     case BuildingType::Felled:
@@ -235,6 +265,7 @@ void MapLayer::update()
 							buildings.push_back(std::make_shared<Felled>(selectedTile));
 							selectedBuilding = buildings.back();
 							treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+							pickedBuilding = nullptr;
 						}
                         break;
 
@@ -244,10 +275,17 @@ void MapLayer::update()
                             buildings.push_back(std::make_shared<Mine>(selectedTile));
 							selectedBuilding = buildings.back();
                             treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+							pickedBuilding = nullptr;
                         }
                         break;
                 }
             }
+	}
+
+	if (pickedBuilding != nullptr && selectedExtensionTile != nullptr && selectedExtensionBuilding == nullptr)
+	{
+		selectedBuilding->setExtension(BuildingType::Warehouse, selectedExtensionTile);
+		pickedBuilding = nullptr;
 	}
 
 	// Снос здания
@@ -267,31 +305,36 @@ void MapLayer::update()
 		}
 
 		// Проверка цели транспортировки
-		bool exist = false;
-		std::shared_ptr<Building> check;
 		for (auto building : buildings)
 		{
 			for (auto target : building->getTransportationTargets())
 			{
-				if (target == building)
-				{
-					exist = true;
-					break;
-				}
-				else
-					check = target;
+				if (std::find(buildings.begin(), buildings.end(), target) == buildings.end())
+					building->deleteTransportationTarget(target);
 			}
-			if (!exist)
-				building->deleteTransportationTarget(check);
 		}
 	}
 
-	if (Keyboard::isKeyPressed(GLFW_KEY_T) && selectedBuilding != nullptr)
+	if (Keyboard::isKeyPressed(GLFW_KEY_T) && selectedBuilding != nullptr && !extensionUI)
 	{
 		if (transportingUI)
+		{
 			transportingUI = false;
+		}
 		else
 			transportingUI = true;
+	}
+
+	if (Keyboard::isKeyPressed(GLFW_KEY_X) && selectedBuilding != nullptr && !transportingUI)
+	{
+		if (extensionUI)
+		{
+			extensionUI = false;
+			selectedExtensionTile = false;
+			selectedExtensionBuilding = false;
+		}
+		else
+			extensionUI = true;
 	}
 
 	// Debug
@@ -369,6 +412,9 @@ void MapLayer::render()
 		else
 			TextureManager::get("Hex")->bind();
 
+		if (extensionUI && tile == selectedExtensionTile)
+			TextureManager::get("SelectedTransportHex")->bind();
+
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
@@ -386,6 +432,13 @@ void MapLayer::render()
 	// Отрисовка зданий
 	for (auto building : buildings)
 	{
+		for (auto extensionBuilding : building->getExtensionBuildings())
+		{
+			shader->setMat4("transform", extensionBuilding->getTransform());
+			extensionBuilding->getTexture()->bind();
+			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+		}
+
 		shader->setMat4("transform", building->getTransform());
 		building->getTexture()->bind();
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
