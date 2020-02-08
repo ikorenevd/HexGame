@@ -93,6 +93,8 @@
     <ClCompile Include="Engine\Graphics\Buffers\VertexAttribute.cpp" />
     <ClCompile Include="Engine\Graphics\Buffers\VertexLayout.cpp" />
     <ClCompile Include="Engine\Graphics\GLDataType.cpp" />
+    <ClCompile Include="Engine\Graphics\Renderer\Batch.cpp" />
+    <ClCompile Include="Engine\Graphics\Renderer\Renderable.cpp" />
     <ClCompile Include="Engine\Graphics\Shader.cpp" />
     <ClCompile Include="Engine\Graphics\Texture.cpp" />
     <ClCompile Include="Engine\Graphics\Buffers\VertexBuffer.cpp" />
@@ -124,6 +126,8 @@
     <ClInclude Include="Engine\Graphics\Buffers\VertexAttribute.hpp" />
     <ClInclude Include="Engine\Graphics\Buffers\VertexLayout.hpp" />
     <ClInclude Include="Engine\Graphics\GLDataType.hpp" />
+    <ClInclude Include="Engine\Graphics\Renderer\Batch.hpp" />
+    <ClInclude Include="Engine\Graphics\Renderer\Renderable.hpp" />
     <ClInclude Include="Engine\Graphics\Shader.hpp" />
     <ClInclude Include="Engine\Graphics\Texture.hpp" />
     <ClInclude Include="Engine\Graphics\Buffers\VertexBuffer.hpp" />
@@ -138,12 +142,15 @@
     <ClInclude Include="Game\Game.hpp" />
     <ClInclude Include="Game\Layers\ButtonsLayer.hpp" />
     <ClInclude Include="Game\Layers\MapLayer.hpp" />
+    <ClInclude Include="Game\Layers\TestLayer.hpp" />
     <ClInclude Include="Game\Map\HexUtils.hpp" />
     <ClInclude Include="Game\Map\Map.hpp" />
     <ClInclude Include="Game\Map\TerrainType.hpp" />
     <ClInclude Include="Game\Map\Tile.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Shaders\BatchFrag.glsl" />
+    <None Include="Assets\Shaders\BatchVert.glsl" />
     <None Include="Assets\Shaders\TestFrag.glsl" />
     <None Include="Assets\Shaders\TestVert.glsl" />
     <None Include="Assets\Shaders\TextureFrag.glsl" />
@@ -163,6 +170,7 @@
     <Image Include="Assets\Textures\Landscape\Flatland.png" />
     <Image Include="Assets\Textures\Landscape\Forest.png" />
     <Image Include="Assets\Textures\Landscape\Hill.png" />
+    <Image Include="Assets\Textures\Landscape\Landscape.png" />
     <Image Include="Assets\Textures\Landscape\Mountain.png" />
     <Image Include="Assets\Textures\Mountain.png" />
     <Image Include="Assets\Textures\Paper.png" />

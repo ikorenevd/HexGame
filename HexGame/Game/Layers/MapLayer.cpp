@@ -37,10 +37,10 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 	float vertices[] =
 	{
-		.5f,  .5f, 1.f, 0.f,
-		.5f, -.5f, 1.f, 1.f,
-		-.5f, -.5f, 0.f,1.f,
-		-.5f,  .5f, 0.f, 0.f
+		-0.5f, -0.5f,  0.f, 1.f,
+		-0.5f,  0.5f,  0.f, 0.f,
+		 0.5f,  0.5f,  1.f, 0.f,
+		 0.5f, -0.5f,  1.f, 1.f,
 	};
 
 	unsigned int indices[] =

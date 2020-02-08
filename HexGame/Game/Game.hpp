@@ -10,6 +10,7 @@
 
 #include <Game/Layers/MapLayer.hpp>
 #include <Game/Layers/ButtonsLayer.hpp>
+#include <Game/Layers/TestLayer.hpp>
 
 class Game : public Application
 {
@@ -23,6 +24,7 @@ public:
 	{
 		map = std::make_shared<Map>(glm::ivec2(20, 20));
 
+		//pushLayer(new TestLayer);
 		pushLayer(new MapLayer(map));
 	}
 private:

@@ -4,17 +4,10 @@
 
 #include <Engine/Graphics/Transformable.hpp>
 
-class Updatable
+class GameObject : public Transformable
 {
 public:
-	virtual void update(const glm::vec2& mouseCoord)
-	{};
-};
-
-class GameObject : public Updatable, public Transformable
-{
-public:
-	virtual void update(const glm::vec2& mouseCoord)
+	virtual void update()
 	{
 	};
 };
