@@ -263,54 +263,58 @@ void MapLayer::update()
 	}
 
 	// Постройка зданий
-	if (pickedBuilding != nullptr && (selectedBuilding == nullptr || selectedExtensionBuilding == nullptr))
+	if (defaultUI && pickedBuilding != nullptr && selectedBuilding == nullptr)
 	{
-		if (defaultUI)
-            if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
-            {
-                switch (pickedBuilding->getBuildingType())
-                {
-                    case BuildingType::Sawmill:
-                        buildings.push_back(std::make_shared<Sawmill>(selectedTile));
-						selectedBuilding = buildings.back();
-                        treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-                        break;
-
-                    case BuildingType::Felled:
-						if (selectedTile->getTerrainType() == TerrainType::Forest)
-						{
-							buildings.push_back(std::make_shared<Felled>(selectedTile));
-							selectedBuilding = buildings.back();
-							treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-						}
-                        break;
-
-                    case BuildingType::Mine:
-                        if (selectedTile->getTerrainType() == TerrainType::Mountain)
-                        {
-                            buildings.push_back(std::make_shared<Mine>(selectedTile));
-							selectedBuilding = buildings.back();
-                            treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
-                        }
-                        break;
-                }
-            }
-
-		if (extensionUI)
+		if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
 		{
 			switch (pickedBuilding->getBuildingType())
 			{
-				case BuildingType::Warehouse:
-					if (selectedBuilding->getExtensionAmount(BuildingType::Warehouse) < 2)
-					{
-						buildings.push_back(std::make_shared<Warehouse>(selectedExtensionTile, selectedBuilding));
-						selectedBuilding->setExtension(buildings.back());
-						selectedExtensionBuilding = buildings.back();
-					}
-					break;
+			case BuildingType::Sawmill:
+				buildings.push_back(std::make_shared<Sawmill>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+				break;
+
+			case BuildingType::Felled:
+				if (selectedTile->getTerrainType() == TerrainType::Forest)
+				{
+					buildings.push_back(std::make_shared<Felled>(selectedTile));
+					selectedBuilding = buildings.back();
+					treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+				}
+				break;
+
+			case BuildingType::Mine:
+				if (selectedTile->getTerrainType() == TerrainType::Mountain)
+				{
+					buildings.push_back(std::make_shared<Mine>(selectedTile));
+					selectedBuilding = buildings.back();
+					treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+				}
+				break;
 			}
 		}
 
+		pickedBuilding = nullptr;
+	}
+
+	if (extensionUI && pickedBuilding != nullptr && selectedExtensionBuilding == nullptr)
+	{
+		if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
+		{
+			switch (pickedBuilding->getBuildingType())
+			{
+			case BuildingType::Warehouse:
+				if (selectedBuilding->getExtensionAmount(BuildingType::Warehouse) < 2)
+				{
+					buildings.push_back(std::make_shared<Warehouse>(selectedExtensionTile, selectedBuilding));
+					selectedBuilding->setExtension(buildings.back());
+					selectedExtensionBuilding = buildings.back();
+				}
+				break;
+			}
+		}
+		
 		pickedBuilding = nullptr;
 	}
 
@@ -318,58 +322,33 @@ void MapLayer::update()
 	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr))
 	{
 		int i = 0;
+		std::shared_ptr<Building> destroyingTarget;
 
-		if (selectedExtensionBuilding != nullptr)
-		{
-			for (auto building : buildings)
-			{
-				if (building == selectedExtensionBuilding)
-				{
-					buildings.erase(buildings.begin() + i);
-					break;
-				}
-
-				i++;
-			}
-		}
+		if (selectedExtensionBuilding == nullptr)
+			destroyingTarget = selectedBuilding;
 		else
+			destroyingTarget = selectedExtensionBuilding;
+
+		for (auto extensionBuilding : destroyingTarget->getExtensionBuildings())
 		{
-			for (auto building : buildings)
-			{
-				if (building == selectedBuilding)
-				{
-					for (auto extensionBuilding : building->getExtensionBuildings())
-					{
-						buildings.erase(buildings.begin() + i);
-					}
-
-					buildings.erase(buildings.begin() + i);
-					break;
-				}
-
-				i++;
-			}
+			if (std::find(buildings.begin(), buildings.end(), extensionBuilding) != buildings.end())
+				buildings.erase(std::find(buildings.begin(), buildings.end(), extensionBuilding));
 		}
+
+		buildings.erase(std::find(buildings.begin(), buildings.end(), destroyingTarget));
 
 		// Удаление в виде цели для транспортировки
 		for (auto building : buildings)
 		{
-			for (auto target : building->getTransportationTargets())
+			for (auto transportationTarget : building->getTransportationTargets())
 			{
-				if (std::find(buildings.begin(), buildings.end(), target) == buildings.end())
-					building->setTransportationTarget(target);
+				if (std::find(buildings.begin(), buildings.end(), transportationTarget) == buildings.end())
+					building->setTransportationTarget(transportationTarget);
 			}
 		}
 
-		// Удаление в виде пристройки
-		for (auto building : buildings)
-		{
-			for (auto target : building->getExtensionBuildings())
-			{
-				if (std::find(buildings.begin(), buildings.end(), target) == buildings.end())
-					building->setExtension(target);
-			}
-		}
+		selectedBuilding = nullptr;
+		selectedExtensionBuilding = nullptr;
 	}
 
 	// Выбор типа интерфейса
