@@ -96,6 +96,11 @@ int Building::getResourseAmount(ResourseType type)
 	return storage[type];
 }
 
+int Building::getProduction(ResourseType type)
+{
+	return productionSpeed[type];
+}
+
 bool Building::isFrozen()
 {
 	return frozen;
@@ -121,17 +126,17 @@ std::shared_ptr<Building> Building::getParent()
 	return parent;
 }
 
-void Building::setTransportationTarget(std::shared_ptr<Building>& building)
+void Building::setTransportationTarget(std::shared_ptr<Building>& building, ResourseType type)
 {
-	auto index = std::find(selectedTransportingTargets.begin(), selectedTransportingTargets.end(), building);
+	auto index = selectedTransportingTargets.find(building);
 
 	if (index != selectedTransportingTargets.end())
 		selectedTransportingTargets.erase(index);
 	else
-		selectedTransportingTargets.push_back(building);
+		selectedTransportingTargets.insert({ building, type });
 }
 
-std::vector<std::shared_ptr<Building>> Building::getTransportationTargets()
+std::unordered_map<std::shared_ptr<Building>, ResourseType> Building::getTransportationTargets()
 {
 	return selectedTransportingTargets;
 }

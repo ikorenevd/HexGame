@@ -17,8 +17,9 @@ private:
 	std::unordered_map<ResourseType, int> storageMap;
 	std::vector<std::shared_ptr<Building>> buildings;
 
-	std::vector<std::shared_ptr<Button>> buttonsGame;
-	std::vector<std::shared_ptr<Button>> buttonsUI;
+	std::vector<std::shared_ptr<Button>> buttonsBuildings;
+	std::vector<std::shared_ptr<Button>> buttonsExtensionBuildings;
+	std::vector<std::shared_ptr<Button>> buttonsResources;
 
 	std::shared_ptr<View> viewGame;
 	std::shared_ptr<View> viewUI;
@@ -29,14 +30,17 @@ private:
 	bool transportingUI;
 
 	bool treasuryEmpty;
+	bool resourcePicked;
 	float treasuryMoney;
 	float totalUpkeep;
 	double lastTime;
+	ResourseType pickedResource;
 	std::shared_ptr<Button> pickedBuilding;
 	std::shared_ptr<Tile> selectedTile;
 	std::shared_ptr<Tile> selectedExtensionTile;
 	std::shared_ptr<Building> selectedBuilding;
 	std::shared_ptr<Building> selectedExtensionBuilding;
+	std::shared_ptr<Building> selectedTransportationBuilding;
 
 	std::shared_ptr<Tile> pointedTile;
 

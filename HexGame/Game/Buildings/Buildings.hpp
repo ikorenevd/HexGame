@@ -16,8 +16,9 @@ public:
 	int storageLimit;
 
 	std::unordered_map<ResourseType, float> storage;
+	std::unordered_map<ResourseType, int> productionSpeed;
 	std::shared_ptr<Texture> texture;
-	std::vector<std::shared_ptr<Building>> selectedTransportingTargets;
+	std::unordered_map<std::shared_ptr<Building>, ResourseType> selectedTransportingTargets;
 	std::vector<std::shared_ptr<Building>> extensionBuildings;
 	std::shared_ptr<Building> parent;
 	BuildingType buildingType;
@@ -29,7 +30,7 @@ public:
 	void setTile(const std::shared_ptr<Tile>& value);
 	void setFrozen(bool setFrozen);
 	void setStorage(ResourseType type, float value);
-	void setTransportationTarget(std::shared_ptr<Building>& building);
+	void setTransportationTarget(std::shared_ptr<Building>& building, ResourseType type);
 	void setExtension(std::shared_ptr<Building>& building);
 
 	std::shared_ptr<Texture> getTexture();
@@ -38,10 +39,11 @@ public:
 	bool isStorageFull();
 	int getUsedStorage();
 	int getResourseAmount(ResourseType);
+	int getProduction(ResourseType);
 	float getUpkeep();
 	int getExtensionAmount(BuildingType type);
 	BuildingType getBuildingType();
-	std::vector<std::shared_ptr<Building>> getTransportationTargets();
+	std::unordered_map<std::shared_ptr<Building>, ResourseType> getTransportationTargets();
 	std::vector<std::shared_ptr<Building>> getExtensionBuildings();
 	std::shared_ptr<Tile>& getTile();
 	std::shared_ptr<Building> getParent();
@@ -75,8 +77,12 @@ public:
 		texture = TextureManager::get("Sawmill");
 
 		storage[ResourseType::RawWood] = 0;
+
 		storage[ResourseType::ProcessedWood] = 0;
+		productionSpeed[ResourseType::ProcessedWood] = 45;
+
 		storage[ResourseType::Plank] = 0;
+		productionSpeed[ResourseType::Plank] = 45;
 	}
 
 	void update() override
@@ -87,16 +93,16 @@ public:
 			{
 				functioning = true;
 
-				if (storage[ResourseType::RawWood] >= 90 / 3600.)
+				if (storage[ResourseType::RawWood] >= productionSpeed[ResourseType::ProcessedWood] * 2 / 3600.)
 				{
-					storage[ResourseType::ProcessedWood] += 45 / 3600.;
-					storage[ResourseType::RawWood] -= 90 / 3600.;
+					storage[ResourseType::ProcessedWood] += productionSpeed[ResourseType::ProcessedWood] / 3600.;
+					storage[ResourseType::RawWood] -= productionSpeed[ResourseType::ProcessedWood] * 2 / 3600.;
 				}
 
-				if (storage[ResourseType::ProcessedWood] >= 15 / 3600.)
+				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Plank] / 3 / 3600.)
 				{
-					storage[ResourseType::Plank] += 45 / 3600.;
-					storage[ResourseType::ProcessedWood] -= 15 / 3600.;
+					storage[ResourseType::Plank] += productionSpeed[ResourseType::Plank] / 3600.;
+					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Plank] / 3 / 3600.;
 				}
 				else
 				{
@@ -123,6 +129,8 @@ public:
 		texture = TextureManager::get("Felled");
 
 		storage[ResourseType::RawWood] = 0;
+		productionSpeed[ResourseType::RawWood] = 45;
+
 	}
 
 	void update() override
@@ -132,7 +140,7 @@ public:
 			if (!isStorageFull())
 			{
 				functioning = true;
-				storage[ResourseType::RawWood] += 45 / 3600.;
+				storage[ResourseType::RawWood] += productionSpeed[ResourseType::RawWood] / 3600.;
 			}
 			else
 			{

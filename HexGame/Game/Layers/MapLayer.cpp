@@ -25,7 +25,8 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Hex", std::make_shared<Texture>("Assets\\Textures\\Hex\\Hex.png", ColorModel::RGBA));
 	TextureManager::add("PointedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\PointedHex.png", ColorModel::RGBA));
 	TextureManager::add("SelectedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\SelectedHex.png", ColorModel::RGBA));
-	TextureManager::add("SelectedTransportHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\TransportingHex.png", ColorModel::RGBA));
+	TextureManager::add("ExtensionSelectedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\ExtensionSelectedHex.png", ColorModel::RGBA));
+	TextureManager::add("TransportHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\TransportHex.png", ColorModel::RGBA));
 
 	TextureManager::add("Flatland", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Flatland.png", ColorModel::RGBA));
 	TextureManager::add("Hill", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Hill.png", ColorModel::RGBA));
@@ -36,6 +37,8 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Felled.png", ColorModel::RGBA));
 	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
 	TextureManager::add("Warehouse", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Warehouse.png", ColorModel::RGBA));
+
+	TextureManager::add("RawWood", std::make_shared<Texture>("Assets\\Textures\\Resource\\RawWood.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -72,11 +75,13 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	defaultUI = true;
 
 	// Кнопки
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(60, 60), TextureManager::get("Sawmill"), "Sawmill"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 240), glm::vec2(60, 60), TextureManager::get("Felled"), "Felled"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 180), glm::vec2(60, 60), TextureManager::get("Mine"), "Mine"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(60, 60), TextureManager::get("Sawmill"), "Sawmill"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 240), glm::vec2(60, 60), TextureManager::get("Felled"), "Felled"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 180), glm::vec2(60, 60), TextureManager::get("Mine"), "Mine"));
 
-	buttonsUI.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
+	buttonsExtensionBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
+
+	buttonsResources.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("RawWood"), "RawWood"));
 }
 
 void MapLayer::update()
@@ -141,8 +146,11 @@ void MapLayer::update()
 			{
 				for (auto transportationTarget : building->getTransportationTargets())
 				{
-					building->setStorage(ResourseType::RawWood, -45 / 3600. / building->getTransportationTargets().size());
-					transportationTarget->setStorage(ResourseType::RawWood, +45 / 3600.);
+					if (!(transportationTarget.first->isStorageFull()) && (building->getResourseAmount(transportationTarget.second) > 0))
+					{
+						building->setStorage(transportationTarget.second, -building->getProduction(transportationTarget.second) / 3600.);
+						transportationTarget.first->setStorage(transportationTarget.second, +building->getProduction(transportationTarget.second) / 3600.);
+					}
 				}
 			}
 		}
@@ -172,7 +180,7 @@ void MapLayer::update()
 	// Кнопки
 	if (defaultUI)
 	{
-		for (auto button : buttonsGame)
+		for (auto button : buttonsBuildings)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
@@ -184,7 +192,7 @@ void MapLayer::update()
 
 	if (extensionUI)
 	{
-		for (auto button : buttonsUI)
+		for (auto button : buttonsExtensionBuildings)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
@@ -194,10 +202,22 @@ void MapLayer::update()
 		}
 	}
 
+	if (transportingUI)
+		for (auto button : buttonsResources)
+		{
+			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+			{
+				pickedResource = button->getResourceType();
+				resourcePicked = true;
+				break;
+			}
+		}
+
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
 		pickedBuilding = nullptr;
+		resourcePicked = false;
 
 		if (defaultUI)
 		{
@@ -245,7 +265,16 @@ void MapLayer::update()
 				{
 					if (building->getTile()->contains(cursorGame))
 					{
-						selectedBuilding->setTransportationTarget(building);
+						if (selectedTransportationBuilding != building || selectedTransportationBuilding == nullptr)
+						{
+							selectedTransportationBuilding = building;
+							break;
+						}
+						else
+						{
+							selectedBuilding->setTransportationTarget(selectedTransportationBuilding, ResourseType::RawWood);
+							selectedTransportationBuilding = nullptr;
+						}
 						break;
 					}
 				}
@@ -327,7 +356,7 @@ void MapLayer::update()
 		}
 	}
 
-	if (extensionUI && pickedBuilding != nullptr && selectedExtensionBuilding == nullptr)
+	if (extensionUI && pickedBuilding != nullptr && selectedExtensionBuilding == nullptr && selectedExtensionTile != nullptr)
 	{
 		if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
 		{
@@ -347,6 +376,14 @@ void MapLayer::update()
 
 	if (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr)
 		pickedBuilding = nullptr;
+
+	// Выбор клетки и ресурса для транспортировки
+	if (selectedTransportationBuilding != nullptr && resourcePicked == true)
+	{
+		selectedBuilding->setTransportationTarget(selectedTransportationBuilding, pickedResource);
+		selectedTransportationBuilding = nullptr;
+		resourcePicked = false;
+	}
 
 	/* Снос здания
 	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr))
@@ -402,6 +439,7 @@ void MapLayer::update()
 		defaultUI = true;
 		transportingUI = false;
 		extensionUI = false;
+		selectedTransportationBuilding = nullptr;
 	}
 
 	if (selectedBuilding != nullptr)
@@ -420,6 +458,7 @@ void MapLayer::update()
 			extensionUI = false;
 			selectedExtensionBuilding = nullptr;
 			selectedExtensionTile = nullptr;
+			selectedTransportationBuilding = nullptr;
 		}
 
 		if (Keyboard::isKeyPressed(GLFW_KEY_X))
@@ -436,6 +475,7 @@ void MapLayer::update()
 			transportingUI = false;
 			selectedExtensionBuilding = nullptr;
 			selectedExtensionTile = nullptr;
+			selectedTransportationBuilding = nullptr;
 		}
 	}
 	
@@ -456,15 +496,16 @@ void MapLayer::update()
 		int number = 0;
 		std::cout << std::endl;
 
-		/*if (selectedBuilding != nullptr)
+		if (selectedBuilding != nullptr)
 			std::cout << "Selected Building:" << selectedBuilding->getTile()->getCoordinates().x << selectedBuilding->getTile()->getCoordinates().y << selectedBuilding->getTile()->getCoordinates().z << std::endl;
+		if (selectedTransportationBuilding != nullptr)
+			std::cout << "Selected Transportation Building:" << selectedTransportationBuilding->getTile()->getCoordinates().x << selectedTransportationBuilding->getTile()->getCoordinates().y << selectedTransportationBuilding->getTile()->getCoordinates().z << std::endl;
 		if (selectedTile != nullptr)
 			std::cout << "Selected Tile:" << selectedTile->getCoordinates().x << selectedTile->getCoordinates().y << selectedTile->getCoordinates().z << std::endl;
-
 		if (selectedExtensionBuilding != nullptr)
 			std::cout << "Selected Ext Building:" << selectedExtensionBuilding->getTile()->getCoordinates().x << selectedExtensionBuilding->getTile()->getCoordinates().y << selectedExtensionBuilding->getTile()->getCoordinates().z << std::endl;
 		if (selectedExtensionTile != nullptr)
-			std::cout << "Selected Ext Tile:" << selectedExtensionTile->getCoordinates().x << selectedExtensionTile->getCoordinates().y << selectedExtensionTile->getCoordinates().z << std::endl;*/
+			std::cout << "Selected Ext Tile:" << selectedExtensionTile->getCoordinates().x << selectedExtensionTile->getCoordinates().y << selectedExtensionTile->getCoordinates().z << std::endl;
 
 		if (transportingUI) 
 			std::cout << "UI Mode: Transporting" << std::endl;
@@ -565,18 +606,23 @@ void MapLayer::render()
 			TextureManager::get("SelectedHex")->bind();
 
 		if (extensionUI && tile == selectedExtensionTile)
-			TextureManager::get("SelectedTransportHex")->bind();
+			TextureManager::get("ExtensionSelectedHex")->bind();
+
+		if (transportingUI)
+			if (selectedTransportationBuilding != nullptr)
+				if (tile == selectedTransportationBuilding->getTile())
+					TextureManager::get("ExtensionSelectedHex")->bind();
 
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
 	if (transportingUI)
 	{
-		TextureManager::get("SelectedTransportHex")->bind();
+		TextureManager::get("TransportHex")->bind();
 
 		for (auto building : selectedBuilding->getTransportationTargets())
 		{
-			shader->setMat4("transform", building->getTile()->getTransform());
+			shader->setMat4("transform", building.first->getTile()->getTransform());
 			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 		}
 	}
@@ -605,7 +651,7 @@ void MapLayer::render()
 	if (defaultUI)
 	{
 		// Без выделенной клетки
-		for (auto button : buttonsGame)
+		for (auto button : buttonsBuildings)
 		{
 			shader->setMat4("transform", button->getTransform());
 			button->getTexture()->bind();
@@ -616,7 +662,17 @@ void MapLayer::render()
 	if (extensionUI)
 	{
 		// При выделенной клетке
-		for (auto button : buttonsUI)
+		for (auto button : buttonsExtensionBuildings)
+		{
+			shader->setMat4("transform", button->getTransform());
+			button->getTexture()->bind();
+			glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+		}
+	}
+
+	if (transportingUI)
+	{
+		for (auto button : buttonsResources)
 		{
 			shader->setMat4("transform", button->getTransform());
 			button->getTexture()->bind();

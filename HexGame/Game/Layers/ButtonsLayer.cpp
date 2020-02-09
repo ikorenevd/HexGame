@@ -37,6 +37,11 @@ BuildingType Button::getBuildingType()
 	if (name == "Warehouse") return BuildingType::Warehouse;
 }
 
+ResourseType Button::getResourceType()
+{
+	if (name == "RawWood") return ResourseType::RawWood;
+}
+
 std::string Button::getName()
 {
 	return name;

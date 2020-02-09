@@ -15,6 +15,7 @@ public:
 
 	const std::shared_ptr<Texture>& getTexture() const;
 	BuildingType getBuildingType();
+	ResourseType getResourceType();
 	std::string getName();
 private:
 	std::shared_ptr<Texture> texture;
