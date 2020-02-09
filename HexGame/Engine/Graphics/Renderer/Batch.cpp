@@ -13,7 +13,8 @@ struct VertexData
 	glm::vec4 color;
 };
 
-Batch::Batch(const std::shared_ptr<View>& view) :
+Batch::Batch(const std::string& name, const std::shared_ptr<View>& view) :
+	name(name),
 	vao(nullptr),
 	shader(nullptr),
 	texture(nullptr),
@@ -34,14 +35,14 @@ void Batch::begin()
 	{
 		updateVAO();
 		dirty = false;
-		std::cout << renderables.size() << std::endl;
+		std::cout << "Batch (" << name << ") renderables count : " << renderables.size() << std::endl;
 	}
 
 	shader->bind();
-	shader->setMat4("view", view->getMatrix());
+	texture->bind();
+	shader->setMat4("u_view", view->getMatrix());
 	shader->setInt("u_texture", 0);
 	vao->bind();
-	texture->bind();
 }
 
 void Batch::render()
@@ -51,8 +52,8 @@ void Batch::render()
 
 void Batch::end()
 {
-	texture->unbind();
 	vao->unbind();
+	texture->unbind();
 	shader->unbind();
 }
 
@@ -118,7 +119,7 @@ void Batch::updateVAO()
 			}
 
 			{
-				auto uv = renderable->getUV();
+				const std::vector<glm::vec2>& uv = renderable->getUV();
 				vertices[iv + 0].uv = uv[0];
 				vertices[iv + 1].uv = uv[1];
 				vertices[iv + 2].uv = uv[2];

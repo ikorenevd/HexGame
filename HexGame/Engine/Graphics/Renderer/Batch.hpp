@@ -13,7 +13,7 @@ class View;
 class Batch
 {
 public:
-	Batch(const std::shared_ptr<View>& view);
+	Batch(const std::string& name, const std::shared_ptr<View>& view);
 
 	void submit(const std::shared_ptr<Renderable>& renderable);
 
@@ -41,4 +41,6 @@ private:
 	std::shared_ptr<View> view;
 
 	mutable bool dirty;
+
+	std::string name;
 };
