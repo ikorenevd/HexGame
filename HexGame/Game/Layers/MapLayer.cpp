@@ -19,7 +19,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	viewUI = std::make_shared<View>(glm::ivec2(1280, 720));
 
 	// Текстуры
-	TextureManager::add("Paper", std::make_shared<Texture>("Assets\\Textures\\Paper.png", ColorModel::RGBA));
+	TextureManager::add("Paper", std::make_shared<Texture>("Assets\\Textures\\Paper.png", ColorModel::RGBA, TextureFilter::Linear));
 
 	TextureManager::add("Hex", std::make_shared<Texture>("Assets\\Textures\\Hex\\Hex.png", ColorModel::RGBA));
 	TextureManager::add("PointedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\PointedHex.png", ColorModel::RGBA));
@@ -181,19 +181,20 @@ void MapLayer::update()
 	{
 		pickedBuilding = nullptr;
 
-		if (transportingUI)
+		if (defaultUI)
 		{
 			for (auto tile : allTiles)
 			{
-				if (tile->contains(cursorGame) && tile != selectedTile)
+				if (tile->contains(cursorGame))
 				{
-					for (auto building : buildings)
+					if (selectedTile != tile || selectedTile == nullptr)
 					{
-						if (building->getTile() == tile)
-						{
-							selectedBuilding->setTransportationTarget(building);
-							break;
-						}
+						selectedTile = tile;
+						break;
+					}
+					else
+					{
+						selectedTile = nullptr;
 					}
 				}
 			}
@@ -208,58 +209,70 @@ void MapLayer::update()
 					if (selectedExtensionTile != tile || selectedExtensionTile == nullptr)
 					{
 						selectedExtensionTile = tile;
-
-						for (auto building : buildings)
-						{
-							if (building->getTile() == selectedExtensionTile)
-							{
-								selectedExtensionBuilding = building;
-								break;
-							}
-							else
-								selectedExtensionBuilding = nullptr;
-						}
+						break;
 					}
 					else
 					{
 						selectedExtensionTile = nullptr;
-						selectedExtensionBuilding = nullptr;
 					}
-					break;
 				}
 			}
 		}
 
-		if (defaultUI)
+		if (transportingUI)
 		{
-			for (auto tile : allTiles)
+			for (auto building : buildings)
 			{
-				if (tile->contains(cursorGame))
+				if (building->getTile()->contains(cursorGame) && building != selectedBuilding)
 				{
-					if (selectedTile != tile || selectedTile == nullptr)
+					if (building->getTile()->contains(cursorGame))
 					{
-						selectedTile = tile;
-
-						for (auto building : buildings)
-						{
-							if (building->getTile() == selectedTile)
-							{
-								selectedBuilding = building;
-								break;
-							}
-							else
-								selectedBuilding = nullptr;
-						}
+						selectedBuilding->setTransportationTarget(building);
+						break;
 					}
-					else
-					{
-						selectedTile = nullptr;
-						selectedBuilding = nullptr;
-					}
-					break;
 				}
 			}
 		}
+
+		// Выделение здания
+		selectedBuilding = nullptr;
+		selectedExtensionBuilding = nullptr;
+
+		if (selectedTile != nullptr)
+			for (auto building : buildings)
+			{
+				if (building->getTile() == selectedTile && building->getParent() == nullptr)
+				{
+					selectedBuilding = building;
+					break;
+				}
+				else
+				{
+					selectedBuilding = nullptr;
+				}
+					
+				if (building->getTile() == selectedTile && building->getParent() != nullptr)
+				{
+					selectedExtensionBuilding = building;
+					break;
+				}
+				else
+				{
+					selectedExtensionBuilding = nullptr;
+				}
+			}
+
+		if (selectedExtensionTile != nullptr)
+			for (auto building : buildings)
+			{
+				if (building->getTile() == selectedExtensionTile && building->getParent() != nullptr)
+				{
+					selectedExtensionBuilding = building;
+					break;
+				}
+				else
+					selectedExtensionBuilding = nullptr;
+			}
 	}
 
 	// Постройка зданий
@@ -294,8 +307,6 @@ void MapLayer::update()
 				break;
 			}
 		}
-
-		pickedBuilding = nullptr;
 	}
 
 	if (extensionUI && pickedBuilding != nullptr && selectedExtensionBuilding == nullptr)
@@ -314,30 +325,49 @@ void MapLayer::update()
 				break;
 			}
 		}
-		
-		pickedBuilding = nullptr;
 	}
 
-	// Снос здания
+	if (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr)
+		pickedBuilding = nullptr;
+
+	/* Снос здания
 	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr))
 	{
 		int i = 0;
-		std::shared_ptr<Building> destroyingTarget;
 
-		if (selectedExtensionBuilding == nullptr)
-			destroyingTarget = selectedBuilding;
-		else
-			destroyingTarget = selectedExtensionBuilding;
-
-		for (auto extensionBuilding : destroyingTarget->getExtensionBuildings())
+		if (selectedBuilding != nullptr)
 		{
-			if (std::find(buildings.begin(), buildings.end(), extensionBuilding) != buildings.end())
-				buildings.erase(std::find(buildings.begin(), buildings.end(), extensionBuilding));
+			for (auto extensionBuiding : selectedBuilding->getExtensionBuildings())
+			{
+				if (std::find(buildings.begin(), buildings.end(), extensionBuiding) != buildings.end())
+				{
+					buildings.erase(std::find(buildings.begin(), buildings.end(), extensionBuiding));
+				}
+			}
+
+			buildings.erase(std::find(buildings.begin(), buildings.end(), selectedBuilding));
+
+			selectedBuilding = nullptr;
+			selectedExtensionBuilding = nullptr;
 		}
 
-		buildings.erase(std::find(buildings.begin(), buildings.end(), destroyingTarget));
+		if (selectedExtensionBuilding != nullptr)
+		{
+			for (auto extensionBuiding : selectedBuilding->getExtensionBuildings())
+			{
+				if (extensionBuiding->getTile() == selectedExtensionBuilding->getTile())
+				{
+					selectedBuilding->setExtension(extensionBuiding);
+					break;
+				}
+			}
 
-		// Удаление в виде цели для транспортировки
+			buildings.erase(std::find(buildings.begin(), buildings.end(), selectedExtensionBuilding));
+
+			selectedExtensionBuilding = nullptr;
+		}
+
+		// Удаление как цели для транспортировки
 		for (auto building : buildings)
 		{
 			for (auto transportationTarget : building->getTransportationTargets())
@@ -346,10 +376,7 @@ void MapLayer::update()
 					building->setTransportationTarget(transportationTarget);
 			}
 		}
-
-		selectedBuilding = nullptr;
-		selectedExtensionBuilding = nullptr;
-	}
+	}	*/
 
 	// Выбор типа интерфейса
 	if (Keyboard::isKeyPressed(GLFW_KEY_ESCAPE))
@@ -411,6 +438,16 @@ void MapLayer::update()
 		int number = 0;
 		std::cout << std::endl;
 
+		if (selectedBuilding != nullptr)
+			std::cout << "Selected Building:" << selectedBuilding->getTile()->getCoordinates().x << selectedBuilding->getTile()->getCoordinates().y << selectedBuilding->getTile()->getCoordinates().z << std::endl;
+		if (selectedTile != nullptr)
+			std::cout << "Selected Tile:" << selectedTile->getCoordinates().x << selectedTile->getCoordinates().y << selectedTile->getCoordinates().z << std::endl;
+
+		if (selectedExtensionBuilding != nullptr)
+			std::cout << "Selected Ext Building:" << selectedExtensionBuilding->getTile()->getCoordinates().x << selectedExtensionBuilding->getTile()->getCoordinates().y << selectedExtensionBuilding->getTile()->getCoordinates().z << std::endl;
+		if (selectedExtensionTile != nullptr)
+			std::cout << "Selected Ext Tile:" << selectedExtensionTile->getCoordinates().x << selectedExtensionTile->getCoordinates().y << selectedExtensionTile->getCoordinates().z << std::endl;
+
 		if (transportingUI) 
 			std::cout << "UI Mode: Transporting" << std::endl;
 		if (extensionUI) 
@@ -424,6 +461,11 @@ void MapLayer::update()
 		for (int i = 0; i < 15; i++)
 		{
 			if (storageMap[(ResourseType)i] != 0) std::cout << "   " << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
+		}
+		for (auto building : buildings)
+		{
+			if (building->getParent() == nullptr)
+				std::cout << building->getExtensionAmount(BuildingType::Warehouse) << std::endl;
 		}
 	}
 }

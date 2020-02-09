@@ -10,6 +10,8 @@ Building::Building(const std::shared_ptr<Tile>& tile) :
 
 	frozen = false;
 	functioning = true;
+
+	extensionBuildings = {};
 }
 
 void Building::update()
@@ -26,22 +28,10 @@ void Building::setTile(const std::shared_ptr<Tile>& value)
 
 void Building::setExtension(std::shared_ptr<Building>& building)
 {
-	int i = 0;
-	bool exist = false;
+	auto index = std::find(extensionBuildings.begin(), extensionBuildings.end(), building);
 
-	for (auto check : extensionBuildings)
-	{
-		if (check == building)
-		{
-			exist = true;
-			break;
-		}
-
-		i++;
-	}
-
-	if (exist)
-		extensionBuildings.erase(extensionBuildings.begin() + i);
+	if (index != extensionBuildings.end())
+		extensionBuildings.erase(index);
 	else
 		extensionBuildings.push_back(building);
 }
@@ -133,22 +123,10 @@ std::shared_ptr<Building> Building::getParent()
 
 void Building::setTransportationTarget(std::shared_ptr<Building>& building)
 {
-	int i = 0;
-	bool exist = false;
+	auto index = std::find(selectedTransportingTargets.begin(), selectedTransportingTargets.end(), building);
 
-	for (auto check : selectedTransportingTargets)
-	{
-		if (check == building)
-		{
-			exist = true;
-			break;
-		}
-
-		i++;
-	}
-
-	if (exist)
-		selectedTransportingTargets.erase(selectedTransportingTargets.begin() + i);
+	if (index != selectedTransportingTargets.end())
+		selectedTransportingTargets.erase(index);
 	else
 		selectedTransportingTargets.push_back(building);
 }
@@ -157,7 +135,6 @@ std::vector<std::shared_ptr<Building>> Building::getTransportationTargets()
 {
 	return selectedTransportingTargets;
 }
-
 
 
 
