@@ -94,5 +94,7 @@ void Shader::setVec4(const std::string& uniform, const glm::vec3& value)
 
 void Shader::setMat4(const std::string& uniform, const glm::mat4& value)
 {
-	glUniformMatrix4fv(glGetUniformLocation(id, uniform.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+	int loc = glGetUniformLocation(id, uniform.c_str());
+	if (loc != GL_INVALID_OPERATION)
+		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }

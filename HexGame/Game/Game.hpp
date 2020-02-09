@@ -17,7 +17,7 @@ class Game : public Application
 public:
 	Game() : Application(std::string("Hex City"), glm::ivec2(1280, 720))
 	{
-		this->getWindow()->setVSync(false);
+		this->getWindow()->setVSync(true);
 	}
 
 	virtual void pushingLayers() override

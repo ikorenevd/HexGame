@@ -5,6 +5,8 @@
 #include <Engine/Core/Window.hpp>
 #include <Engine/Core/Layer.hpp>
 
+#include <Engine/Input/Keyboard.hpp>
+
 Application::Application(const std::string& name, const glm::ivec2& windowSize) :
 	window(std::make_shared<Window>(name, windowSize)),
 	name(name),
@@ -15,22 +17,19 @@ Application::Application(const std::string& name, const glm::ivec2& windowSize) 
 void Application::update()
 {
 	for (Layer* layer : layers)
-	{
 		layer->update();
-	}
 
-	if (glfwGetKey(window->getGLFWWindow(), GLFW_KEY_F4))
-	{
+	if (Keyboard::isKeyPressed(GLFW_KEY_F4))
 		running = false;
-	}
+
+	if (Keyboard::isKeyReleased(GLFW_KEY_F9))
+		window->setVSync(!window->isVSync());
 }
 
 void Application::render()
 {
 	for (Layer* layer : layers)
-	{
 		layer->render();
-	}
 }
 
 void Application::run()
@@ -60,7 +59,7 @@ void Application::run()
 	int updates = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(.85, .85, .8, 1);
+	glClearColor(.85f, .85f, .8f, 1.f);
 
 	while (running)
 	{
@@ -106,4 +105,3 @@ const std::shared_ptr<Window>& Application::getWindow() const
 {
 	return window;
 }
-
