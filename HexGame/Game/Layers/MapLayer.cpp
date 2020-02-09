@@ -20,6 +20,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 
 	// Текстуры
 	TextureManager::add("Paper", std::make_shared<Texture>("Assets\\Textures\\Paper.png", ColorModel::RGBA, TextureFilter::Linear));
+	TextureManager::add("Overlay", std::make_shared<Texture>("Assets\\Textures\\Overlay.png", ColorModel::RGBA, TextureFilter::Linear));
 
 	TextureManager::add("Hex", std::make_shared<Texture>("Assets\\Textures\\Hex\\Hex.png", ColorModel::RGBA));
 	TextureManager::add("PointedHex", std::make_shared<Texture>("Assets\\Textures\\Hex\\PointedHex.png", ColorModel::RGBA));
@@ -71,9 +72,9 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	defaultUI = true;
 
 	// Кнопки
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Sawmill"), "Sawmill"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 220), glm::vec2(80, 80), TextureManager::get("Felled"), "Felled"));
-	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 140), glm::vec2(80, 80), TextureManager::get("Mine"), "Mine"));
+	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(60, 60), TextureManager::get("Sawmill"), "Sawmill"));
+	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 240), glm::vec2(60, 60), TextureManager::get("Felled"), "Felled"));
+	buttonsGame.push_back(std::make_shared<Button>(glm::vec2(-575, 180), glm::vec2(60, 60), TextureManager::get("Mine"), "Mine"));
 
 	buttonsUI.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
 }
@@ -107,21 +108,6 @@ void MapLayer::update()
 	std::vector<std::shared_ptr<Tile>> allTiles = map->getTiles();
 	bool debug = false;
 
-	// Обновление состояние зданий, общей стоимости их содержания и казны города
-	totalUpkeep = 0;
-
-	for (auto building : buildings)
-	{
-		building->update();
-
-		if (!building->isFrozen() and building->isFunctioning())
-			totalUpkeep += building->getUpkeep();
-		else
-			totalUpkeep += building->getUpkeep() / 5;
-	}
-
-	treasuryMoney -= totalUpkeep;
-
 	// Отключение зданий при пустой казне
 	if (treasuryMoney <= 0 && !treasuryEmpty)
 	{
@@ -139,6 +125,32 @@ void MapLayer::update()
 		for (auto building : buildings)
 			building->setFrozen(false);
 	}
+
+	// Обновление состояние зданий, общей стоимости их содержания и казны города
+	totalUpkeep = 0;
+
+	for (auto building : buildings)
+	{
+		building->update();
+
+		if (!building->isFrozen() and building->isFunctioning())
+		{
+			totalUpkeep += building->getUpkeep();
+
+			if (building->getTransportationTargets().size() > 0)
+			{
+				for (auto transportationTarget : building->getTransportationTargets())
+				{
+					building->setStorage(ResourseType::RawWood, -45 / 3600. / building->getTransportationTargets().size());
+					transportationTarget->setStorage(ResourseType::RawWood, +45 / 3600.);
+				}
+			}
+		}
+		else
+			totalUpkeep += building->getUpkeep() / 5;
+	}
+
+	treasuryMoney -= totalUpkeep;
 
 	// Расчет общих ресурсов карты
 	if (glfwGetTime() - lastTime >= 1)
@@ -163,7 +175,10 @@ void MapLayer::update()
 		for (auto button : buttonsGame)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+			{
 				pickedBuilding = button;
+				break;
+			}
 		}
 	}
 
@@ -172,7 +187,10 @@ void MapLayer::update()
 		for (auto button : buttonsUI)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+			{
 				pickedBuilding = button;
+				break;
+			}
 		}
 	}
 
@@ -276,7 +294,7 @@ void MapLayer::update()
 	}
 
 	// Постройка зданий
-	if (defaultUI && pickedBuilding != nullptr && selectedBuilding == nullptr)
+	if (defaultUI && pickedBuilding != nullptr && selectedBuilding == nullptr && (selectedTile != nullptr || selectedExtensionTile != nullptr))
 	{
 		if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
 		{
@@ -438,7 +456,7 @@ void MapLayer::update()
 		int number = 0;
 		std::cout << std::endl;
 
-		if (selectedBuilding != nullptr)
+		/*if (selectedBuilding != nullptr)
 			std::cout << "Selected Building:" << selectedBuilding->getTile()->getCoordinates().x << selectedBuilding->getTile()->getCoordinates().y << selectedBuilding->getTile()->getCoordinates().z << std::endl;
 		if (selectedTile != nullptr)
 			std::cout << "Selected Tile:" << selectedTile->getCoordinates().x << selectedTile->getCoordinates().y << selectedTile->getCoordinates().z << std::endl;
@@ -446,7 +464,7 @@ void MapLayer::update()
 		if (selectedExtensionBuilding != nullptr)
 			std::cout << "Selected Ext Building:" << selectedExtensionBuilding->getTile()->getCoordinates().x << selectedExtensionBuilding->getTile()->getCoordinates().y << selectedExtensionBuilding->getTile()->getCoordinates().z << std::endl;
 		if (selectedExtensionTile != nullptr)
-			std::cout << "Selected Ext Tile:" << selectedExtensionTile->getCoordinates().x << selectedExtensionTile->getCoordinates().y << selectedExtensionTile->getCoordinates().z << std::endl;
+			std::cout << "Selected Ext Tile:" << selectedExtensionTile->getCoordinates().x << selectedExtensionTile->getCoordinates().y << selectedExtensionTile->getCoordinates().z << std::endl;*/
 
 		if (transportingUI) 
 			std::cout << "UI Mode: Transporting" << std::endl;
@@ -458,15 +476,32 @@ void MapLayer::update()
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
 		std::cout << "Map Storage:" << std::endl;
+
 		for (int i = 0; i < 15; i++)
 		{
-			if (storageMap[(ResourseType)i] != 0) std::cout << "   " << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
+			if (storageMap[(ResourseType)i] != 0) std::cout << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
 		}
+
+		std::cout << std::endl;
+
 		for (auto building : buildings)
+		{
+			std::cout << "Building " << number << ": ";
+
+			for (int i = 0; i < 15; i++)
+			{
+				if (building->getResourseAmount((ResourseType)i) != 0) std::cout << "   " << getResourceName((ResourseType)i) << " - " << building->getResourseAmount((ResourseType)i);
+			}
+
+			number++;
+
+			std::cout << std::endl;
+		}
+		/*for (auto building : buildings)
 		{
 			if (building->getParent() == nullptr)
 				std::cout << building->getExtensionAmount(BuildingType::Warehouse) << std::endl;
-		}
+		}*/
 	}
 }
 
@@ -556,6 +591,15 @@ void MapLayer::render()
 
 	//// Интерфейс
 	shader->setMat4("view", viewUI->getMatrix());
+
+	// Overlay
+	glm::mat4 transformation = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
+	transformation = glm::scale(transformation, glm::vec3(viewGame->getSize().x, viewGame->getSize().y, 0));
+
+	shader->setMat4("transform", transformation);
+	TextureManager::get("Overlay")->bind();
+
+	glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 
 	// Отрисовка кнопок
 	if (defaultUI)
