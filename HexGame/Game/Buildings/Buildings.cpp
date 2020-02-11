@@ -130,10 +130,13 @@ void Building::setTransportationTarget(std::shared_ptr<Building>& building, Reso
 {
 	auto index = selectedTransportingTargets.find(building);
 
-	if (index != selectedTransportingTargets.end())
-		selectedTransportingTargets.erase(index);
-	else
+	if (index == selectedTransportingTargets.end())
 		selectedTransportingTargets.insert({ building, type });
+}
+
+void Building::deleteTransportationTarget(std::shared_ptr<Building> building)
+{
+	selectedTransportingTargets.erase(building);
 }
 
 std::unordered_map<std::shared_ptr<Building>, ResourseType> Building::getTransportationTargets()

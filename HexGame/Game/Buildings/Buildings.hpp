@@ -32,6 +32,7 @@ public:
 	void setStorage(ResourseType type, float value);
 	void setTransportationTarget(std::shared_ptr<Building>& building, ResourseType type);
 	void setExtension(std::shared_ptr<Building>& building);
+	void deleteTransportationTarget(std::shared_ptr<Building> building);
 
 	std::shared_ptr<Texture> getTexture();
 	bool isFrozen();

@@ -72,7 +72,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
 	lastTime = glfwGetTime();
-	defaultUI = true;
+	interface = UI::Default;
 
 	// Кнопки
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(60, 60), TextureManager::get("Sawmill"), "Sawmill"));
@@ -142,20 +142,39 @@ void MapLayer::update()
 		{
 			totalUpkeep += building->getUpkeep();
 
+			// Количество целей транспортировки
+			int transportationTargetsAmount = 0;
+
 			if (building->getTransportationTargets().size() > 0)
 			{
 				for (auto transportationTarget : building->getTransportationTargets())
 				{
 					if (!(transportationTarget.first->isStorageFull()) && (building->getResourseAmount(transportationTarget.second) > 0))
 					{
-						building->setStorage(transportationTarget.second, -building->getProduction(transportationTarget.second) / 3600.);
-						transportationTarget.first->setStorage(transportationTarget.second, +building->getProduction(transportationTarget.second) / 3600.);
+						transportationTargetsAmount++;
+					}
+				}
+			}
+
+			// Транспортировка
+			if (building->getTransportationTargets().size() > 0)
+			{
+				for (auto transportationTarget : building->getTransportationTargets())
+				{
+					if (!(transportationTarget.first->isStorageFull()) && (building->getResourseAmount(transportationTarget.second) > 0))
+					{
+						building->setStorage(transportationTarget.second, -building->getProduction(transportationTarget.second) / transportationTargetsAmount/  3600.);
+						transportationTarget.first->setStorage(transportationTarget.second, +building->getProduction(transportationTarget.second) / transportationTargetsAmount/ 3600.);
+
+						totalUpkeep += building->getTile()->getDistance(transportationTarget.first->getTile()) / 3600.;
 					}
 				}
 			}
 		}
 		else
+		{
 			totalUpkeep += building->getUpkeep() / 5;
+		}
 	}
 
 	treasuryMoney -= totalUpkeep;
@@ -178,48 +197,49 @@ void MapLayer::update()
 	}
 
 	// Кнопки
-	if (defaultUI)
+	if (interface == UI::Default)
 	{
 		for (auto button : buttonsBuildings)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				pickedBuilding = button;
+				pickedBuildingButton = button;
 				break;
 			}
 		}
 	}
 
-	if (extensionUI)
+	if (interface == UI::Extension)
 	{
 		for (auto button : buttonsExtensionBuildings)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				pickedBuilding = button;
+				pickedBuildingButton = button;
 				break;
 			}
 		}
 	}
 
-	if (transportingUI)
+	if (interface == UI::Transportation)
+	{
 		for (auto button : buttonsResources)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 			{
-				pickedResource = button->getResourceType();
-				resourcePicked = true;
+				pickedResourceButton = button;
 				break;
 			}
 		}
+	}
 
 	// Выделение клетки
 	if (Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
-		pickedBuilding = nullptr;
-		resourcePicked = false;
+		pickedBuildingButton = nullptr;
+		pickedResourceButton = nullptr;
 
-		if (defaultUI)
+		if (interface == UI::Default)
 		{
 			for (auto tile : allTiles)
 			{
@@ -238,7 +258,7 @@ void MapLayer::update()
 			}
 		}
 
-		if (extensionUI)
+		if (interface == UI::Extension)
 		{
 			for (auto tile : map->getNeighbors(selectedTile))
 			{
@@ -257,25 +277,20 @@ void MapLayer::update()
 			}
 		}
 
-		if (transportingUI)
+		if (interface == UI::Transportation)
 		{
 			for (auto building : buildings)
 			{
-				if (building->getTile()->contains(cursorGame) && building != selectedBuilding)
+				if (building->getTile()->contains(cursorGame) && building != selectedBuilding && building->getParent() == nullptr)
 				{
-					if (building->getTile()->contains(cursorGame))
+					if (selectedTransportationTile != building->getTile() || selectedTransportationTile == nullptr)
 					{
-						if (selectedTransportationBuilding != building || selectedTransportationBuilding == nullptr)
-						{
-							selectedTransportationBuilding = building;
-							break;
-						}
-						else
-						{
-							selectedBuilding->setTransportationTarget(selectedTransportationBuilding, ResourseType::RawWood);
-							selectedTransportationBuilding = nullptr;
-						}
+						selectedTransportationTile = building->getTile();
 						break;
+					}
+					else
+					{
+						selectedTransportationTile = nullptr;
 					}
 				}
 			}
@@ -284,6 +299,7 @@ void MapLayer::update()
 		// Выделение здания
 		selectedBuilding = nullptr;
 		selectedExtensionBuilding = nullptr;
+		selectedTransportationBuilding = nullptr;
 
 		if (selectedTile != nullptr)
 			for (auto building : buildings)
@@ -318,21 +334,40 @@ void MapLayer::update()
 					break;
 				}
 				else
+				{
 					selectedExtensionBuilding = nullptr;
+				}
 			}
+
+		if (selectedTransportationTile != nullptr)
+		{
+			for (auto building : buildings)
+			{
+				if (building->getTile() == selectedTransportationTile)
+				{
+					selectedTransportationBuilding = building;
+					break;
+				}
+				else
+				{
+					selectedTransportationBuilding = nullptr;
+				}
+
+			}
+		}
 	}
 
 	// Постройка зданий
-	if (defaultUI && pickedBuilding != nullptr && selectedBuilding == nullptr && (selectedTile != nullptr || selectedExtensionTile != nullptr))
+	if (interface == UI::Default && pickedBuildingButton != nullptr && selectedBuilding == nullptr && (selectedTile != nullptr || selectedExtensionTile != nullptr))
 	{
-		if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
+		if (treasuryMoney - buildingCost(pickedBuildingButton->getBuildingType()) >= 0)
 		{
-			switch (pickedBuilding->getBuildingType())
+			switch (pickedBuildingButton->getBuildingType())
 			{
 			case BuildingType::Sawmill:
 				buildings.push_back(std::make_shared<Sawmill>(selectedTile));
 				selectedBuilding = buildings.back();
-				treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+				treasuryMoney -= buildingCost(pickedBuildingButton->getBuildingType());
 				break;
 
 			case BuildingType::Felled:
@@ -340,7 +375,7 @@ void MapLayer::update()
 				{
 					buildings.push_back(std::make_shared<Felled>(selectedTile));
 					selectedBuilding = buildings.back();
-					treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+					treasuryMoney -= buildingCost(pickedBuildingButton->getBuildingType());
 				}
 				break;
 
@@ -349,18 +384,18 @@ void MapLayer::update()
 				{
 					buildings.push_back(std::make_shared<Mine>(selectedTile));
 					selectedBuilding = buildings.back();
-					treasuryMoney -= buildingCost(pickedBuilding->getBuildingType());
+					treasuryMoney -= buildingCost(pickedBuildingButton->getBuildingType());
 				}
 				break;
 			}
 		}
 	}
 
-	if (extensionUI && pickedBuilding != nullptr && selectedExtensionBuilding == nullptr && selectedExtensionTile != nullptr)
+	if (interface == UI::Extension && pickedBuildingButton != nullptr && selectedExtensionBuilding == nullptr && selectedExtensionTile != nullptr)
 	{
-		if (treasuryMoney - buildingCost(pickedBuilding->getBuildingType()) >= 0)
+		if (treasuryMoney - buildingCost(pickedBuildingButton->getBuildingType()) >= 0)
 		{
-			switch (pickedBuilding->getBuildingType())
+			switch (pickedBuildingButton->getBuildingType())
 			{
 			case BuildingType::Warehouse:
 				if (selectedBuilding->getExtensionAmount(BuildingType::Warehouse) < 2)
@@ -375,114 +410,66 @@ void MapLayer::update()
 	}
 
 	if (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr)
-		pickedBuilding = nullptr;
+		pickedBuildingButton = nullptr;
 
 	// Выбор клетки и ресурса для транспортировки
-	if (selectedTransportationBuilding != nullptr && resourcePicked == true)
+	if (selectedTransportationBuilding != nullptr && pickedResourceButton != nullptr)
 	{
-		selectedBuilding->setTransportationTarget(selectedTransportationBuilding, pickedResource);
-		selectedTransportationBuilding = nullptr;
-		resourcePicked = false;
+		selectedBuilding->setTransportationTarget(selectedTransportationBuilding, pickedResourceButton->getResourceType());
+		pickedResourceButton = nullptr;
 	}
 
-	/* Снос здания
-	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE) && (selectedBuilding != nullptr || selectedExtensionBuilding != nullptr))
+	// Отмена транспортировки в здание
+	if (Keyboard::isKeyPressed(GLFW_KEY_DELETE))
 	{
-		int i = 0;
-
-		if (selectedBuilding != nullptr)
+		if (interface == UI::Transportation)
 		{
-			for (auto extensionBuiding : selectedBuilding->getExtensionBuildings())
+			if (selectedTransportationBuilding != nullptr)
 			{
-				if (std::find(buildings.begin(), buildings.end(), extensionBuiding) != buildings.end())
-				{
-					buildings.erase(std::find(buildings.begin(), buildings.end(), extensionBuiding));
-				}
-			}
-
-			buildings.erase(std::find(buildings.begin(), buildings.end(), selectedBuilding));
-
-			selectedBuilding = nullptr;
-			selectedExtensionBuilding = nullptr;
-		}
-
-		if (selectedExtensionBuilding != nullptr)
-		{
-			for (auto extensionBuiding : selectedBuilding->getExtensionBuildings())
-			{
-				if (extensionBuiding->getTile() == selectedExtensionBuilding->getTile())
-				{
-					selectedBuilding->setExtension(extensionBuiding);
-					break;
-				}
-			}
-
-			buildings.erase(std::find(buildings.begin(), buildings.end(), selectedExtensionBuilding));
-
-			selectedExtensionBuilding = nullptr;
-		}
-
-		// Удаление как цели для транспортировки
-		for (auto building : buildings)
-		{
-			for (auto transportationTarget : building->getTransportationTargets())
-			{
-				if (std::find(buildings.begin(), buildings.end(), transportationTarget) == buildings.end())
-					building->setTransportationTarget(transportationTarget);
+				selectedBuilding->deleteTransportationTarget(selectedTransportationBuilding);
 			}
 		}
-	}	*/
+	}
+
 
 	// Выбор типа интерфейса
 	if (Keyboard::isKeyPressed(GLFW_KEY_ESCAPE))
 	{
-		defaultUI = true;
-		transportingUI = false;
-		extensionUI = false;
-		selectedTransportationBuilding = nullptr;
+		interface = UI::Default;
 	}
 
 	if (selectedBuilding != nullptr)
 	{
 		if (Keyboard::isKeyPressed(GLFW_KEY_T))
 		{
-			if (transportingUI)
+			if (interface != UI::Transportation)
 			{
-				transportingUI = false;
+				interface = UI::Transportation;
 			}
 			else
 			{
-				transportingUI = true;
-			}
+				interface = UI::Default;
 
-			extensionUI = false;
-			selectedExtensionBuilding = nullptr;
-			selectedExtensionTile = nullptr;
-			selectedTransportationBuilding = nullptr;
+				selectedTransportationTile = nullptr;
+				selectedTransportationBuilding = nullptr;
+			}
 		}
 
 		if (Keyboard::isKeyPressed(GLFW_KEY_X))
 		{
-			if (extensionUI)
+			if (interface != UI::Extension)
 			{
-				extensionUI = false;
+				interface = UI::Extension;
 			}
 			else
 			{
-				extensionUI = true;
-			}
+				interface = UI::Default;
 
-			transportingUI = false;
-			selectedExtensionBuilding = nullptr;
-			selectedExtensionTile = nullptr;
-			selectedTransportationBuilding = nullptr;
+				selectedExtensionTile = nullptr;
+				selectedExtensionBuilding = nullptr;
+			}
 		}
 	}
-	
-	if (transportingUI || extensionUI)
-		defaultUI = false;
-	else
-		defaultUI = true;
 
 	for (auto tile : allTiles)
 	{
@@ -500,6 +487,8 @@ void MapLayer::update()
 			std::cout << "Selected Building:" << selectedBuilding->getTile()->getCoordinates().x << selectedBuilding->getTile()->getCoordinates().y << selectedBuilding->getTile()->getCoordinates().z << std::endl;
 		if (selectedTransportationBuilding != nullptr)
 			std::cout << "Selected Transportation Building:" << selectedTransportationBuilding->getTile()->getCoordinates().x << selectedTransportationBuilding->getTile()->getCoordinates().y << selectedTransportationBuilding->getTile()->getCoordinates().z << std::endl;
+		if (selectedTransportationTile != nullptr)
+			std::cout << "Selected Transportation Tile:" << selectedTransportationTile->getCoordinates().x << selectedTransportationTile->getCoordinates().y << selectedTransportationTile->getCoordinates().z << std::endl;
 		if (selectedTile != nullptr)
 			std::cout << "Selected Tile:" << selectedTile->getCoordinates().x << selectedTile->getCoordinates().y << selectedTile->getCoordinates().z << std::endl;
 		if (selectedExtensionBuilding != nullptr)
@@ -507,11 +496,11 @@ void MapLayer::update()
 		if (selectedExtensionTile != nullptr)
 			std::cout << "Selected Ext Tile:" << selectedExtensionTile->getCoordinates().x << selectedExtensionTile->getCoordinates().y << selectedExtensionTile->getCoordinates().z << std::endl;
 
-		if (transportingUI) 
+		if (interface == UI::Transportation) 
 			std::cout << "UI Mode: Transporting" << std::endl;
-		if (extensionUI) 
+		if (interface == UI::Extension)
 			std::cout << "UI Mode: Extension" << std::endl;
-		if (defaultUI)
+		if (interface == UI::Default)
 			std::cout << "UI Mode: Default" << std::endl;
 
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
@@ -538,11 +527,6 @@ void MapLayer::update()
 
 			std::cout << std::endl;
 		}
-		/*for (auto building : buildings)
-		{
-			if (building->getParent() == nullptr)
-				std::cout << building->getExtensionAmount(BuildingType::Warehouse) << std::endl;
-		}*/
 	}
 }
 
@@ -605,18 +589,17 @@ void MapLayer::render()
 		if (tile == selectedTile)
 			TextureManager::get("SelectedHex")->bind();
 
-		if (extensionUI && tile == selectedExtensionTile)
+		if (interface == UI::Extension && tile == selectedExtensionTile)
 			TextureManager::get("ExtensionSelectedHex")->bind();
 
-		if (transportingUI)
-			if (selectedTransportationBuilding != nullptr)
-				if (tile == selectedTransportationBuilding->getTile())
-					TextureManager::get("ExtensionSelectedHex")->bind();
+		if (interface == UI::Transportation)
+			if (selectedTransportationTile == tile)
+				TextureManager::get("ExtensionSelectedHex")->bind();
 
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
-	if (transportingUI)
+	if (interface == UI::Transportation)
 	{
 		TextureManager::get("TransportHex")->bind();
 
@@ -648,7 +631,7 @@ void MapLayer::render()
 	glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 
 	// Отрисовка кнопок
-	if (defaultUI)
+	if (interface == UI::Default)
 	{
 		// Без выделенной клетки
 		for (auto button : buttonsBuildings)
@@ -659,7 +642,7 @@ void MapLayer::render()
 		}
 	}
 
-	if (extensionUI)
+	if (interface == UI::Extension)
 	{
 		// При выделенной клетке
 		for (auto button : buttonsExtensionBuildings)
@@ -670,7 +653,7 @@ void MapLayer::render()
 		}
 	}
 
-	if (transportingUI)
+	if (interface == UI::Transportation)
 	{
 		for (auto button : buttonsResources)
 		{
