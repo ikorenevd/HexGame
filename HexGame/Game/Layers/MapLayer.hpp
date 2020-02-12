@@ -51,6 +51,8 @@ private:
 	std::shared_ptr<Building> selectedTransportationBuilding;
 
 	std::shared_ptr<Tile> pointedTile;
+	glm::vec2 cursorGame;
+	glm::vec2 cursorUI;
 
 	std::shared_ptr<VertexArray> vao;
 };

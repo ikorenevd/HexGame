@@ -101,6 +101,11 @@ int Building::getProduction(ResourseType type)
 	return productionSpeed[type];
 }
 
+std::unordered_map<ResourseType, int> Building::getAllProduction()
+{
+	return productionSpeed;
+}
+
 bool Building::isFrozen()
 {
 	return frozen;
@@ -114,6 +119,11 @@ bool Building::isFunctioning()
 float Building::getUpkeep()
 {
 	return upkeep;
+}
+
+int Building::getStorage(ResourseType type)
+{
+	return storage[type];
 }
 
 bool Building::isStorageFull()

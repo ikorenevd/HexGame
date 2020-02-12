@@ -115,8 +115,6 @@ int getResourcePrice(ResourseType type)
 	case ResourseType::Cotton:
 		return 5;
 		break;
-	default:
-		break;
 	}
 }
 

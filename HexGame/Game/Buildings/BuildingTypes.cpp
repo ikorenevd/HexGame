@@ -72,3 +72,73 @@ int getBuildingPrice(BuildingType type)
         break;
 	}
 }
+
+std::string getBuildingName(BuildingType type)
+{
+    switch (type)
+    {
+    case BuildingType::Felled:
+        return "Felled";
+        break;
+    case BuildingType::Sawmill:
+        return "Sawmill";
+        break;
+    case BuildingType::FurnitureManufacture:
+        return "FurnitureManufacture";
+        break;
+    case BuildingType::PlanksManufacture:
+        return "PlanksManufacture";
+        break;
+    case BuildingType::Mine:
+        return "Mine";
+        break;
+    case BuildingType::AdditionalMine:
+        return "AdditionalMine";
+        break;
+    case BuildingType::Foundry:
+        return "Foundry";
+        break;
+    case BuildingType::AdditionalOven:
+        return "AdditionalOven";
+        break;
+    case BuildingType::RailBeamWorkshop:
+        return "RailBeamWorkshop";
+        break;
+    case BuildingType::MachineShop:
+        return "MachineShop";
+        break;
+    case BuildingType::MachineShopExtension:
+        return "MachineShopExtension";
+        break;
+    case BuildingType::Armory:
+        return "Armory";
+        break;
+    case BuildingType::ArmoryExtension:
+        return "ArmoryExtension";
+        break;
+    case BuildingType::Farm:
+        return "Farm";
+        break;
+    case BuildingType::Pasture:
+        return "Pasture";
+        break;
+    case BuildingType::SheepPasture:
+        return "SheepPasture";
+        break;
+    case BuildingType::Field:
+        return "Field";
+        break;
+    case BuildingType::CottonField:
+        return "CottonField";
+        break;
+    case BuildingType::TradingWarehouse:
+        return "TradingWarehouse";
+        break;
+    case BuildingType::WarehouseExtension:
+        return "WarehouseExtension";
+        break;
+    case BuildingType::Warehouse:
+        return "Warehouse";
+        break;
+    }
+}

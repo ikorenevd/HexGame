@@ -101,7 +101,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	vao->setIndexBuffer(ibo);
 	vao->setVertexBuffer(vbo);
 
-	treasuryMoney = 1750;
+	treasuryMoney = 10000;
 
 	ShaderManager::add("Texture", std::make_shared<Shader>("Assets\\Shaders\\TextureVert.glsl", "Assets\\Shaders\\TextureFrag.glsl"));
 
@@ -120,8 +120,6 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -180), glm::vec2(60, 60), TextureManager::get("TradingWarehouse"), "TradingWarehouse"));
 
 	buttonsExtensionBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
-
-	buttonsResources.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("RawWood"), "RawWood"));
 }
 
 void MapLayer::update()
@@ -203,8 +201,8 @@ void MapLayer::update()
 				{
 					if (!(transportationTarget.first->isStorageFull()) && (building->getResourseAmount(transportationTarget.second) > 0))
 					{
-						building->setStorage(transportationTarget.second, -building->getProduction(transportationTarget.second) / transportationTargetsAmount/  3600.);
-						transportationTarget.first->setStorage(transportationTarget.second, +building->getProduction(transportationTarget.second) / transportationTargetsAmount/ 3600.);
+						building->setStorage(transportationTarget.second, -building->getProduction(transportationTarget.second) / transportationTargetsAmount / 3600.);
+						transportationTarget.first->setStorage(transportationTarget.second, +building->getProduction(transportationTarget.second) / transportationTargetsAmount / 3600.);
 
 						totalUpkeep += building->getTile()->getDistance(transportationTarget.first->getTile()) / 3600.;
 					}
@@ -404,12 +402,6 @@ void MapLayer::update()
 		{
 			switch (pickedBuildingButton->getBuildingType())
 			{
-			case BuildingType::Sawmill:
-				buildings.push_back(std::make_shared<Sawmill>(selectedTile));
-				selectedBuilding = buildings.back();
-				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
-				break;
-
 			case BuildingType::Felled:
 				if (selectedTile->getTerrainType() == TerrainType::Forest)
 				{
@@ -419,6 +411,18 @@ void MapLayer::update()
 				}
 				break;
 
+			case BuildingType::Sawmill:
+				buildings.push_back(std::make_shared<Sawmill>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				break;
+
+			case BuildingType::FurnitureManufacture:
+				buildings.push_back(std::make_shared<FurnitureManufacture>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				break;
+
 			case BuildingType::Mine:
 				if (selectedTile->getTerrainType() == TerrainType::Mountain)
 				{
@@ -426,6 +430,12 @@ void MapLayer::update()
 					selectedBuilding = buildings.back();
 					treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				}
+				break;
+
+			case BuildingType::Foundry:
+				buildings.push_back(std::make_shared<Foundry>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				break;
 			}
 		}
@@ -485,6 +495,16 @@ void MapLayer::update()
 			if (interface != UI::Transportation)
 			{
 				interface = UI::Transportation;
+
+				int i = 300;
+				for (auto resource : selectedBuilding->getAllProduction())
+				{
+					if (resource.second >= 0)
+					{
+						buttonsResources.push_back(std::make_shared<Button>(glm::vec2(-575, i), glm::vec2(80, 80), TextureManager::get(getResourceName(resource.first)), getResourceName(resource.first)));
+						i = i - 60;
+					}
+				}
 			}
 			else
 			{

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 enum class BuildingType
 {
@@ -26,3 +27,4 @@ enum class BuildingType
 };
 
 int getBuildingPrice(BuildingType);
+std::string getBuildingName(BuildingType);

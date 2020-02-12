@@ -38,9 +38,11 @@ public:
 	bool isFrozen();
 	bool isFunctioning();
 	bool isStorageFull();
+	int getStorage(ResourseType type);
 	int getUsedStorage();
 	int getResourseAmount(ResourseType);
 	int getProduction(ResourseType);
+	std::unordered_map<ResourseType, int> getAllProduction();
 	float getUpkeep();
 	int getExtensionAmount(BuildingType type);
 	BuildingType getBuildingType();
@@ -92,9 +94,7 @@ public:
 				storage[ResourseType::RawWood] += productionSpeed[ResourseType::RawWood] / 3600.;
 			}
 			else
-			{
 				functioning = false;
-			}
 		}
 	}
 };
@@ -105,14 +105,14 @@ public:
 	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
 		upkeep = 50 / 3600.;
-		storageLimit = 500;
+		storageLimit = 1000;
 
 		buildingType = BuildingType::Sawmill;
 		texture = TextureManager::get("Sawmill");
 
 		storage[ResourseType::RawWood] = 0;
 		storage[ResourseType::ProcessedWood] = 0;
-		productionSpeed[ResourseType::ProcessedWood] = 90;	
+		productionSpeed[ResourseType::ProcessedWood] = 30;	
 	}
 
 	void update() override
@@ -121,22 +121,17 @@ public:
 		{
 			if ( !isStorageFull() )
 			{
-				functioning = true;
-
 				if (storage[ResourseType::RawWood] >= productionSpeed[ResourseType::ProcessedWood] / 3 / 3600.)
 				{
+					functioning = true;
 					storage[ResourseType::ProcessedWood] += productionSpeed[ResourseType::ProcessedWood] / 3600.;
 					storage[ResourseType::RawWood] -= productionSpeed[ResourseType::ProcessedWood] / 3 / 3600.;
 				}
 				else
-				{
 					functioning = false;
-				}
 			}
 			else
-			{
 				functioning = false;
-			}
 		}
 	}
 };
@@ -147,9 +142,9 @@ public:
 	FurnitureManufacture(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
 		upkeep = 50 / 3600.;
-		storageLimit = 500;
+		storageLimit = 1000;
 
-		buildingType = BuildingType::Sawmill;
+		buildingType = BuildingType::FurnitureManufacture;
 		texture = TextureManager::get("FurnitureManufacture");
 
 		storage[ResourseType::ProcessedWood] = 0;
@@ -165,32 +160,85 @@ public:
 		{
 			if (!isStorageFull())
 			{
-				functioning = true;
-
 				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Plank] / 3 / 3600.)
 				{
+					functioning = true;
 					storage[ResourseType::Plank] += productionSpeed[ResourseType::Plank] / 3600.;
 					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Plank] / 3 / 3600.;
 				}
 				else
-				{
 					functioning = false;
-				}
 
 				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Furniture] * 2 / 3600.)
 				{
+					functioning = true;
 					storage[ResourseType::Furniture] += productionSpeed[ResourseType::Furniture] / 3600.;
 					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Furniture] * 2 / 3600.;
 				}
 				else
-				{
 					functioning = false;
-				}
 			}
 			else
-			{
 				functioning = false;
+		}
+	}
+};
+
+class Foundry : public MainBuilding
+{
+public:
+	Foundry(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
+	{
+		upkeep = 50 / 3600.;
+		storageLimit = 1000;
+
+		buildingType = BuildingType::Foundry;
+		texture = TextureManager::get("Foundry");
+
+		storage[ResourseType::Ore] = 0;
+		storage[ResourseType::PreciousOre] = 0;
+		storage[ResourseType::Coal] = 0;
+		storage[ResourseType::Metal] = 0;
+		productionSpeed[ResourseType::Metal] = 50;
+		storage[ResourseType::PreciousMetal] = 0;
+		productionSpeed[ResourseType::PreciousMetal] = 25;
+	}
+
+	void update() override
+	{
+		if (!frozen)
+		{
+			if (!isStorageFull())
+			{
+				functioning = true;
+
+				if (storage[ResourseType::Coal] >= (productionSpeed[ResourseType::Metal] * 2 + productionSpeed[ResourseType::PreciousMetal]) / 3600.)
+				{
+					if (storage[ResourseType::Ore] >= productionSpeed[ResourseType::Metal] * 2 / 3600.)
+					{
+						functioning = true;
+						storage[ResourseType::Metal] += productionSpeed[ResourseType::Metal] / 3600.;
+						storage[ResourseType::Ore] -= productionSpeed[ResourseType::Metal] * 2 / 3600.;
+						storage[ResourseType::Coal] -= productionSpeed[ResourseType::Metal] * 2 / 3600.;
+					}
+					else
+						functioning = false;
+
+					if (storage[ResourseType::PreciousOre] >= productionSpeed[ResourseType::PreciousMetal] / 3600.)
+					{
+						functioning = true;
+						storage[ResourseType::PreciousMetal] += productionSpeed[ResourseType::PreciousMetal] / 3600.;
+						storage[ResourseType::PreciousOre] -= productionSpeed[ResourseType::PreciousMetal] / 3600.;
+						storage[ResourseType::Coal] -= productionSpeed[ResourseType::PreciousMetal] / 3600.;
+					}
+					else
+							functioning = false;
+				}
+				else
+					functioning = false;
 			}
+			else
+				functioning = false;
 		}
 	}
 };
@@ -206,7 +254,12 @@ public:
 		buildingType = BuildingType::Mine;
 		texture = TextureManager::get("Mine");
 
-		storage[ResourseType::RawWood] = 0;
+		storage[ResourseType::Ore] = 0;
+		productionSpeed[ResourseType::Ore] = 25;
+		storage[ResourseType::PreciousOre] = 0;
+		productionSpeed[ResourseType::PreciousOre] = 10;
+		storage[ResourseType::Coal] = 0;
+		productionSpeed[ResourseType::Coal] = 30;
 	}
 
 	void update() override
@@ -216,13 +269,12 @@ public:
 			if (!isStorageFull())
 			{
 				functioning = true;
-				storage[ResourseType::Ore] += 50 / 3600.;
-				storage[ResourseType::PreciousOre] += 15 / 3600.;
+				storage[ResourseType::Ore] += productionSpeed[ResourseType::Ore] / 3600.;
+				storage[ResourseType::PreciousOre] += productionSpeed[ResourseType::PreciousOre] / 3600.;
+				storage[ResourseType::Coal] += productionSpeed[ResourseType::Coal] / 3600.;
 			}
 			else
-			{
 				functioning = false;
-			}
 		}
 	}
 };
