@@ -3,24 +3,26 @@
 
 enum class ResourseType
 {
-	RawWood = 0,
+	RawWood,
 	ProcessedWood,
 	Plank,
-
 	Ore,
 	PreciousOre,
 	Coal,
 	Stone,
-
 	Metal,
 	PreciousMetal,
-
 	Machine,
 	Rail,
 	Beam,
 	Wearpon,
-	Jewelry
+	Jewelry,
+	Cereal,
+	Meat,
+	Cotton,
+	Furniture
 };
 
 int getResourceSize(ResourseType);
+int getResourcePrice(ResourseType);
 std::string getResourceName(ResourseType);

@@ -33,12 +33,46 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Mountain", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Mountain.png", ColorModel::RGBA));
 	TextureManager::add("Forest", std::make_shared<Texture>("Assets\\Textures\\Landscape\\Forest.png", ColorModel::RGBA));
 
-	TextureManager::add("Sawmill", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Sawmill.png", ColorModel::RGBA));
 	TextureManager::add("Felled", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Felled.png", ColorModel::RGBA));
+	TextureManager::add("Sawmill", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Sawmill.png", ColorModel::RGBA));
+	TextureManager::add("FurnitureManufacture", std::make_shared<Texture>("Assets\\Textures\\Buildings\\FurnitureManufacture.png", ColorModel::RGBA));
+	TextureManager::add("PlanksManufacture", std::make_shared<Texture>("Assets\\Textures\\Buildings\\PlanksManufacture.png", ColorModel::RGBA));
 	TextureManager::add("Mine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Mine.png", ColorModel::RGBA));
+	TextureManager::add("AdditionalMine", std::make_shared<Texture>("Assets\\Textures\\Buildings\\AdditionalMine.png", ColorModel::RGBA));
+	TextureManager::add("Foundry", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Foundry.png", ColorModel::RGBA));
+	TextureManager::add("AdditionalOven", std::make_shared<Texture>("Assets\\Textures\\Buildings\\AdditionalOven.png", ColorModel::RGBA));
+	TextureManager::add("RailBeamWorkshop", std::make_shared<Texture>("Assets\\Textures\\Buildings\\RailBeamWorkshop.png", ColorModel::RGBA));
+	TextureManager::add("MachineShop", std::make_shared<Texture>("Assets\\Textures\\Buildings\\MachineShop.png", ColorModel::RGBA));
+	TextureManager::add("MachineShopExtension", std::make_shared<Texture>("Assets\\Textures\\Buildings\\MachineShopExtension.png", ColorModel::RGBA));
+	TextureManager::add("Armory", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Armory.png", ColorModel::RGBA));
+	TextureManager::add("ArmoryExtension", std::make_shared<Texture>("Assets\\Textures\\Buildings\\ArmoryExtension.png", ColorModel::RGBA));
+	TextureManager::add("Farm", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Farm.png", ColorModel::RGBA));
+	TextureManager::add("Pasture", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Pasture.png", ColorModel::RGBA));
+	TextureManager::add("SheepPasture", std::make_shared<Texture>("Assets\\Textures\\Buildings\\SheepPasture.png", ColorModel::RGBA));
+	TextureManager::add("Field", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Field.png", ColorModel::RGBA));
+	TextureManager::add("CottonField", std::make_shared<Texture>("Assets\\Textures\\Buildings\\CottonField.png", ColorModel::RGBA));
+	TextureManager::add("CottonField", std::make_shared<Texture>("Assets\\Textures\\Buildings\\CottonField.png", ColorModel::RGBA));
+	TextureManager::add("TradingWarehouse", std::make_shared<Texture>("Assets\\Textures\\Buildings\\TradingWarehouse.png", ColorModel::RGBA));
+	TextureManager::add("WarehouseExtension", std::make_shared<Texture>("Assets\\Textures\\Buildings\\WarehouseExtension", ColorModel::RGBA));
 	TextureManager::add("Warehouse", std::make_shared<Texture>("Assets\\Textures\\Buildings\\Warehouse.png", ColorModel::RGBA));
 
 	TextureManager::add("RawWood", std::make_shared<Texture>("Assets\\Textures\\Resource\\RawWood.png", ColorModel::RGBA));
+	TextureManager::add("ProcessedWood", std::make_shared<Texture>("Assets\\Textures\\Resource\\ProcessedWood.png", ColorModel::RGBA));
+	TextureManager::add("Plank", std::make_shared<Texture>("Assets\\Textures\\Resource\\Plank.png", ColorModel::RGBA));
+	TextureManager::add("Ore", std::make_shared<Texture>("Assets\\Textures\\Resource\\Ore.png", ColorModel::RGBA));
+	TextureManager::add("PreciousOre", std::make_shared<Texture>("Assets\\Textures\\Resource\\PreciousOre.png", ColorModel::RGBA));
+	TextureManager::add("Coal", std::make_shared<Texture>("Assets\\Textures\\Resource\\Coal.png", ColorModel::RGBA));
+	TextureManager::add("Stone", std::make_shared<Texture>("Assets\\Textures\\Resource\\Stone.png", ColorModel::RGBA));
+	TextureManager::add("Metal", std::make_shared<Texture>("Assets\\Textures\\Resource\\Metal.png", ColorModel::RGBA));
+	TextureManager::add("PreciousMetal", std::make_shared<Texture>("Assets\\Textures\\Resource\\PreciousMetal.png", ColorModel::RGBA));
+	TextureManager::add("Machine", std::make_shared<Texture>("Assets\\Textures\\Resource\\Machine.png", ColorModel::RGBA));
+	TextureManager::add("Rail", std::make_shared<Texture>("Assets\\Textures\\Resource\\Rail.png", ColorModel::RGBA));
+	TextureManager::add("Beam", std::make_shared<Texture>("Assets\\Textures\\Resource\\Beam.png", ColorModel::RGBA));
+	TextureManager::add("Wearpon", std::make_shared<Texture>("Assets\\Textures\\Resource\\Wearpon.png", ColorModel::RGBA));
+	TextureManager::add("Jewelry", std::make_shared<Texture>("Assets\\Textures\\Resource\\Jewelry.png", ColorModel::RGBA));
+	TextureManager::add("Cereal", std::make_shared<Texture>("Assets\\Textures\\Resource\\Cereal.png", ColorModel::RGBA));
+	TextureManager::add("Meat", std::make_shared<Texture>("Assets\\Textures\\Resource\\Meat.png", ColorModel::RGBA));
+	TextureManager::add("Cotton", std::make_shared<Texture>("Assets\\Textures\\Resource\\Cotton.png", ColorModel::RGBA));
 
 	float vertices[] =
 	{
@@ -75,9 +109,15 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	interface = UI::Default;
 
 	// Кнопки
-	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(60, 60), TextureManager::get("Sawmill"), "Sawmill"));
-	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 240), glm::vec2(60, 60), TextureManager::get("Felled"), "Felled"));
-	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 180), glm::vec2(60, 60), TextureManager::get("Mine"), "Mine"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(60, 60), TextureManager::get("Felled"), "Felled"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 240), glm::vec2(60, 60), TextureManager::get("Sawmill"), "Sawmill"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 180), glm::vec2(60, 60), TextureManager::get("FurnitureManufacture"), "FurnitureManufacture"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 120), glm::vec2(60, 60), TextureManager::get("Mine"), "Mine"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 60), glm::vec2(60, 60), TextureManager::get("Foundry"), "Foundry"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 0), glm::vec2(60, 60), TextureManager::get("MachineShop"), "MachineShop"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -60), glm::vec2(60, 60), TextureManager::get("Armory"), "Armory"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -120), glm::vec2(60, 60), TextureManager::get("Farm"), "Farm"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -180), glm::vec2(60, 60), TextureManager::get("TradingWarehouse"), "TradingWarehouse"));
 
 	buttonsExtensionBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
 
@@ -360,14 +400,14 @@ void MapLayer::update()
 	// Постройка зданий
 	if (interface == UI::Default && pickedBuildingButton != nullptr && selectedBuilding == nullptr && (selectedTile != nullptr || selectedExtensionTile != nullptr))
 	{
-		if (treasuryMoney - buildingCost(pickedBuildingButton->getBuildingType()) >= 0)
+		if (treasuryMoney - getBuildingPrice(pickedBuildingButton->getBuildingType()) >= 0)
 		{
 			switch (pickedBuildingButton->getBuildingType())
 			{
 			case BuildingType::Sawmill:
 				buildings.push_back(std::make_shared<Sawmill>(selectedTile));
 				selectedBuilding = buildings.back();
-				treasuryMoney -= buildingCost(pickedBuildingButton->getBuildingType());
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				break;
 
 			case BuildingType::Felled:
@@ -375,7 +415,7 @@ void MapLayer::update()
 				{
 					buildings.push_back(std::make_shared<Felled>(selectedTile));
 					selectedBuilding = buildings.back();
-					treasuryMoney -= buildingCost(pickedBuildingButton->getBuildingType());
+					treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				}
 				break;
 
@@ -384,7 +424,7 @@ void MapLayer::update()
 				{
 					buildings.push_back(std::make_shared<Mine>(selectedTile));
 					selectedBuilding = buildings.back();
-					treasuryMoney -= buildingCost(pickedBuildingButton->getBuildingType());
+					treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				}
 				break;
 			}
@@ -393,7 +433,7 @@ void MapLayer::update()
 
 	if (interface == UI::Extension && pickedBuildingButton != nullptr && selectedExtensionBuilding == nullptr && selectedExtensionTile != nullptr)
 	{
-		if (treasuryMoney - buildingCost(pickedBuildingButton->getBuildingType()) >= 0)
+		if (treasuryMoney - getBuildingPrice(pickedBuildingButton->getBuildingType()) >= 0)
 		{
 			switch (pickedBuildingButton->getBuildingType())
 			{

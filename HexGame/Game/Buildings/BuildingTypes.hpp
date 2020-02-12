@@ -2,11 +2,27 @@
 
 enum class BuildingType
 {
-	Sawmill = 0,
 	Felled,
+	Sawmill,
+	FurnitureManufacture,
+		PlanksManufacture,
 	Mine,
-
+		AdditionalMine,
+	Foundry,
+		AdditionalOven,
+		RailBeamWorkshop,
+	MachineShop,
+		MachineShopExtension,
+	Armory,
+		ArmoryExtension,
+	Farm,
+		Pasture,
+		SheepPasture,
+		Field,
+		CottonField,
+	TradingWarehouse,
+		WarehouseExtension,
 	Warehouse
 };
 
-int buildingCost(BuildingType);
+int getBuildingPrice(BuildingType);

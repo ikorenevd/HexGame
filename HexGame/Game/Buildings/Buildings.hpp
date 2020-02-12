@@ -1,4 +1,4 @@
-#include <Engine\Engine.hpp>
+﻿#include <Engine\Engine.hpp>
 #include <Engine\Core\Manager.hpp>
 #include <Game/Buildings/ResourceTypes.hpp>
 #include <Game/Buildings/BuildingTypes.hpp>
@@ -65,65 +65,13 @@ public:
 };
 
 
-
-class Sawmill : public MainBuilding
-{
-public:
-	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
-	{
-		upkeep = 50 / 3600.;
-		storageLimit = 500;
-
-		buildingType = BuildingType::Sawmill;
-		texture = TextureManager::get("Sawmill");
-
-		storage[ResourseType::RawWood] = 0;
-
-		storage[ResourseType::ProcessedWood] = 0;
-		productionSpeed[ResourseType::ProcessedWood] = 45;
-
-		storage[ResourseType::Plank] = 0;
-		productionSpeed[ResourseType::Plank] = 45;
-	}
-
-	void update() override
-	{
-		if (!frozen)
-		{
-			if ( !isStorageFull() )
-			{
-				functioning = true;
-
-				if (storage[ResourseType::RawWood] >= productionSpeed[ResourseType::ProcessedWood] * 2 / 3600.)
-				{
-					storage[ResourseType::ProcessedWood] += productionSpeed[ResourseType::ProcessedWood] / 3600.;
-					storage[ResourseType::RawWood] -= productionSpeed[ResourseType::ProcessedWood] * 2 / 3600.;
-				}
-
-				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Plank] / 3 / 3600.)
-				{
-					storage[ResourseType::Plank] += productionSpeed[ResourseType::Plank] / 3600.;
-					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Plank] / 3 / 3600.;
-				}
-				else
-				{
-					functioning = false;
-				}
-			}
-			else
-			{
-				functioning = false;
-			}
-		}
-	}
-};
-
+// Здания
 class Felled : public MainBuilding
 {
 public:
 	Felled(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
-		upkeep = 40 / 3600.;
+		upkeep = 25 / 3600.;
 		storageLimit = 1000;
 
 		buildingType = BuildingType::Felled;
@@ -142,6 +90,102 @@ public:
 			{
 				functioning = true;
 				storage[ResourseType::RawWood] += productionSpeed[ResourseType::RawWood] / 3600.;
+			}
+			else
+			{
+				functioning = false;
+			}
+		}
+	}
+};
+
+class Sawmill : public MainBuilding
+{
+public:
+	Sawmill(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
+	{
+		upkeep = 50 / 3600.;
+		storageLimit = 500;
+
+		buildingType = BuildingType::Sawmill;
+		texture = TextureManager::get("Sawmill");
+
+		storage[ResourseType::RawWood] = 0;
+		storage[ResourseType::ProcessedWood] = 0;
+		productionSpeed[ResourseType::ProcessedWood] = 90;	
+	}
+
+	void update() override
+	{
+		if (!frozen)
+		{
+			if ( !isStorageFull() )
+			{
+				functioning = true;
+
+				if (storage[ResourseType::RawWood] >= productionSpeed[ResourseType::ProcessedWood] / 3 / 3600.)
+				{
+					storage[ResourseType::ProcessedWood] += productionSpeed[ResourseType::ProcessedWood] / 3600.;
+					storage[ResourseType::RawWood] -= productionSpeed[ResourseType::ProcessedWood] / 3 / 3600.;
+				}
+				else
+				{
+					functioning = false;
+				}
+			}
+			else
+			{
+				functioning = false;
+			}
+		}
+	}
+};
+
+class FurnitureManufacture : public MainBuilding
+{
+public:
+	FurnitureManufacture(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
+	{
+		upkeep = 50 / 3600.;
+		storageLimit = 500;
+
+		buildingType = BuildingType::Sawmill;
+		texture = TextureManager::get("FurnitureManufacture");
+
+		storage[ResourseType::ProcessedWood] = 0;
+		storage[ResourseType::Plank] = 0;
+		productionSpeed[ResourseType::Plank] = 90;
+		storage[ResourseType::Furniture] = 0;
+		productionSpeed[ResourseType::Furniture] = 15;
+	}
+
+	void update() override
+	{
+		if (!frozen)
+		{
+			if (!isStorageFull())
+			{
+				functioning = true;
+
+				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Plank] / 3 / 3600.)
+				{
+					storage[ResourseType::Plank] += productionSpeed[ResourseType::Plank] / 3600.;
+					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Plank] / 3 / 3600.;
+				}
+				else
+				{
+					functioning = false;
+				}
+
+				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Furniture] * 2 / 3600.)
+				{
+					storage[ResourseType::Furniture] += productionSpeed[ResourseType::Furniture] / 3600.;
+					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Furniture] * 2 / 3600.;
+				}
+				else
+				{
+					functioning = false;
+				}
 			}
 			else
 			{

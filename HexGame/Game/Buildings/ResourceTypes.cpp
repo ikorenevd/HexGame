@@ -4,40 +4,118 @@ int getResourceSize(ResourseType type)
 {
 	switch (type)
 	{
-	case ResourseType::RawWood: return 5;
+	case ResourseType::RawWood:
+		return 10;
 		break;
-
-	case ResourseType::ProcessedWood: return 3;
+	case ResourseType::ProcessedWood:
+		return 4;
 		break;
-
-	case ResourseType::Plank: return 1;
+	case ResourseType::Plank:
+		return 1;
 		break;
-
-	case ResourseType::Ore: return 4;
+	case ResourseType::Ore:
+		return 8;
 		break;
-
-	case ResourseType::PreciousOre: return 4;
+	case ResourseType::PreciousOre:
+		return 8;
 		break;
-
-	case ResourseType::Coal: return 2;
+	case ResourseType::Coal:
+		return 8;
 		break;
-
-	case ResourseType::Stone: return 4;
+	case ResourseType::Stone:
+		return 2;
 		break;
-
-	case ResourseType::Machine: return 10;
+	case ResourseType::Metal:
+		return 2;
 		break;
-
-	case ResourseType::Rail: return 5;
+	case ResourseType::PreciousMetal:
+		return 2;
 		break;
-
-	case ResourseType::Beam: return 5;
+	case ResourseType::Machine:
+		return 4;
 		break;
-
-	case ResourseType::Wearpon: return 2;
+	case ResourseType::Rail:
+		return 10;
 		break;
+	case ResourseType::Beam:
+		return 10;
+		break;
+	case ResourseType::Wearpon:
+		return 3;
+		break;
+	case ResourseType::Jewelry:
+		return 1;
+		break;
+	case ResourseType::Cereal:
+		return 1;
+		break;
+	case ResourseType::Meat:
+		return 1;
+		break;
+	case ResourseType::Cotton:
+		return 1;
+		break;
+	default:
+		break;
+	}
+}
 
-	case ResourseType::Jewelry: return 1;
+int getResourcePrice(ResourseType type)
+{
+	switch (type)
+	{
+	case ResourseType::RawWood:
+		return 5;
+		break;
+	case ResourseType::ProcessedWood:
+		return 5;
+		break;
+	case ResourseType::Plank:
+		return 5;
+		break;
+	case ResourseType::Ore:
+		return 5;
+		break;
+	case ResourseType::PreciousOre:
+		return 5;
+		break;
+	case ResourseType::Coal:
+		return 5;
+		break;
+	case ResourseType::Stone:
+		return 5;
+		break;
+	case ResourseType::Metal:
+		return 5;
+		break;
+	case ResourseType::PreciousMetal:
+		return 5;
+		break;
+	case ResourseType::Machine:
+		return 5;
+		break;
+	case ResourseType::Rail:
+		return 5;
+		break;
+	case ResourseType::Beam:
+		return 5;
+		break;
+	case ResourseType::Wearpon:
+		return 5;
+		break;
+	case ResourseType::Jewelry:
+		return 5;
+		break;
+	case ResourseType::Cereal:
+		return 5;
+		break;
+	case ResourseType::Meat:
+		return 5;
+		break;
+	case ResourseType::Cotton:
+		return 5;
+		break;
+	default:
 		break;
 	}
 }
@@ -46,40 +124,56 @@ std::string getResourceName(ResourseType type)
 {
 	switch (type)
 	{
-	case ResourseType::RawWood: return "RawWood";
+	case ResourseType::RawWood:
+		return "RawWood";
 		break;
-
-	case ResourseType::ProcessedWood: return "ProcessedWood";
+	case ResourseType::ProcessedWood:
+		return "ProcessedWood";
 		break;
-
-	case ResourseType::Plank: return "Plank";
+	case ResourseType::Plank:
+		return "Plank";
 		break;
-
-	case ResourseType::Ore: return "Ore";
+	case ResourseType::Ore:
+		return "Ore";
 		break;
-
-	case ResourseType::PreciousOre: return "PreciousOre";
+	case ResourseType::PreciousOre:
+		return "PreciousOre";
 		break;
-
-	case ResourseType::Coal: return "Coal";
+	case ResourseType::Coal:
+		return "Coal";
 		break;
-
-	case ResourseType::Stone: return "Stone";
+	case ResourseType::Stone:
+		return "Stone";
 		break;
-
-	case ResourseType::Machine: return "Machine";
+	case ResourseType::Metal:
+		return "Metal";
 		break;
-
-	case ResourseType::Rail: return "Rail";
+	case ResourseType::PreciousMetal:
+		return "PreciousMetal";
 		break;
-
-	case ResourseType::Beam: return "Beam";
+	case ResourseType::Machine:
+		return "Machine";
 		break;
-
-	case ResourseType::Wearpon: return "Wearpon";
+	case ResourseType::Rail:
+		return "Rail";
 		break;
-
-	case ResourseType::Jewelry: return "Jewelry";
+	case ResourseType::Beam:
+		return "Beam";
+		break;
+	case ResourseType::Wearpon:
+		return "Wearpon";
+		break;
+	case ResourseType::Jewelry:
+		return "Jewelry";
+		break;
+	case ResourseType::Cereal:
+		return "Cereal";
+		break;
+	case ResourseType::Meat:
+		return "Meat";
+		break;
+	case ResourseType::Cotton:
+		return "Cotton";
 		break;
 	}
 }
