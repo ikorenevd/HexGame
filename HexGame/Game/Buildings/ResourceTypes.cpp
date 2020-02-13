@@ -55,7 +55,8 @@ int getResourceSize(ResourseType type)
 	case ResourseType::Cotton:
 		return 1;
 		break;
-	default:
+	case ResourseType::Furniture:
+		return 3;
 		break;
 	}
 }
@@ -115,6 +116,9 @@ int getResourcePrice(ResourseType type)
 	case ResourseType::Cotton:
 		return 5;
 		break;
+	case ResourseType::Furniture:
+		return 5;
+		break;
 	}
 }
 
@@ -172,6 +176,9 @@ std::string getResourceName(ResourseType type)
 		break;
 	case ResourseType::Cotton:
 		return "Cotton";
+		break;
+	case ResourseType::Furniture:
+		return "Furniture";
 		break;
 	}
 }

@@ -108,9 +108,19 @@ int Building::getProduction(ResourseType type)
 	return currentProduction[type];
 }
 
+int Building::getDefaultProduction(ResourseType type)
+{
+	return defaultProduction[type];
+}
+
 std::unordered_map<ResourseType, int> Building::getProductions()
 {
 	return currentProduction;
+}
+
+std::unordered_map<ResourseType, int> Building::getDefaultProductions()
+{
+	return defaultProduction;
 }
 
 std::shared_ptr<Building> Building::getParent()

@@ -43,7 +43,9 @@ public:
 	int getStorage(ResourseType type);
 	int getUsedStorage();
 	int getProduction(ResourseType);
+	int getDefaultProduction(ResourseType);
 	std::unordered_map<ResourseType, int> getProductions();
+	std::unordered_map<ResourseType, int> getDefaultProductions();
 	BuildingType getBuildingType();
 	std::unordered_map<std::shared_ptr<Building>, ResourseType> getTransportationTargets();
 	std::vector<std::shared_ptr<Building>> getExtensionBuildings();
@@ -79,7 +81,7 @@ public:
 		texture = TextureManager::get("Felled");
 
 		storage[ResourseType::RawWood] = 0;
-		defaultProduction[ResourseType::RawWood] = 45;
+		defaultProduction[ResourseType::RawWood] = 20;
 	}
 
 	void update() override
@@ -114,7 +116,7 @@ public:
 		storage[ResourseType::RawWood] = 0;
 		defaultProduction[ResourseType::RawWood] = -10;
 		storage[ResourseType::ProcessedWood] = 0;
-		defaultProduction[ResourseType::ProcessedWood] = 30;	
+		defaultProduction[ResourseType::ProcessedWood] = 20;	
 	}
 
 	void update() override
@@ -133,7 +135,7 @@ public:
 					currentProduction[ResourseType::ProcessedWood] = defaultProduction[ResourseType::ProcessedWood];
 
 					storage[ResourseType::ProcessedWood] += currentProduction[ResourseType::ProcessedWood] / 3600.;
-					storage[ResourseType::RawWood] += defaultProduction[ResourseType::ProcessedWood] / 3 / 3600.;
+					storage[ResourseType::RawWood] += currentProduction[ResourseType::ProcessedWood] / 3600.;
 				}
 				else
 					functioning = false;
@@ -156,13 +158,13 @@ public:
 		texture = TextureManager::get("FurnitureManufacture");
 
 		storage[ResourseType::ProcessedWood] = 0;
-		defaultProduction[ResourseType::ProcessedWood] = -135;
+		defaultProduction[ResourseType::ProcessedWood] = -50;
 
 		storage[ResourseType::Plank] = 0;
-		defaultProduction[ResourseType::Plank] = 90;
+		defaultProduction[ResourseType::Plank] = 40;
 
 		storage[ResourseType::Furniture] = 0;
-		defaultProduction[ResourseType::Furniture] = 15;
+		defaultProduction[ResourseType::Furniture] = 5;
 	}
 
 	void update() override
