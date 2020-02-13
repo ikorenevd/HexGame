@@ -16,7 +16,8 @@ public:
 	int storageLimit;
 
 	std::unordered_map<ResourseType, float> storage;
-	std::unordered_map<ResourseType, int> productionSpeed;
+	std::unordered_map<ResourseType, int> defaultProduction;
+	std::unordered_map<ResourseType, int> currentProduction;
 	std::shared_ptr<Texture> texture;
 	std::unordered_map<std::shared_ptr<Building>, ResourseType> selectedTransportingTargets;
 	std::vector<std::shared_ptr<Building>> extensionBuildings;
@@ -31,20 +32,18 @@ public:
 	void setFrozen(bool setFrozen);
 	void setStorage(ResourseType type, float value);
 	void setTransportationTarget(std::shared_ptr<Building>& building, ResourseType type);
-	void setExtension(std::shared_ptr<Building>& building);
 	void deleteTransportationTarget(std::shared_ptr<Building> building);
+	void setExtension(std::shared_ptr<Building>& building);
 
 	std::shared_ptr<Texture> getTexture();
 	bool isFrozen();
 	bool isFunctioning();
 	bool isStorageFull();
+	float getUpkeep();
 	int getStorage(ResourseType type);
 	int getUsedStorage();
-	int getResourseAmount(ResourseType);
 	int getProduction(ResourseType);
-	std::unordered_map<ResourseType, int> getAllProduction();
-	float getUpkeep();
-	int getExtensionAmount(BuildingType type);
+	std::unordered_map<ResourseType, int> getProductions();
 	BuildingType getBuildingType();
 	std::unordered_map<std::shared_ptr<Building>, ResourseType> getTransportationTargets();
 	std::vector<std::shared_ptr<Building>> getExtensionBuildings();
@@ -80,18 +79,20 @@ public:
 		texture = TextureManager::get("Felled");
 
 		storage[ResourseType::RawWood] = 0;
-		productionSpeed[ResourseType::RawWood] = 45;
-
+		defaultProduction[ResourseType::RawWood] = 45;
 	}
 
 	void update() override
 	{
+		currentProduction[ResourseType::RawWood] = 0;
+
 		if (!frozen)
 		{
 			if (!isStorageFull())
 			{
 				functioning = true;
-				storage[ResourseType::RawWood] += productionSpeed[ResourseType::RawWood] / 3600.;
+				currentProduction[ResourseType::RawWood] = defaultProduction[ResourseType::RawWood];
+				storage[ResourseType::RawWood] += currentProduction[ResourseType::RawWood] / 3600.;
 			}
 			else
 				functioning = false;
@@ -111,21 +112,28 @@ public:
 		texture = TextureManager::get("Sawmill");
 
 		storage[ResourseType::RawWood] = 0;
+		defaultProduction[ResourseType::RawWood] = -10;
 		storage[ResourseType::ProcessedWood] = 0;
-		productionSpeed[ResourseType::ProcessedWood] = 30;	
+		defaultProduction[ResourseType::ProcessedWood] = 30;	
 	}
 
 	void update() override
 	{
+		currentProduction[ResourseType::ProcessedWood] = 0;
+		currentProduction[ResourseType::RawWood] = 0;
+
 		if (!frozen)
 		{
 			if ( !isStorageFull() )
 			{
-				if (storage[ResourseType::RawWood] >= productionSpeed[ResourseType::ProcessedWood] / 3 / 3600.)
+				if (storage[ResourseType::RawWood] >= -defaultProduction[ResourseType::RawWood] / 3600.)
 				{
 					functioning = true;
-					storage[ResourseType::ProcessedWood] += productionSpeed[ResourseType::ProcessedWood] / 3600.;
-					storage[ResourseType::RawWood] -= productionSpeed[ResourseType::ProcessedWood] / 3 / 3600.;
+					currentProduction[ResourseType::RawWood] = defaultProduction[ResourseType::RawWood];
+					currentProduction[ResourseType::ProcessedWood] = defaultProduction[ResourseType::ProcessedWood];
+
+					storage[ResourseType::ProcessedWood] += currentProduction[ResourseType::ProcessedWood] / 3600.;
+					storage[ResourseType::RawWood] += defaultProduction[ResourseType::ProcessedWood] / 3 / 3600.;
 				}
 				else
 					functioning = false;
@@ -148,130 +156,38 @@ public:
 		texture = TextureManager::get("FurnitureManufacture");
 
 		storage[ResourseType::ProcessedWood] = 0;
+		defaultProduction[ResourseType::ProcessedWood] = -135;
+
 		storage[ResourseType::Plank] = 0;
-		productionSpeed[ResourseType::Plank] = 90;
+		defaultProduction[ResourseType::Plank] = 90;
+
 		storage[ResourseType::Furniture] = 0;
-		productionSpeed[ResourseType::Furniture] = 15;
+		defaultProduction[ResourseType::Furniture] = 15;
 	}
 
 	void update() override
 	{
+		currentProduction[ResourseType::ProcessedWood] = 0;
+		currentProduction[ResourseType::Plank] = 0;
+		currentProduction[ResourseType::Furniture] = 0;
+
 		if (!frozen)
 		{
 			if (!isStorageFull())
 			{
-				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Plank] / 3 / 3600.)
+				if (storage[ResourseType::ProcessedWood] >= -defaultProduction[ResourseType::ProcessedWood] / 3600.)
 				{
 					functioning = true;
-					storage[ResourseType::Plank] += productionSpeed[ResourseType::Plank] / 3600.;
-					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Plank] / 3 / 3600.;
+					currentProduction[ResourseType::ProcessedWood] = defaultProduction[ResourseType::ProcessedWood];
+					currentProduction[ResourseType::Plank] = defaultProduction[ResourseType::Plank];
+					currentProduction[ResourseType::Furniture] = defaultProduction[ResourseType::Furniture];
+
+					storage[ResourseType::ProcessedWood] += currentProduction[ResourseType::ProcessedWood] / 3600.;
+					storage[ResourseType::Plank] += currentProduction[ResourseType::Plank] / 3600.;
+					storage[ResourseType::Furniture] += currentProduction[ResourseType::Furniture] / 3600.;
 				}
 				else
 					functioning = false;
-
-				if (storage[ResourseType::ProcessedWood] >= productionSpeed[ResourseType::Furniture] * 2 / 3600.)
-				{
-					functioning = true;
-					storage[ResourseType::Furniture] += productionSpeed[ResourseType::Furniture] / 3600.;
-					storage[ResourseType::ProcessedWood] -= productionSpeed[ResourseType::Furniture] * 2 / 3600.;
-				}
-				else
-					functioning = false;
-			}
-			else
-				functioning = false;
-		}
-	}
-};
-
-class Foundry : public MainBuilding
-{
-public:
-	Foundry(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
-	{
-		upkeep = 50 / 3600.;
-		storageLimit = 1000;
-
-		buildingType = BuildingType::Foundry;
-		texture = TextureManager::get("Foundry");
-
-		storage[ResourseType::Ore] = 0;
-		storage[ResourseType::PreciousOre] = 0;
-		storage[ResourseType::Coal] = 0;
-		storage[ResourseType::Metal] = 0;
-		productionSpeed[ResourseType::Metal] = 50;
-		storage[ResourseType::PreciousMetal] = 0;
-		productionSpeed[ResourseType::PreciousMetal] = 25;
-	}
-
-	void update() override
-	{
-		if (!frozen)
-		{
-			if (!isStorageFull())
-			{
-				functioning = true;
-
-				if (storage[ResourseType::Coal] >= (productionSpeed[ResourseType::Metal] * 2 + productionSpeed[ResourseType::PreciousMetal]) / 3600.)
-				{
-					if (storage[ResourseType::Ore] >= productionSpeed[ResourseType::Metal] * 2 / 3600.)
-					{
-						functioning = true;
-						storage[ResourseType::Metal] += productionSpeed[ResourseType::Metal] / 3600.;
-						storage[ResourseType::Ore] -= productionSpeed[ResourseType::Metal] * 2 / 3600.;
-						storage[ResourseType::Coal] -= productionSpeed[ResourseType::Metal] * 2 / 3600.;
-					}
-					else
-						functioning = false;
-
-					if (storage[ResourseType::PreciousOre] >= productionSpeed[ResourseType::PreciousMetal] / 3600.)
-					{
-						functioning = true;
-						storage[ResourseType::PreciousMetal] += productionSpeed[ResourseType::PreciousMetal] / 3600.;
-						storage[ResourseType::PreciousOre] -= productionSpeed[ResourseType::PreciousMetal] / 3600.;
-						storage[ResourseType::Coal] -= productionSpeed[ResourseType::PreciousMetal] / 3600.;
-					}
-					else
-							functioning = false;
-				}
-				else
-					functioning = false;
-			}
-			else
-				functioning = false;
-		}
-	}
-};
-
-class Mine : public MainBuilding
-{
-public:
-	Mine(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
-	{
-		upkeep = 75 / 3600.;
-		storageLimit = 1500;
-
-		buildingType = BuildingType::Mine;
-		texture = TextureManager::get("Mine");
-
-		storage[ResourseType::Ore] = 0;
-		productionSpeed[ResourseType::Ore] = 25;
-		storage[ResourseType::PreciousOre] = 0;
-		productionSpeed[ResourseType::PreciousOre] = 10;
-		storage[ResourseType::Coal] = 0;
-		productionSpeed[ResourseType::Coal] = 30;
-	}
-
-	void update() override
-	{
-		if (!frozen)
-		{
-			if (!isStorageFull())
-			{
-				functioning = true;
-				storage[ResourseType::Ore] += productionSpeed[ResourseType::Ore] / 3600.;
-				storage[ResourseType::PreciousOre] += productionSpeed[ResourseType::PreciousOre] / 3600.;
-				storage[ResourseType::Coal] += productionSpeed[ResourseType::Coal] / 3600.;
 			}
 			else
 				functioning = false;

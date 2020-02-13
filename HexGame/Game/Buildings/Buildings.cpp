@@ -66,46 +66,6 @@ BuildingType Building::getBuildingType()
 	return buildingType;
 }
 
-int Building::getExtensionAmount(BuildingType type)
-{
-	int amount = 0;
-
-	for (auto extensionBuiding : extensionBuildings)
-	{
-		if (extensionBuiding->getBuildingType() == type)
-			amount++;
-	}
-
-	return amount;
-}
-
-int Building::getUsedStorage()
-{
-	int storageUsed = 0;
-
-	for (auto i : storage)
-	{
-		storageUsed += getResourceSize(i.first) * i.second;
-	}
-
-	return storageUsed;
-}
-
-int Building::getResourseAmount(ResourseType type)
-{
-	return storage[type];
-}
-
-int Building::getProduction(ResourseType type)
-{
-	return productionSpeed[type];
-}
-
-std::unordered_map<ResourseType, int> Building::getAllProduction()
-{
-	return productionSpeed;
-}
-
 bool Building::isFrozen()
 {
 	return frozen;
@@ -126,9 +86,31 @@ int Building::getStorage(ResourseType type)
 	return storage[type];
 }
 
+int Building::getUsedStorage()
+{
+	int storageUsed = 0;
+
+	for (auto i : storage)
+	{
+		storageUsed += getResourceSize(i.first) * i.second;
+	}
+
+	return storageUsed;
+}
+
 bool Building::isStorageFull()
 {
 	return getUsedStorage() >= storageLimit;
+}
+
+int Building::getProduction(ResourseType type)
+{
+	return currentProduction[type];
+}
+
+std::unordered_map<ResourseType, int> Building::getProductions()
+{
+	return currentProduction;
 }
 
 std::shared_ptr<Building> Building::getParent()

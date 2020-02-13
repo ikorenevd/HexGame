@@ -112,12 +112,12 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(60, 60), TextureManager::get("Felled"), "Felled"));
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 240), glm::vec2(60, 60), TextureManager::get("Sawmill"), "Sawmill"));
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 180), glm::vec2(60, 60), TextureManager::get("FurnitureManufacture"), "FurnitureManufacture"));
-	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 120), glm::vec2(60, 60), TextureManager::get("Mine"), "Mine"));
+	/*buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 120), glm::vec2(60, 60), TextureManager::get("Mine"), "Mine"));
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 60), glm::vec2(60, 60), TextureManager::get("Foundry"), "Foundry"));
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 0), glm::vec2(60, 60), TextureManager::get("MachineShop"), "MachineShop"));
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -60), glm::vec2(60, 60), TextureManager::get("Armory"), "Armory"));
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -120), glm::vec2(60, 60), TextureManager::get("Farm"), "Farm"));
-	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -180), glm::vec2(60, 60), TextureManager::get("TradingWarehouse"), "TradingWarehouse"));
+	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, -180), glm::vec2(60, 60), TextureManager::get("TradingWarehouse"), "TradingWarehouse"));*/
 
 	buttonsExtensionBuildings.push_back(std::make_shared<Button>(glm::vec2(-575, 300), glm::vec2(80, 80), TextureManager::get("Warehouse"), "Warehouse"));
 }
@@ -187,7 +187,7 @@ void MapLayer::update()
 			{
 				for (auto transportationTarget : building->getTransportationTargets())
 				{
-					if (!(transportationTarget.first->isStorageFull()) && (building->getResourseAmount(transportationTarget.second) > 0))
+					if (!(transportationTarget.first->isStorageFull()) && (building->getStorage(transportationTarget.second) > 0))
 					{
 						transportationTargetsAmount++;
 					}
@@ -199,7 +199,7 @@ void MapLayer::update()
 			{
 				for (auto transportationTarget : building->getTransportationTargets())
 				{
-					if (!(transportationTarget.first->isStorageFull()) && (building->getResourseAmount(transportationTarget.second) > 0))
+					if (!(transportationTarget.first->isStorageFull()) && (building->getStorage(transportationTarget.second) > 0))
 					{
 						building->setStorage(transportationTarget.second, -building->getProduction(transportationTarget.second) / transportationTargetsAmount / 3600.);
 						transportationTarget.first->setStorage(transportationTarget.second, +building->getProduction(transportationTarget.second) / transportationTargetsAmount / 3600.);
@@ -226,7 +226,7 @@ void MapLayer::update()
 		{
 			for (int i = 0; i < 15; i++)
 			{
-				storageMap[(ResourseType)i] += building->getResourseAmount((ResourseType)i);
+				storageMap[(ResourseType)i] += building->getStorage((ResourseType)i);
 			}
 		}
 
@@ -422,21 +422,6 @@ void MapLayer::update()
 				selectedBuilding = buildings.back();
 				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				break;
-
-			case BuildingType::Mine:
-				if (selectedTile->getTerrainType() == TerrainType::Mountain)
-				{
-					buildings.push_back(std::make_shared<Mine>(selectedTile));
-					selectedBuilding = buildings.back();
-					treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
-				}
-				break;
-
-			case BuildingType::Foundry:
-				buildings.push_back(std::make_shared<Foundry>(selectedTile));
-				selectedBuilding = buildings.back();
-				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
-				break;
 			}
 		}
 	}
@@ -448,12 +433,9 @@ void MapLayer::update()
 			switch (pickedBuildingButton->getBuildingType())
 			{
 			case BuildingType::Warehouse:
-				if (selectedBuilding->getExtensionAmount(BuildingType::Warehouse) < 2)
-				{
-					buildings.push_back(std::make_shared<Warehouse>(selectedExtensionTile, selectedBuilding));
-					selectedBuilding->setExtension(buildings.back());
-					selectedExtensionBuilding = buildings.back();
-				}
+				buildings.push_back(std::make_shared<Warehouse>(selectedExtensionTile, selectedBuilding));
+				selectedBuilding->setExtension(buildings.back());
+				selectedExtensionBuilding = buildings.back();
 				break;
 			}
 		}
@@ -481,6 +463,14 @@ void MapLayer::update()
 		}
 	}
 
+	// Заморозка здания
+	if (Keyboard::isKeyPressed(GLFW_KEY_F) && selectedBuilding != nullptr)
+	{
+		if (!selectedBuilding->isFrozen())
+			selectedBuilding->setFrozen(true);
+		else
+			selectedBuilding->setFrozen(false);
+	}
 
 	// Выбор типа интерфейса
 	if (Keyboard::isKeyPressed(GLFW_KEY_ESCAPE))
@@ -497,9 +487,9 @@ void MapLayer::update()
 				interface = UI::Transportation;
 
 				int i = 300;
-				for (auto resource : selectedBuilding->getAllProduction())
+				for (auto resource : selectedBuilding->getProductions())
 				{
-					if (resource.second >= 0)
+					if (resource.second > 0)
 					{
 						buttonsResources.push_back(std::make_shared<Button>(glm::vec2(-575, i), glm::vec2(80, 80), TextureManager::get(getResourceName(resource.first)), getResourceName(resource.first)));
 						i = i - 60;
@@ -540,21 +530,7 @@ void MapLayer::update()
 	// Debug
 	if (debug)
 	{
-		int number = 0;
 		std::cout << std::endl;
-
-		if (selectedBuilding != nullptr)
-			std::cout << "Selected Building:" << selectedBuilding->getTile()->getCoordinates().x << selectedBuilding->getTile()->getCoordinates().y << selectedBuilding->getTile()->getCoordinates().z << std::endl;
-		if (selectedTransportationBuilding != nullptr)
-			std::cout << "Selected Transportation Building:" << selectedTransportationBuilding->getTile()->getCoordinates().x << selectedTransportationBuilding->getTile()->getCoordinates().y << selectedTransportationBuilding->getTile()->getCoordinates().z << std::endl;
-		if (selectedTransportationTile != nullptr)
-			std::cout << "Selected Transportation Tile:" << selectedTransportationTile->getCoordinates().x << selectedTransportationTile->getCoordinates().y << selectedTransportationTile->getCoordinates().z << std::endl;
-		if (selectedTile != nullptr)
-			std::cout << "Selected Tile:" << selectedTile->getCoordinates().x << selectedTile->getCoordinates().y << selectedTile->getCoordinates().z << std::endl;
-		if (selectedExtensionBuilding != nullptr)
-			std::cout << "Selected Ext Building:" << selectedExtensionBuilding->getTile()->getCoordinates().x << selectedExtensionBuilding->getTile()->getCoordinates().y << selectedExtensionBuilding->getTile()->getCoordinates().z << std::endl;
-		if (selectedExtensionTile != nullptr)
-			std::cout << "Selected Ext Tile:" << selectedExtensionTile->getCoordinates().x << selectedExtensionTile->getCoordinates().y << selectedExtensionTile->getCoordinates().z << std::endl;
 
 		if (interface == UI::Transportation) 
 			std::cout << "UI Mode: Transporting" << std::endl;
@@ -565,27 +541,20 @@ void MapLayer::update()
 
 		std::cout << "Treasury Money: " << round(treasuryMoney) << " coins" << std::endl;
 		std::cout << "Upkeep: " << round(totalUpkeep * 3600) << " coins / minute" << std::endl;
-		std::cout << "Map Storage:" << std::endl;
-
-		for (int i = 0; i < 15; i++)
-		{
-			if (storageMap[(ResourseType)i] != 0) std::cout << getResourceName( (ResourseType)i ) << " - " << storageMap[(ResourseType)i] << std::endl;
-		}
-
 		std::cout << std::endl;
 
 		for (auto building : buildings)
 		{
-			std::cout << "Building " << number << ": ";
+			std::cout << "--- " << getBuildingName(building->getBuildingType()) << ": ";
+
+			if (!(building->isFrozen()) && building->isFunctioning()) std::cout << "(Functioning) ";
+
+			std::cout << std::endl;
 
 			for (int i = 0; i < 15; i++)
 			{
-				if (building->getResourseAmount((ResourseType)i) != 0) std::cout << "   " << getResourceName((ResourseType)i) << " - " << building->getResourseAmount((ResourseType)i);
+				if (building->getStorage((ResourseType)i) != 0) std::cout << "     " << getResourceName((ResourseType)i) << " - " << building->getStorage((ResourseType)i) << " | " << building->getProduction((ResourseType)i) << " / hour" << std::endl;
 			}
-
-			number++;
-
-			std::cout << std::endl;
 		}
 	}
 }
