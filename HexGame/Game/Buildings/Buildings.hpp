@@ -327,22 +327,22 @@ class TradingWarehouse : public MainBuilding
 public:
 	TradingWarehouse(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
+		functioning = true;
 		upkeep = 100 / 3600.;
 		storageLimit = 1000;
 
 		for (int i = 0; i < 20; i++)
 		{
-			storage.insert({ (ResourseType)i, 0 });
+			storage[(ResourseType)i] = 0;
 		};
 
 		for (int i = 0; i < 20; i++)
 		{
-			defaultProduction.insert({ (ResourseType)i, -50 });
+			defaultProduction[(ResourseType)i] = -50;
 		};
 
 		buildingType = BuildingType::TradingWarehouse;
 		texture = TextureManager::get("TradingWarehouse");
-		functioning = true;
 	}
 };
 

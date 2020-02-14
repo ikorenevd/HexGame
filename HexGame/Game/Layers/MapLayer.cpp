@@ -192,7 +192,7 @@ void MapLayer::update()
 			building->setFrozen(false);
 	}
 
-	// Обновление состояние зданий, общей стоимости их содержания и казны города
+	// Транспортировка, обновление состояние зданий, общей стоимости их содержания и казны города
 	totalUpkeep = 0;
 
 	for (auto building : buildings)
@@ -206,9 +206,9 @@ void MapLayer::update()
 			// Продажа ресурсов
 			if (building->getBuildingType() == BuildingType::TradingWarehouse)
 			{
-				for (int i = 0; i < 20; i++)
+				for (int i = 0; i < 20; i++)	
 				{
-					if (building->getStorage((ResourseType)i) >= 1)
+					if (building->getStorage((ResourseType)i) >= 10)
 					{
 						treasuryMoney += getResourcePrice((ResourseType)i) * building->getStorage((ResourseType)i);
 						building->setStorage((ResourseType)i, -building->getStorage((ResourseType)i));
@@ -217,48 +217,33 @@ void MapLayer::update()
 			}
 
 			// Транспортировка
-			for (auto resource : building->getDefaultProductions())
+			std::unordered_map<ResourseType, int> demand;
+			std::unordered_map<ResourseType, int> targets;
+
+			for (auto target : building->getTransportationTargets())
 			{
-				if (resource.second > 0)
+				if (!target.first->isFrozen() && !target.first->isStorageFull())
 				{
-					int targets = 0;
-					int demand = 0;
+					demand[target.second] += -target.first->getDefaultProduction(target.second);
+					targets[target.second]++;
+				}
+			}
 
-					// Подсчет спроса и количества целей
-					for (auto target : building->getTransportationTargets())
+			for (auto target : building->getTransportationTargets())
+			{
+				if (!target.first->isFrozen() && !target.first->isStorageFull() && target.first->getDefaultProduction(target.second) < 0)
+				{
+					if (demand[target.second] <= building->getDefaultProduction(target.second))
 					{
-						if (target.second == resource.first && building->getStorage(resource.first) > 0 && !target.first->isStorageFull() && !target.first->isFrozen())
-						{
-							targets++;
-							demand += target.first->getDefaultProduction(resource.first);
-						}
+						building->setStorage(target.second, target.first->getDefaultProduction(target.second) / 3600.);
+						target.first->setStorage(target.second, -target.first->getDefaultProduction(target.second) / 3600.);
 					}
-
-					if (targets > 0)
+					else
 					{
-						// Если спрос меньше предложения
-						if (building->getDefaultProduction(resource.first) >= -demand)
-							for (auto target : building->getTransportationTargets())
-							{
-								if (target.second == resource.first && building->getStorage(resource.first) > 0 && !target.first->isStorageFull() && !target.first->isFrozen())
-								{
-									building->setStorage(resource.first, target.first->getDefaultProduction(resource.first) / 3600.);
-									target.first->setStorage(resource.first, -target.first->getDefaultProduction(resource.first) / 3600.);
-								}
-							}
-						else
-						// Если спрос больше предложения
-							for (auto target : building->getTransportationTargets())
-							{
-								if (target.second == resource.first && building->getStorage(resource.first) > 0 && !target.first->isStorageFull() && !target.first->isFrozen())
-								{
-									building->setStorage(resource.first, -building->getDefaultProduction(resource.first) / targets / 3600.);
-									target.first->setStorage(resource.first, building->getDefaultProduction(resource.first) / targets / 3600.);
-								}	
-							}
+						building->setStorage(target.second, -building->getDefaultProduction(target.second) / targets[target.second] / 3600.);
+						target.first->setStorage(target.second, building->getDefaultProduction(target.second) / targets[target.second] / 3600.);
 					}
 				}
-
 			}
 		}
 		else
@@ -270,25 +255,20 @@ void MapLayer::update()
 	treasuryMoney -= totalUpkeep;
 
 	// Расчет общих ресурсов карты
-	if (glfwGetTime() - lastTime >= 1)
+	storageMap = {};
+
+	for (std::shared_ptr<Building> building : buildings)
 	{
-		storageMap = {};
-
-		for (std::shared_ptr<Building> building : buildings)
+		for (int i = 0; i < 15; i++)
 		{
-			for (int i = 0; i < 15; i++)
-			{
-				storageMap[(ResourseType)i] += building->getStorage((ResourseType)i);
-			}
+			storageMap[(ResourseType)i] += building->getStorage((ResourseType)i);
 		}
-
-		debug = true;		// Debug
-		lastTime++;
 	}
 
 	// Кнопки
-	if (interface == UI::Default)
+	switch (interface)
 	{
+	case UI::Default:
 		for (auto button : buttonsBuildings)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -297,22 +277,9 @@ void MapLayer::update()
 				break;
 			}
 		}
-	}
+		break;
 
-	if (interface == UI::Extension)
-	{
-		for (auto button : buttonsExtensionBuildings)
-		{
-			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-			{
-				pickedBuildingButton = button;
-				break;
-			}
-		}
-	}
-
-	if (interface == UI::Transportation)
-	{
+	case UI::Transportation:
 		for (auto button : buttonsResources)
 		{
 			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
@@ -321,6 +288,18 @@ void MapLayer::update()
 				break;
 			}
 		}
+		break;
+
+	case UI::Extension:
+		for (auto button : buttonsExtensionBuildings)
+		{
+			if (button->contains(cursorUI) && Mouse::isButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
+			{
+				pickedBuildingButton = button;
+				break;
+			}
+		}
+		break;
 	}
 
 	// Выделение клетки
@@ -625,7 +604,7 @@ void MapLayer::update()
 	}
 
 	// Debug
-	if (debug)
+	if (glfwGetTime() - lastTime >= 1)
 	{
 		std::cout << std::endl;
 
@@ -659,6 +638,8 @@ void MapLayer::update()
 				if (building->getStorage((ResourseType)i) != 0) std::cout << "     " << getResourceName((ResourseType)i) << ": " << building->getStorage((ResourseType)i) << " | " << building->getProduction((ResourseType)i) << " / hour" << std::endl;
 			}
 		}
+
+		lastTime++;
 	}
 }
 
