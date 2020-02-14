@@ -67,7 +67,7 @@ ResourseType Button::getResourceType()
 	if (name == "Machine") return ResourseType::Machine;
 	if (name == "Rail") return ResourseType::Rail;
 	if (name == "Beam") return ResourseType::Beam;
-	if (name == "Wearpon") return ResourseType::Wearpon;
+	if (name == "Weapon") return ResourseType::Weapon;
 	if (name == "Jewelry") return ResourseType::Jewelry;
 	if (name == "Cereal") return ResourseType::Cereal;
 	if (name == "Meat") return ResourseType::Meat;

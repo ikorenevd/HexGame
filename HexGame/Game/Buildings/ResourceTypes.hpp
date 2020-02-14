@@ -15,7 +15,7 @@ enum class ResourseType
 	Machine,
 	Rail,
 	Beam,
-	Wearpon,
+	Weapon,
 	Jewelry,
 	Cereal,
 	Meat,

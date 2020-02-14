@@ -168,6 +168,7 @@
     <Image Include="Assets\Textures\Buildings\mine.png" />
     <Image Include="Assets\Textures\Buildings\Sawmill.png" />
     <Image Include="Assets\Textures\Buildings\Warehouse.png" />
+    <Image Include="Assets\Textures\Frame.png" />
     <Image Include="Assets\Textures\Hex.png" />
     <Image Include="Assets\Textures\Hex\Hex.png" />
     <Image Include="Assets\Textures\Hex\PointedHex.png" />

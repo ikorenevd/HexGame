@@ -90,7 +90,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	TextureManager::add("Machine", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Machine.png", ColorModel::RGBA));
 	TextureManager::add("Rail", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Rail.png", ColorModel::RGBA));
 	TextureManager::add("Beam", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Beam.png", ColorModel::RGBA));
-	TextureManager::add("Wearpon", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Wearpon.png", ColorModel::RGBA));
+	TextureManager::add("Weapon", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Weapon.png", ColorModel::RGBA));
 	TextureManager::add("Jewelry", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Jewelry.png", ColorModel::RGBA));
 	TextureManager::add("Cereal", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Cereal.png", ColorModel::RGBA));
 	TextureManager::add("Meat", std::make_shared<Texture>("Assets\\Textures\\Icons\\Resources\\Meat.png", ColorModel::RGBA));
@@ -142,7 +142,7 @@ MapLayer::MapLayer(const std::shared_ptr<Map>& map) :
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-485, -50), glm::vec2(250, 50), TextureManager::get("Farm_Text"), "Farm"));
 	buttonsBuildings.push_back(std::make_shared<Button>(glm::vec2(-485, -100), glm::vec2(250, 50), TextureManager::get("TradingWarehouse_Text"), "TradingWarehouse"));
 
-	buttonsExtensionBuildings.push_back(std::make_shared<Button>(glm::vec2(-490, 300), glm::vec2(240, 80), TextureManager::get("Warehouse"), "Warehouse"));
+	buttonsExtensionBuildings.push_back(std::make_shared<Button>(glm::vec2(-485, 300), glm::vec2(250, 50), TextureManager::get("Warehouse_Text"), "Warehouse"));
 }
 
 void MapLayer::update()
@@ -200,8 +200,21 @@ void MapLayer::update()
 		building->update();
 
 		if (!building->isFrozen() and building->isFunctioning())
-		{
+		{	
 			totalUpkeep += building->getUpkeep();
+
+			// Продажа ресурсов
+			if (building->getBuildingType() == BuildingType::TradingWarehouse)
+			{
+				for (int i = 0; i < 20; i++)
+				{
+					if (building->getStorage((ResourseType)i) >= 1)
+					{
+						treasuryMoney += getResourcePrice((ResourseType)i) * building->getStorage((ResourseType)i);
+						building->setStorage((ResourseType)i, -building->getStorage((ResourseType)i));
+					}
+				};
+			}
 
 			// Транспортировка
 			for (auto resource : building->getDefaultProductions())
@@ -229,8 +242,8 @@ void MapLayer::update()
 							{
 								if (target.second == resource.first && building->getStorage(resource.first) > 0 && !target.first->isStorageFull() && !target.first->isFrozen())
 								{
-									building->setStorage(resource.first, target.first->getDefaultProduction(resource.first) / targets / 3600.);
-									target.first->setStorage(resource.first, -target.first->getDefaultProduction(resource.first) / targets / 3600.);
+									building->setStorage(resource.first, target.first->getDefaultProduction(resource.first) / 3600.);
+									target.first->setStorage(resource.first, -target.first->getDefaultProduction(resource.first) / 3600.);
 								}
 							}
 						else
@@ -456,6 +469,27 @@ void MapLayer::update()
 
 			case BuildingType::FurnitureManufacture:
 				buildings.push_back(std::make_shared<FurnitureManufacture>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				break;
+
+			case BuildingType::Mine:
+				if (selectedTile->getTerrainType() == TerrainType::Mountain)
+				{
+					buildings.push_back(std::make_shared<Mine>(selectedTile));
+					selectedBuilding = buildings.back();
+					treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				}
+				break;
+
+			case BuildingType::TradingWarehouse:
+				buildings.push_back(std::make_shared<TradingWarehouse>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				break;
+
+			case BuildingType::Foundry:
+				buildings.push_back(std::make_shared<Foundry>(selectedTile));
 				selectedBuilding = buildings.back();
 				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				break;

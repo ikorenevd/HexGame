@@ -40,7 +40,7 @@ int getResourceSize(ResourseType type)
 	case ResourseType::Beam:
 		return 10;
 		break;
-	case ResourseType::Wearpon:
+	case ResourseType::Weapon:
 		return 3;
 		break;
 	case ResourseType::Jewelry:
@@ -66,7 +66,7 @@ int getResourcePrice(ResourseType type)
 	switch (type)
 	{
 	case ResourseType::RawWood:
-		return 5;
+		return 10;
 		break;
 	case ResourseType::ProcessedWood:
 		return 5;
@@ -75,37 +75,37 @@ int getResourcePrice(ResourseType type)
 		return 5;
 		break;
 	case ResourseType::Ore:
-		return 5;
+		return 15;
 		break;
 	case ResourseType::PreciousOre:
-		return 5;
+		return 25;
 		break;
 	case ResourseType::Coal:
-		return 5;
+		return 10;
 		break;
 	case ResourseType::Stone:
-		return 5;
+		return 10;
 		break;
 	case ResourseType::Metal:
-		return 5;
+		return 20;
 		break;
 	case ResourseType::PreciousMetal:
-		return 5;
+		return 40;
 		break;
 	case ResourseType::Machine:
-		return 5;
+		return 50;
 		break;
 	case ResourseType::Rail:
-		return 5;
+		return 75;
 		break;
 	case ResourseType::Beam:
-		return 5;
+		return 40;
 		break;
-	case ResourseType::Wearpon:
-		return 5;
+	case ResourseType::Weapon:
+		return 100;
 		break;
 	case ResourseType::Jewelry:
-		return 5;
+		return 75;
 		break;
 	case ResourseType::Cereal:
 		return 5;
@@ -117,7 +117,7 @@ int getResourcePrice(ResourseType type)
 		return 5;
 		break;
 	case ResourseType::Furniture:
-		return 5;
+		return 25;
 		break;
 	}
 }
@@ -162,8 +162,8 @@ std::string getResourceName(ResourseType type)
 	case ResourseType::Beam:
 		return "Beam";
 		break;
-	case ResourseType::Wearpon:
-		return "Wearpon";
+	case ResourseType::Weapon:
+		return "Weapon";
 		break;
 	case ResourseType::Jewelry:
 		return "Jewelry";
