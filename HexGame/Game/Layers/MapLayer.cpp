@@ -227,7 +227,7 @@ void MapLayer::update()
 
 					for (auto target : building->getTransportationTargets())
 					{
-						if (!target.first->isFrozen() && !target.first->isStorageFull())
+						if (!target.first->isFrozen() && !target.first->isStorageFull() && target.first->getDefaultProduction(target.second) < 0 && target.second == (ResourseType)i)
 						{
 							targets++;
 						}
@@ -475,6 +475,12 @@ void MapLayer::update()
 
 			case BuildingType::Farm:
 				buildings.push_back(std::make_shared<Farm>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				break;
+
+			case BuildingType::MachineShop:
+				buildings.push_back(std::make_shared<MachineShop>(selectedTile));
 				selectedBuilding = buildings.back();
 				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				break;

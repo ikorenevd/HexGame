@@ -247,6 +247,7 @@ public:
 
 						storage[ResourseType::Metal] += currentProduction[ResourseType::Metal] / 3600.;
 						storage[ResourseType::Coal] += currentProduction[ResourseType::Coal] / 2 / 3600.;
+						storage[ResourseType::Ore] += currentProduction[ResourseType::Ore] / 3600.;
 					}
 					else
 						functioning = false;
@@ -260,7 +261,52 @@ public:
 
 						storage[ResourseType::PreciousMetal] += currentProduction[ResourseType::PreciousMetal] / 3600.;
 						storage[ResourseType::Coal] += currentProduction[ResourseType::Coal] / 2 / 3600.;
+						storage[ResourseType::PreciousOre] += currentProduction[ResourseType::PreciousOre] / 3600.;
 					}
+				}
+				else
+					functioning = false;
+			}
+			else
+				functioning = false;
+		}
+	}
+};
+
+class MachineShop : public MainBuilding
+{
+public:
+	MachineShop(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
+	{
+		upkeep = 100 / 3600.;
+		storageLimit = 1000;
+
+		buildingType = BuildingType::MachineShop;
+		texture = TextureManager::get("MachineShop");
+
+		storage[ResourseType::Metal] = 0;
+		defaultProduction[ResourseType::Metal] = -50;
+		storage[ResourseType::Machine] = 0;
+		defaultProduction[ResourseType::Machine] = 10;
+	}
+
+	void update() override
+	{
+		currentProduction[ResourseType::Metal] = 0;
+		currentProduction[ResourseType::Machine] = 0;
+
+		if (!frozen)
+		{
+			if (!isStorageFull())
+			{
+				if (storage[ResourseType::Metal] >= -defaultProduction[ResourseType::Machine] / 3600.)
+				{
+					functioning = true;
+					currentProduction[ResourseType::Metal] = defaultProduction[ResourseType::Metal];
+					currentProduction[ResourseType::Machine] = defaultProduction[ResourseType::Machine];
+
+					storage[ResourseType::Metal] += currentProduction[ResourseType::Metal] / 3600.;
+					storage[ResourseType::Machine] += currentProduction[ResourseType::Machine] / 3600.;
 				}
 				else
 					functioning = false;
