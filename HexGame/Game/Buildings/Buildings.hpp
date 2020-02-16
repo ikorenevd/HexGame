@@ -273,6 +273,57 @@ public:
 	}
 };
 
+class Armory : public MainBuilding
+{
+public:
+	Armory(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
+	{
+		upkeep = 100 / 3600.;
+		storageLimit = 1000;
+
+		buildingType = BuildingType::Armory;
+		texture = TextureManager::get("Armory");
+
+		storage[ResourseType::ProcessedWood] = 0;
+		defaultProduction[ResourseType::ProcessedWood] = -25;
+
+		storage[ResourseType::Metal] = 0;
+		defaultProduction[ResourseType::Metal] = -50;
+
+		storage[ResourseType::Weapon] = 0;
+		defaultProduction[ResourseType::Weapon] = 10;
+	}
+
+	void update() override
+	{
+		currentProduction[ResourseType::ProcessedWood] = 0;
+		currentProduction[ResourseType::Metal] = 0;
+		currentProduction[ResourseType::Weapon] = 0;
+
+		if (!frozen)
+		{
+			if (!isStorageFull())
+			{
+				if (storage[ResourseType::ProcessedWood] + storage[ResourseType::Metal] >= -(defaultProduction[ResourseType::ProcessedWood] + defaultProduction[ResourseType::Metal]) / 3600.)
+				{
+					functioning = true;
+					currentProduction[ResourseType::ProcessedWood] = defaultProduction[ResourseType::ProcessedWood];
+					currentProduction[ResourseType::Metal] = defaultProduction[ResourseType::Metal];
+					currentProduction[ResourseType::Weapon] = defaultProduction[ResourseType::Weapon];
+
+					storage[ResourseType::ProcessedWood] += currentProduction[ResourseType::ProcessedWood] / 3600.;
+					storage[ResourseType::Metal] += currentProduction[ResourseType::Metal] / 3600.;
+					storage[ResourseType::Weapon] += currentProduction[ResourseType::Weapon] / 3600.;
+				}
+				else
+					functioning = false;
+			}
+			else
+				functioning = false;
+		}
+	}
+};
+
 class MachineShop : public MainBuilding
 {
 public:
@@ -323,22 +374,22 @@ public:
 	Mine(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
 		upkeep = 75 / 3600.;
-		storageLimit = 1000;
+		storageLimit = 10000;
 
 		buildingType = BuildingType::Mine;
 		texture = TextureManager::get("Mine");
 
 		storage[ResourseType::Coal] = 0;
-		defaultProduction[ResourseType::Coal] = 60;
+		defaultProduction[ResourseType::Coal] = 30;
 
 		storage[ResourseType::Ore] = 0;
-		defaultProduction[ResourseType::Ore] = 40;
+		defaultProduction[ResourseType::Ore] = 10;
 
 		storage[ResourseType::PreciousOre] = 0;
-		defaultProduction[ResourseType::PreciousOre] = 20;
+		defaultProduction[ResourseType::PreciousOre] = 5;
 
 		storage[ResourseType::Stone] = 0;
-		defaultProduction[ResourseType::Stone] = 80;
+		defaultProduction[ResourseType::Stone] = 40;
 	}
 
 	void update() override
@@ -357,7 +408,8 @@ public:
 				currentProduction[ResourseType::Coal] = defaultProduction[ResourseType::Coal];
 				currentProduction[ResourseType::Ore] = defaultProduction[ResourseType::Ore];
 				currentProduction[ResourseType::PreciousOre] = defaultProduction[ResourseType::PreciousOre];
-				currentProduction[ResourseType::Stone] = defaultProduction[ResourseType::Stone];
+				if (storage[ResourseType::Stone] < 100)
+					currentProduction[ResourseType::Stone] = defaultProduction[ResourseType::Stone];
 
 				storage[ResourseType::Coal] += currentProduction[ResourseType::Coal] / 3600.;
 				storage[ResourseType::Ore] += currentProduction[ResourseType::Ore] / 3600.;
@@ -410,7 +462,6 @@ class TradingWarehouse : public MainBuilding
 public:
 	TradingWarehouse(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
 	{
-		functioning = true;
 		upkeep = 100 / 3600.;
 		storageLimit = 1000;
 
@@ -422,6 +473,14 @@ public:
 
 		buildingType = BuildingType::TradingWarehouse;
 		texture = TextureManager::get("TradingWarehouse");
+	}
+
+	void update() override
+	{
+		functioning = false;
+
+		if (getUsedStorage() > 0)
+			functioning = true;
 	}
 };
 

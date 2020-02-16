@@ -474,13 +474,22 @@ void MapLayer::update()
 				break;
 
 			case BuildingType::Farm:
-				buildings.push_back(std::make_shared<Farm>(selectedTile));
-				selectedBuilding = buildings.back();
-				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				if (selectedTile->getTerrainType() != TerrainType::Mountain)
+				{
+					buildings.push_back(std::make_shared<Farm>(selectedTile));
+					selectedBuilding = buildings.back();
+					treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				}
 				break;
 
 			case BuildingType::MachineShop:
 				buildings.push_back(std::make_shared<MachineShop>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				break;
+
+			case BuildingType::Armory:
+				buildings.push_back(std::make_shared<Armory>(selectedTile));
 				selectedBuilding = buildings.back();
 				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				break;
