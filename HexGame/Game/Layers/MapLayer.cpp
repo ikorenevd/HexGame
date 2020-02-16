@@ -208,7 +208,7 @@ void MapLayer::update()
 			{
 				for (int i = 0; i < 20; i++)	
 				{
-					if (building->getStorage((ResourseType)i) >= 10)
+					if (building->getStorage((ResourseType)i) >= 50)
 					{
 						treasuryMoney += getResourcePrice((ResourseType)i) * building->getStorage((ResourseType)i);
 						building->setStorage((ResourseType)i, -building->getStorage((ResourseType)i));
@@ -217,31 +217,31 @@ void MapLayer::update()
 			}
 
 			// Транспортировка
-			std::unordered_map<ResourseType, int> demand;
-			std::unordered_map<ResourseType, int> targets;
+			int transportationSpeed = 15;
 
-			for (auto target : building->getTransportationTargets())
+			for (int i = 0; i < 20; i++)
 			{
-				if (!target.first->isFrozen() && !target.first->isStorageFull())
+				if (building->getStorage((ResourseType)i) >= transportationSpeed)
 				{
-					demand[target.second] += -target.first->getDefaultProduction(target.second);
-					targets[target.second]++;
-				}
-			}
+					float targets = 0;
 
-			for (auto target : building->getTransportationTargets())
-			{
-				if (!target.first->isFrozen() && !target.first->isStorageFull() && target.first->getDefaultProduction(target.second) < 0)
-				{
-					if (demand[target.second] <= building->getDefaultProduction(target.second))
+					for (auto target : building->getTransportationTargets())
 					{
-						building->setStorage(target.second, target.first->getDefaultProduction(target.second) / 3600.);
-						target.first->setStorage(target.second, -target.first->getDefaultProduction(target.second) / 3600.);
+						if (!target.first->isFrozen() && !target.first->isStorageFull())
+						{
+							targets++;
+						}
 					}
-					else
+
+					for (auto target : building->getTransportationTargets())
 					{
-						building->setStorage(target.second, -building->getDefaultProduction(target.second) / targets[target.second] / 3600.);
-						target.first->setStorage(target.second, building->getDefaultProduction(target.second) / targets[target.second] / 3600.);
+						if (!target.first->isFrozen() && !target.first->isStorageFull() && target.first->getDefaultProduction(target.second) < 0 && target.second == (ResourseType)i)
+						{
+							treasuryMoney -= building->getTile()->getDistance(target.first->getTile());
+
+							building->setStorage(target.second, -transportationSpeed / targets);
+							target.first->setStorage(target.second, transportationSpeed / targets);
+						}
 					}
 				}
 			}
@@ -469,6 +469,12 @@ void MapLayer::update()
 
 			case BuildingType::Foundry:
 				buildings.push_back(std::make_shared<Foundry>(selectedTile));
+				selectedBuilding = buildings.back();
+				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
+				break;
+
+			case BuildingType::Farm:
+				buildings.push_back(std::make_shared<Farm>(selectedTile));
 				selectedBuilding = buildings.back();
 				treasuryMoney -= getBuildingPrice(pickedBuildingButton->getBuildingType());
 				break;

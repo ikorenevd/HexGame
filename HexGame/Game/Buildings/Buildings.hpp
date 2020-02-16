@@ -81,7 +81,7 @@ public:
 		texture = TextureManager::get("Felled");
 
 		storage[ResourseType::RawWood] = 0;
-		defaultProduction[ResourseType::RawWood] = 20;
+		defaultProduction[ResourseType::RawWood] = 30;
 	}
 
 	void update() override
@@ -114,9 +114,9 @@ public:
 		texture = TextureManager::get("Sawmill");
 
 		storage[ResourseType::RawWood] = 0;
-		defaultProduction[ResourseType::RawWood] = -10;
+		defaultProduction[ResourseType::RawWood] = -15;
 		storage[ResourseType::ProcessedWood] = 0;
-		defaultProduction[ResourseType::ProcessedWood] = 20;	
+		defaultProduction[ResourseType::ProcessedWood] = 30;	
 	}
 
 	void update() override
@@ -134,8 +134,8 @@ public:
 					currentProduction[ResourseType::RawWood] = defaultProduction[ResourseType::RawWood];
 					currentProduction[ResourseType::ProcessedWood] = defaultProduction[ResourseType::ProcessedWood];
 
+					storage[ResourseType::RawWood] += currentProduction[ResourseType::RawWood] / 3600.;
 					storage[ResourseType::ProcessedWood] += currentProduction[ResourseType::ProcessedWood] / 3600.;
-					storage[ResourseType::RawWood] += currentProduction[ResourseType::ProcessedWood] / 3600.;
 				}
 				else
 					functioning = false;
@@ -158,13 +158,13 @@ public:
 		texture = TextureManager::get("FurnitureManufacture");
 
 		storage[ResourseType::ProcessedWood] = 0;
-		defaultProduction[ResourseType::ProcessedWood] = -50;
+		defaultProduction[ResourseType::ProcessedWood] = -60;
 
 		storage[ResourseType::Plank] = 0;
 		defaultProduction[ResourseType::Plank] = 40;
 
 		storage[ResourseType::Furniture] = 0;
-		defaultProduction[ResourseType::Furniture] = 5;
+		defaultProduction[ResourseType::Furniture] = 10;
 	}
 
 	void update() override
@@ -243,6 +243,7 @@ public:
 						functioning = true;
 						currentProduction[ResourseType::Metal] = defaultProduction[ResourseType::Metal];
 						currentProduction[ResourseType::Coal] = defaultProduction[ResourseType::Coal];
+						currentProduction[ResourseType::Ore] = defaultProduction[ResourseType::Ore];
 
 						storage[ResourseType::Metal] += currentProduction[ResourseType::Metal] / 3600.;
 						storage[ResourseType::Coal] += currentProduction[ResourseType::Coal] / 2 / 3600.;
@@ -255,6 +256,7 @@ public:
 						functioning = true;
 						currentProduction[ResourseType::PreciousMetal] = defaultProduction[ResourseType::PreciousMetal];
 						currentProduction[ResourseType::Coal] = defaultProduction[ResourseType::Coal];
+						currentProduction[ResourseType::PreciousOre] = defaultProduction[ResourseType::PreciousOre];
 
 						storage[ResourseType::PreciousMetal] += currentProduction[ResourseType::PreciousMetal] / 3600.;
 						storage[ResourseType::Coal] += currentProduction[ResourseType::Coal] / 2 / 3600.;
@@ -322,6 +324,41 @@ public:
 	}
 };
 
+class Farm : public MainBuilding
+{
+public:
+	Farm(const std::shared_ptr<Tile>& tile) : MainBuilding(tile)
+	{
+		upkeep = 50 / 3600.;
+		storageLimit = 1000;
+
+		buildingType = BuildingType::Farm;
+		texture = TextureManager::get("Farm");
+
+		storage[ResourseType::Cereal] = 0;
+		defaultProduction[ResourseType::Cereal] = 75;
+	}
+
+	void update() override
+	{
+		currentProduction[ResourseType::Cereal] = 0;
+
+		if (!frozen)
+		{
+			if (!isStorageFull())
+			{
+				functioning = true;
+
+				currentProduction[ResourseType::Cereal] = defaultProduction[ResourseType::Cereal];
+
+				storage[ResourseType::Cereal] += currentProduction[ResourseType::Cereal] / 3600.;
+			}
+			else
+				functioning = false;
+		}
+	}
+};
+
 class TradingWarehouse : public MainBuilding
 {
 public:
@@ -332,14 +369,10 @@ public:
 		storageLimit = 1000;
 
 		for (int i = 0; i < 20; i++)
-		{
 			storage[(ResourseType)i] = 0;
-		};
 
 		for (int i = 0; i < 20; i++)
-		{
 			defaultProduction[(ResourseType)i] = -50;
-		};
 
 		buildingType = BuildingType::TradingWarehouse;
 		texture = TextureManager::get("TradingWarehouse");
