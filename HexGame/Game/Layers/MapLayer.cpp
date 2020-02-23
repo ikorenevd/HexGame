@@ -669,6 +669,7 @@ void MapLayer::render()
 	auto shader = ShaderManager::get("Texture");
 	shader->bind();
 	shader->setInt("ourTexture", 0);
+	shader->setFloat("opacity", 1);
 	vao->bind();
 
 	//// Карта
@@ -749,11 +750,18 @@ void MapLayer::render()
 	{
 		shader->setMat4("transform", building->getTransform());
 		building->getTexture()->bind();
+
+		if (building->isFunctioning())
+			shader->setFloat("opacity", 1);
+		else
+			shader->setFloat("opacity", 0.25);
+
 		glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
 	//// Интерфейс
 	shader->setMat4("view", viewUI->getMatrix());
+	shader->setFloat("opacity", 1);
 
 	// Overlay
 	glm::mat4 transformation = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));

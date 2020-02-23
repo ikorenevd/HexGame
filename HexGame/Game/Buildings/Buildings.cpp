@@ -9,7 +9,7 @@ Building::Building(const std::shared_ptr<Tile>& tile) :
 	setScale(glm::vec2(50));
 
 	frozen = false;
-	functioning = true;
+	functioning = false;
 
 	extensionBuildings = {};
 }
