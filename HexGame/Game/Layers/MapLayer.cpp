@@ -627,7 +627,7 @@ void MapLayer::update()
 	// Debug
 	if (glfwGetTime() - lastTime >= 1)
 	{
-		std::cout << std::endl;
+		std::cout << "\033[2J\033[1;1H";	// Очистка консоли
 
 		switch (interface)
 		{
@@ -658,6 +658,8 @@ void MapLayer::update()
 			{
 				if (building->getStorage((ResourseType)i) != 0) std::cout << "     " << getResourceName((ResourseType)i) << ": " << building->getStorage((ResourseType)i) << " | " << building->getProduction((ResourseType)i) << " / hour" << std::endl;
 			}
+
+			std::cout << std::endl;
 		}
 
 		lastTime++;
